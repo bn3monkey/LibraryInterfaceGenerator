@@ -226,7 +226,7 @@ Above is an overview of the JSON format your project will need to write in order
 Take a look at the JSON object for each order below.
 
 위는 필요한 출력을 얻기 위해 프로젝트에서 작성해야 하는 JSON 형식의 개요입니다.  
-아래에서 각 분류에 대한 JSON 객체를 살펴보세요.
+아래에서 각 분류에 대한 JSON 객체를 살펴보겠습니다.
 
 ### Package (패키지)
 
