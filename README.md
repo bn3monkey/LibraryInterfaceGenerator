@@ -101,18 +101,18 @@ This project converts the module structure modeled in JSON into the output below
 ```json
 {
     "order" : "package",
-    "name" : "package A",
+    "name" : "packageA",
     "author" : "...",
     "description" : "...",
     "childs" : [
         {
             "order" : "module",
-            "name" : "module A",
+            "name" : "moduleA",
             "description" : "...",
             "childs" : [
                 {
                     "order" : "module",
-                    "name" : "module AA",
+                    "name" : "moduleAA",
                     "description" : "...",
                     "childs" : [
 
@@ -122,34 +122,34 @@ This project converts the module structure modeled in JSON into the output below
         },
         {
             "order" : "module",
-            "name" : "module B",
+            "name" : "moduleB",
             "description" : "...",
             "childs" : [
                 {
                     "order" : "interface",
-                    "name" : "interface A",
+                    "name" : "interfaceA",
                     "description" : "...",
                     "childs" : [
                         {
                             "order" : "property",
                             "type" : "int32",
-                            "name" : "property A",
+                            "name" : "propertyA",
                             "description" : "..."
                         },
                         {
                             "order" : "method",
                             "type" : "int64",
-                            "name" : "method A",
+                            "name" : "methodA",
                             "description" : "...",
                             "parameters" : [
                                 {
                                     "type" : "string",
-                                    "name" : "param A",
+                                    "name" : "paramA",
                                     "description" : "..."
                                 },
                                 {
                                     "type" : "bool",
-                                    "name" : "param B",
+                                    "name" : "paramB",
                                     "description" : "..."
                                 }
                             ]
@@ -158,30 +158,30 @@ This project converts the module structure modeled in JSON into the output below
                 },
                 {
                     "order" : "class",
-                    "name" : "class A",
-                    "base" : ["module B/interface A"],
+                    "name" : "classA",
+                    "base" : ["moduleB/interfaceA"],
                     "description" : "...",
                     "childs" : [
                         {
                             "order" : "property",
                             "type" : "int8",
-                            "name" : "property C",
+                            "name" : "propertyC",
                             "description" : "..."
                         },
                         {
                             "order" : "method",
                             "type" : "int16",
-                            "name" : "method D",
+                            "name" : "methodD",
                             "description" : "...",
                             "parameters" : [
                                 {
                                     "type" : "array<int32>",
-                                    "name" : "param A",
+                                    "name" : "paramA",
                                     "description" : "..."
                                 },
                                 {
                                     "type" : "array<bool>",
-                                    "name" : "param B",
+                                    "name" : "paramB",
                                     "description" : "..."
                                 }
                             ]
@@ -191,27 +191,27 @@ This project converts the module structure modeled in JSON into the output below
                 {
                     "order" : "method",
                     "type" : "",
-                    "name" : "method D",
+                    "name" : "methodD",
                     "description" : "...",
                     "parameters" : [
                         {
                             "type" : "double",
-                            "name" : "param A",
+                            "name" : "paramA",
                             "description" : "..."
                         },
                         {
                             "type" : "float",
-                            "name" : "param B",
+                            "name" : "paramB",
                             "description" : "..."
                         },
                         {
                             "type" : "array<module B/interface A>",
-                            "name" : "param C",
+                            "name" : "paramC",
                             "description" : "..."
                         },
                         {
                             "type" : "module B/class A",
-                            "name" : "param D",
+                            "name" : "paramD",
                             "description" : "..."
                         }
                     ]
@@ -230,48 +230,246 @@ Take a look at the JSON object for each order below.
 
 ### Package (패키지)
 
-```json
+**Package** is the highest level of software. The package name determines the name of the library or the top-level namespace of the library's C++ code.
 
+**패키지**는 소프트웨어의 최상위 단위입니다. 패키지 이름이 라이브러리의 이름이나 라이브러리 C++ 코드의  최상위 네임스페이스를 결정합니다.
+
+```json
+{
+    "order" : "package",
+    "name" : "packageA",
+    "author" : "...",
+    "description" : "...",
+    "childs" : [
+    ]
+}
 ```
+
+|*field name*|*description*|
+|:-:|:--|
+|order|The type of json object. pinned to "package"|
+|name|The name of the package. It is recommended to name the library.|
+|author|library creator|
+|description|Description of library features|
+|childs|The software modules of the highest layer possessed by the library|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형입니다. "package"로 고정입니다.|
+|name|패키지의 이름. 라이브러리 이름을 정하는 것이 좋습니다.|
+|author|라이브러리 제작자|
+|description|라이브러리 기능에 대한 설명|
+|childs|라이브러리가 보유하고 있는 가장 상위 계층의 소프트웨어 모듈들|
 
 ### Module (모듈)
 
-```json
+**Module** is a unit of software. The name of the module determines the directory or namespace containing the class code.
 
+**모듈**은 소프트웨어의 단위입니다. 모듈의 이름이 클래스 코드가 담긴 디렉토리나 네임스페이스를 결정합니다.
+
+```json
+{
+    "order" : "module",
+    "name" : "moduleA",
+    "author" : "...",
+    "description" : "...",
+    "childs" : [
+    ]
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+|order|The type of the json object. Fixed as "module".|
+|name|Name of the module|
+|description|Description of module function|
+|childs|Submodules or global methods of modules|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "module"로 고정입니다.|
+|name|모듈의 이름|
+|description|모듈 기능에 대한 설명|
+|childs|하위 모듈들 또는 모듈의 전역 메소드|
 
 ### Interface (인터페이스)
 
-```json
+**Interfaces** are guidelines for the methods and properties that a class must implement. *Classes* inherit interfaces to implement methods and properties.
 
+**인터페이스**는 클래스가 구현해야 할 메소드와 프로퍼티에 대한 가이드라인입니다. *클래스*는 인터페이스를 상속하여 메소드와 프로퍼티를 구현합니다.
+
+```json
+{
+    "order" : "interface",
+    "name" : "interfaceA",
+    "author" : "...",
+    "description" : "...",
+    "childs" : [
+    ]
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+|order|The type of the json object. Fixed as "interface".|
+|name|Name of the interface|
+|description|Description of the role of the interface|
+|childs|method or property|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "interface"로 고정입니다.|
+|name|인터페이스의 이름|
+|description|인터페이스의 역할에 대한 설명|
+|childs|메소드 또는 프로퍼티|
 
 ### Class (클래스)
 
-```json
+**Class** is a logical set of methods and properties.
+**클래스**는 메소드와 프로퍼티에 대한 논리적 집합입니다. 
 
+```json
+{
+    "order" : "class",
+    "name" : "classA",
+    "author" : "...",
+    "description" : "...",
+    "childs" : [
+    ]
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+The type of the |order|json object. Fixed as "class".|
+|name|Name of class|
+|description|A description of the role of the class|
+|childs|method or property|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "class"로 고정입니다.|
+|name|클래스의 이름|
+|description|클래스의 역할에 대한 설명|
+|childs|메소드 또는 프로퍼티|
 
 ### Type (타입)
 
-```json
+All types supported by the library are introduced below. Used in the "type" field of properties, methods, and parameters.
 
-```
+라이브러리에서 지원하는 모든 타입들을 아래에서 소개합니다. 프로퍼티, 메소드, 파라미터의 "type" 필드에서 사용됩니다. 
+
+|Type|Description|
+|:-:|:--|
+|int8|Used as byte or char|
+|int16|Used as short|
+|int32|Used as int|
+|int64|Used as long|
+|float|32bit real|
+|double|64-bit real|
+|string|Commonly used string|
+|class|**Only classes or interfaces within the library can be used.** Used as 'module/class'. |
+|array\<T\>|Fixed array of type T|
+|vector\<T\>|dynamic array of type T|
+
+|타입|설명|
+|:-:|:--|
+|int8|byte나 char로 쓰임|
+|int16|short로 쓰임|
+|int32|int로 쓰임|
+|int64|long으로 쓰임|
+|float|32bit 실수|
+|double|64bit 실수|
+|string|일반적으로 사용하는 문자열|
+|class|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/class'로 쓰임. |
+|array\<T\>|T 타입의 고정 배열|
+|vector\<T\>|T 타입의 동적 배열|
 
 ### Property (프로퍼티)
 
-```json
+**Properties** are data that can be modified outside the class.
+**프로퍼티**는 클래스 외부에서 수정 가능한 데이터입니다.
 
+```json
+{
+    "order" : "property",
+    "type" : "int8",
+    "name" : "propertyC",
+    "description" : "..."
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+The type of the |order|json object. Fixed as "property".|
+|name|Name of the property|
+|type|Data type of the property|
+|description|Description of the role of the property|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "property"로 고정입니다.|
+|name|프로퍼티의 이름|
+|type|프로퍼티의 데이터 타입|
+|description|프로퍼티의 역할에 대한 설명|
 
 ### Method (메소드)
 
-```json
+**Methods** are operations that a class can perform.
+**메소드**는 클래스가 수행가능한 작업입니다.
 
+```json
+{
+    "order" : "method",
+    "type" : "int8",
+    "name" : "methodA",
+    "description" : "...",
+    "parameters" : [
+
+    ]
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+The type of the |order|json object. Fixed as "method".|
+|name|Name of the method|
+|type|Data type of the method|
+|description|Description of the method's role|
+|parameters|메소드의 인자들|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "method"로 고정입니다.|
+|name|메소드의 이름|
+|type|메소드의 데이터 타입|
+|description|메소드의 역할에 대한 설명|
+|parameters|메소드의 인자들|
 
 ### Parameter (파라미터)
 
-```json
+**parameters** are data needed to execute the method.
+**파라미터**는 메소드를 수행하기 위해 필요한 데이터들입니다.
 
+```json
+{
+    "order" : "parameter",
+    "type" : "int8",
+    "name" : "paramA",
+    "description" : "..."
+}
 ```
+
+|*Field name*|*Description*|
+|:-:|:--|
+The type of the |order|json object. Fixed by "parameter".|
+|name|Name of parameter|
+|type|Data type of the parameter|
+|description|Description of the role of the parameter|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "parameter"로 고정입니다.|
+|name|파라미터의 이름|
+|type|파라미터의 데이터 타입|
+|description|파라미터의 역할에 대한 설명|
