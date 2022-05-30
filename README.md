@@ -7,10 +7,15 @@
     - [Module (모듈)](#module-모듈)
     - [Interface (인터페이스)](#interface-인터페이스)
     - [Class (클래스)](#class-클래스)
+    - [Enum (열거 클래스)](#enum-열거-클래스)
     - [Type (타입)](#type-타입)
     - [Property (프로퍼티)](#property-프로퍼티)
     - [Method (메소드)](#method-메소드)
     - [Parameter (파라미터)](#parameter-파라미터)
+  - [Sample Deliverable (결과물 예시)](#sample-deliverable-결과물-예시)
+    - [C++ Class & Interface Header](#c-class--interface-header)
+      - [Input](#input)
+      - [Output](#output)
 
 This project converts the json that specifies the software module in the library to the API document, C/C++ header of the library, and library interface for each language.
 
@@ -131,16 +136,28 @@ This project converts the module structure modeled in JSON into the output below
                     "description" : "...",
                     "childs" : [
                         {
+                            "order" : "enum",
+                            "name" : "EnumA",
+                            "description" : "...",
+                            "values" : [
+                                "A/1",
+                                "B/2",
+                                "C/3"
+                            ]
+                        },
+                        {
                             "order" : "property",
                             "type" : "int32",
                             "name" : "propertyA",
-                            "description" : "..."
+                            "description" : "...",
+                            "readonly" : true 
                         },
                         {
                             "order" : "method",
                             "type" : "int64",
                             "name" : "methodA",
                             "description" : "...",
+                            "return" : "...",
                             "parameters" : [
                                 {
                                     "type" : "string",
@@ -151,6 +168,11 @@ This project converts the module structure modeled in JSON into the output below
                                     "type" : "bool",
                                     "name" : "paramB",
                                     "description" : "..."
+                                },
+                                {
+                                    "type" : "packageA/moduleB/interfaceA/EnumA",
+                                    "name" : "paramC",
+                                    "description" : "...",
                                 }
                             ]
                         }
@@ -166,6 +188,7 @@ This project converts the module structure modeled in JSON into the output below
                             "order" : "property",
                             "type" : "int8",
                             "name" : "propertyC",
+                            "readonly" : true,
                             "description" : "..."
                         },
                         {
@@ -173,6 +196,7 @@ This project converts the module structure modeled in JSON into the output below
                             "type" : "int16",
                             "name" : "methodD",
                             "description" : "...",
+                            "return" : "...",
                             "parameters" : [
                                 {
                                     "type" : "array<int32>",
@@ -190,9 +214,10 @@ This project converts the module structure modeled in JSON into the output below
                 },
                 {
                     "order" : "method",
-                    "type" : "",
+                    "type" : "bool",
                     "name" : "methodD",
                     "description" : "...",
+                    "return" : "...",
                     "parameters" : [
                         {
                             "type" : "double",
@@ -205,12 +230,12 @@ This project converts the module structure modeled in JSON into the output below
                             "description" : "..."
                         },
                         {
-                            "type" : "array<module B/interface A>",
+                            "type" : "array<moduleB/interfaceA>",
                             "name" : "paramC",
                             "description" : "..."
                         },
                         {
-                            "type" : "module B/class A",
+                            "type" : "moduleB/classA",
                             "name" : "paramD",
                             "description" : "..."
                         }
@@ -271,7 +296,6 @@ Take a look at the JSON object for each order below.
 {
     "order" : "module",
     "name" : "moduleA",
-    "author" : "...",
     "description" : "...",
     "childs" : [
     ]
@@ -302,7 +326,6 @@ Take a look at the JSON object for each order below.
 {
     "order" : "interface",
     "name" : "interfaceA",
-    "author" : "...",
     "description" : "...",
     "childs" : [
     ]
@@ -332,7 +355,7 @@ Take a look at the JSON object for each order below.
 {
     "order" : "class",
     "name" : "classA",
-    "author" : "...",
+    "base" : ["moduleA/interfaceA"],
     "description" : "...",
     "childs" : [
     ]
@@ -343,6 +366,7 @@ Take a look at the JSON object for each order below.
 |:-:|:--|
 The type of the |order|json object. Fixed as "class".|
 |name|Name of class|
+|base|Classes or interfaces from which this class inherits|
 |description|A description of the role of the class|
 |childs|method or property|
 
@@ -350,17 +374,53 @@ The type of the |order|json object. Fixed as "class".|
 |:-:|:--|
 |order|json 객체의 유형. "class"로 고정입니다.|
 |name|클래스의 이름|
+|base|이 클래스가 상속한 클래스나 인터페이스들|
 |description|클래스의 역할에 대한 설명|
 |childs|메소드 또는 프로퍼티|
+
+### Enum (열거 클래스)
+
+**Enum** is a set of named constants.
+**Enum**은 이름을 가진 상수의 집합입니다.
+
+```json
+{
+    "order" : "enum",
+    "name" : "enumA",
+    "description" : "...",
+    "values" : {
+        "A/1",
+        "B/2",
+        "C/3"
+    }
+}
+```
+
+|*Field name*|*Description*|
+|:-:|:--|
+|order|The type of the json object. Fixed as "enum".|
+|name|Name of enumeration class|
+|description|Description of the role of the enumeration class|
+|values|expressed as an array of strings. String must be expressed as "constant name/constant value (integer)"|
+
+|*필드 이름*|*설명*|
+|:-:|:--|
+|order|json 객체의 유형. "enum"로 고정입니다.|
+|name|열거 클래스의 이름|
+|description|열거 클래스의 역할에 대한 설명|
+|values|문자열의 배열로 표현이 됨. 문자열은 "상수 이름/상수 값(정수)"로 표현하여야 함|
 
 ### Type (타입)
 
 All types supported by the library are introduced below. Used in the "type" field of properties, methods, and parameters.
+Since this project does not support in/out parameters, implementation using tuples is recommended when multiple return values ​​are required.
 
 라이브러리에서 지원하는 모든 타입들을 아래에서 소개합니다. 프로퍼티, 메소드, 파라미터의 "type" 필드에서 사용됩니다. 
+이 프로젝트는 in/out parameter를 지원하지 않기 때문에, 다수의 리턴 값이 필요한 경우 튜플을 통한 구현을 추천합니다.
 
 |Type|Description|
 |:-:|:--|
+|void|empty type|
 |int8|Used as byte or char|
 |int16|Used as short|
 |int32|Used as int|
@@ -369,11 +429,14 @@ All types supported by the library are introduced below. Used in the "type" fiel
 |double|64-bit real|
 |string|Commonly used string|
 |class|**Only classes or interfaces within the library can be used.** Used as 'module/class'. |
+|enum|**Only enum within the library can be used.** Used as 'module/enum'. |
 |array\<T\>|Fixed array of type T|
 |vector\<T\>|dynamic array of type T|
+|tuple\<T1,T2,...>|Tuples of type T1, T2, ...|
 
 |타입|설명|
 |:-:|:--|
+|void|타입 없음|
 |int8|byte나 char로 쓰임|
 |int16|short로 쓰임|
 |int32|int로 쓰임|
@@ -382,8 +445,11 @@ All types supported by the library are introduced below. Used in the "type" fiel
 |double|64bit 실수|
 |string|일반적으로 사용하는 문자열|
 |class|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/class'로 쓰임. |
+|enum|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/enum'로 쓰임. |
 |array\<T\>|T 타입의 고정 배열|
 |vector\<T\>|T 타입의 동적 배열|
+|tuple\<T1,T2,...>|T1, T2, ... 타입의 튜플|
+
 
 ### Property (프로퍼티)
 
@@ -394,6 +460,7 @@ All types supported by the library are introduced below. Used in the "type" fiel
 {
     "order" : "property",
     "type" : "int8",
+    "readonly" : true, 
     "name" : "propertyC",
     "description" : "..."
 }
@@ -404,6 +471,7 @@ All types supported by the library are introduced below. Used in the "type" fiel
 The type of the |order|json object. Fixed as "property".|
 |name|Name of the property|
 |type|Data type of the property|
+|readonly|If the value is true, this property is read-only; if false, it is read-write.|
 |description|Description of the role of the property|
 
 |*필드 이름*|*설명*|
@@ -411,6 +479,7 @@ The type of the |order|json object. Fixed as "property".|
 |order|json 객체의 유형. "property"로 고정입니다.|
 |name|프로퍼티의 이름|
 |type|프로퍼티의 데이터 타입|
+|readonly|해당 값이 참이면 이 프로퍼티는 읽기만 가능하고, 거짓이면 읽고 쓰기가 가능하다.|
 |description|프로퍼티의 역할에 대한 설명|
 
 ### Method (메소드)
@@ -424,6 +493,7 @@ The type of the |order|json object. Fixed as "property".|
     "type" : "int8",
     "name" : "methodA",
     "description" : "...",
+    "return" : "...",
     "parameters" : [
 
     ]
@@ -436,6 +506,7 @@ The type of the |order|json object. Fixed as "method".|
 |name|Name of the method|
 |type|Data type of the method|
 |description|Description of the method's role|
+|return|Description of the return value of the method|
 |parameters|메소드의 인자들|
 
 |*필드 이름*|*설명*|
@@ -444,7 +515,11 @@ The type of the |order|json object. Fixed as "method".|
 |name|메소드의 이름|
 |type|메소드의 데이터 타입|
 |description|메소드의 역할에 대한 설명|
+|return|메소드의 리턴 값에 대한 설명|
 |parameters|메소드의 인자들|
+
+> If field "name" is "constructor", the JSON object for this method means the constructor.
+> "name" : "constructor"일 경우, 이 메소드에 대한 JSON 오브젝트는 생성자를 의미합니다.
 
 ### Parameter (파라미터)
 
@@ -473,3 +548,234 @@ The type of the |order|json object. Fixed by "parameter".|
 |name|파라미터의 이름|
 |type|파라미터의 데이터 타입|
 |description|파라미터의 역할에 대한 설명|
+
+## Sample Deliverable (결과물 예시)
+
+### C++ Class & Interface Header
+
+#### Input
+
+```json
+{
+    "order" : "package",
+    "name" : "Vertebrate",
+    "author" : "Jaechun Choe",
+    "description" : "Libraries for mimicking vertebrate behavior",
+    "childs" : [
+        {
+            "order" : "module",
+            "name" : "Mammalia",
+            "description" : "Module for simulating mammalia",
+            "childs" : [
+                {
+                    "order" : "interface",
+                    "name" : "Dog",
+                    "description" : "Interfaces to dog features or behaviors",
+                    "childs" : [
+                        {
+                            "order" : "enum",
+                            "name" : "FurColor",
+                            "description" : "the color of fur",
+                            "values" : [
+                                "RED/1",
+                                "BLUE/2",
+                                "GREEN/3",
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "fur",
+                            "type" : "Vertebrate/Mammalia/Dog/FurColor",
+                            "readonly" : false,
+                            "description" : "dog hair color"
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "bark",
+                            "type" : "double",
+                            "description" : 
+                                "barks when it sees dangerous objects.",
+                            "return" : "decibel of the barking sound"
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "obj",
+                                    "description" : "hazard of the object"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "cross",
+                            "type" : "Vertebrate/Mammalia/Dog",
+                            "description" : "Mate with other dog and produce new dog.",
+                            "return" : "the new dog",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "Verbrate/Mammalia/Dog",
+                                    "name" : "mate",
+                                    "description" : "other dog"
+                                }
+                            ]
+                        }                        
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "Jindo",
+                    "base" : ["Vertebrate/Mammalia/Dog"]
+                    "description" : "Interfaces to jindo dog features or behaviors",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "consturctor",
+                            "type" : "void",
+                            "description" : "constructor of the jindo dog",
+                            "return" : "",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "age",
+                                    "description" : "age for the jindo dog"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "guard",
+                            "type" : "void",
+                            "description" : "guard the house",
+                            "return" : "none",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "address",
+                                    "description" : "home address to guard"
+                                }
+                            ]
+                        }                       
+                    ]
+                }
+            ]
+            
+        }
+    ]
+}
+```
+
+#### Output
+
+1. Dog.hpp
+
+```cpp
+#if !defined(__VERTEBRATE_MAMMALIA_DOG_20220530__)
+#define __VERTEBRATE_MAMMALIA_DOG_20220530__
+
+#include <memory>
+#include <string>
+
+namespace Vertebrate
+{
+    namespace Mammalia
+    {
+        /*
+        * \brief Interfaces to dog features or behaviors
+        */
+        class Dog
+        {
+            // \brief the color of fur
+            enum class FurColor
+            {
+                RED = 1,
+                BLUE = 2,
+                GREEN = 3,
+            }
+
+            explicit Dog();
+            virtual ~Dog();
+
+            /*
+            * Property name : fur
+            * \brief dog hair color
+            */
+            virtual void setFur(Vertebrate::Mammalia::Dog::FurColor value);
+            virtual Vertebrate::Mammalia::Dog::FurColor getFur();
+
+            /* brief : barks when it sees dangerous objects.
+             * @param obj hazard of the object
+             * @return decibel of the barking sound
+             */
+            virtual double bark(int32_t obj);
+
+            /* brief : Mate with other dog and produce new dog.
+             * @param mate other dog
+             * @return the new dog
+             */
+            virtual std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate);
+
+        }
+    }
+}
+
+#endif // __VERTEBRATE_MAMMALIA_DOG_20220530__
+```
+
+2. Jindo.hpp
+
+```cpp
+#if !defined(__VERTEBRATE_MAMMALIA_DOG_20220530__)
+#define __VERTEBRATE_MAMMALIA_DOG_20220530__
+
+#include <memory>
+#include <string>
+
+namespace Vertebrate
+{
+    namespace Mammalia
+    {
+        /*
+        * \brief Interfaces to dog features or behaviors
+        */
+        class Jindo : public Vertebrate::Mammalia::Dog
+        {
+            /*
+            * \brief constructor of the jindo dog
+            * @param age  age for the jindo dog
+            */
+            explicit Jindo(const int age);
+            virtual ~Jindo();
+
+            /*
+            * Property name : fur
+            * \brief dog hair color
+            */
+            void setFur(Vertebrate::Mammalia::Dog::FurColor value) override;
+            Vertebrate::Mammalia::Dog::FurColor getFur() override;
+
+            /* \brief : barks when it sees dangerous objects.
+             * @param obj hazard of the object
+             * @return decibel of the barking sound
+             */
+            double bark(int32_t obj) override;
+
+            /* \brief : Mate with other dog and produce new dog.
+             * @param mate other dog
+             * @return the new dog
+             */
+            std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate) override;
+
+            /* \brief : guard the house
+            * @param address  home address to guard
+            * @return none
+            */
+            void guard(std::string address);
+        }
+    }
+}
+
+#endif // __VERTEBRATE_MAMMALIA_DOG_20220530__
+```
