@@ -12,6 +12,8 @@
     - [Property (프로퍼티)](#property-프로퍼티)
     - [Method (메소드)](#method-메소드)
     - [Parameter (파라미터)](#parameter-파라미터)
+  - [Library Memory Management (라이브러리 메모리 관리)](#library-memory-management-라이브러리-메모리-관리)
+    - [Memory Pool (메모리 풀)](#memory-pool-메모리-풀)
   - [Sample Deliverable (결과물 예시)](#sample-deliverable-결과물-예시)
     - [C++ Class & Interface Header](#c-class--interface-header)
       - [Input](#input)
@@ -450,7 +452,6 @@ Since this project does not support in/out parameters, implementation using tupl
 |vector\<T\>|T 타입의 동적 배열|
 |tuple\<T1,T2,...>|T1, T2, ... 타입의 튜플|
 
-
 ### Property (프로퍼티)
 
 **Properties** are data that can be modified outside the class.
@@ -548,6 +549,229 @@ The type of the |order|json object. Fixed by "parameter".|
 |name|파라미터의 이름|
 |type|파라미터의 데이터 타입|
 |description|파라미터의 역할에 대한 설명|
+
+## Library Memory Management (라이브러리 메모리 관리)
+
+The purpose of this project is to make it easy to use the C++ library in other languages ​​or frameworks.  
+
+The reason why it is difficult to use C++ class objects in class objects of other languages ​​is because memory management methods differ according to languages ​​and frameworks.  
+For example, C/C++ objects require the manager to free memory directly or use smart pointers, whereas Java/Kotlin objects free memory automatically by the language's memory manager.
+
+In languages ​​where memory is automatically managed (Java/Kotlin), the library created in this project provides native functions so that the administrator can automatically allocate and deallocate memory.  
+
+이 프로젝트의 목적은 C++ 라이브러리를 다른 언어 혹은 프레임워크에서 쉽게 사용하기 위함입니다.
+
+C++ 클래스 오브젝트를 다른 언어의 클래스 오브젝트에서 쓰기 어려운 이유는 언어 및 프레임워크에 따라 메모리 관리 방식이 다르기 때문입니다.  
+예를 들어, C/C++ 오브젝트는 관리자가 직접 메모리를 해제하거나 스마트 포인터를 사용해야 하지만 Java/Kotlin 오브젝트는 언어의 메모리 관리자에 의해 메모리가 자동으로 해제합니다.
+
+자동으로 메모리가 관리가 되는 언어(Java/Kotlin)에서 관리자가 자동으로 메모리 할당 및 할당해제를 할 수 있도록, 이 프로젝트에서 생성된 라이브러리는 Native function을 제공합니다.  
+
+### Memory Pool (메모리 풀)
+
+The native function provided by the library created in this project uses the memory pool to allocate and deallocate internally.
+
+When an object is created in an automatic memory management language, the library memory pool created automatically by the project allocates a C++ object and passes a handle to the object.  
+When an object is deallocated in an automatic memory management language, the C++ object is deallocated from the memory pool via handle.
+
+이 프로젝트에서 만든 라이브러리에서 제공하는 Native function은 내부에서 메모리 풀을 활용하여 할당 및 할당 해제를 합니다.
+
+자동 메모리 관리 언어에서 객체가 생성될 때, 프로젝트가 자동으로 생성한 라이브러리 메모리풀이 C++ 객체를 할당하고 handle을 객체에 넘겨줍니다.  
+자동 메모리 관리 언어에서 객체가 할당해제 될 때, handle을 통해 C++ 객체를 메모리 풀로부터 할당해제 합니다.
+
+Below is an example of how this project utilizes C++ objects in an automatic memory management language through memory pools.
+
+아래는 이 프로젝트가 메모리 풀을 통해 어떻게 자동 메모리 관리 언어에서 C++ 객체를 활용하는 지에 대한 예시입니다. 
+
+*MemoryPool.h*
+
+```cpp
+#if !defined(__LIBRARY_MEMORY_POOL_20220531__)
+#define __LIBRARY_MEMORY_POOL_20220531__
+#include <memory>
+
+namespace Library
+{
+    class MemoryPool
+    {
+    public:
+        /* \brief : initialize memory pool.
+         * @param block_num  The maximum number of usable blocks in the memory pool
+         * @return Whether the initialization is successful
+         */
+        static bool initialize(size_t block_num);
+        
+        /*
+        * \brief release memory pool
+        */
+        static void release();
+
+        /* \brief check if memory pool is initialized
+        * @return wheter the initialization is successful
+        */        
+        static bool initialized();
+        
+        /*
+        * \brief allocate object
+        * @param n number of objects to allocate
+        * @return Address of the first object allocated
+        */
+        template<class T>
+        static T* allocate(size_t n = 1);
+        
+        /*
+        * \brief deallocate object
+        * @param ptr Address of the first object allocated
+        * @param n Total number of allocated objects
+        */
+        template<class T>
+        static void deallocate(T* ptr, size_t n=1);
+    }
+
+    
+    /*
+    * \brief  Allocator required to allocate memory in container classes such as vector
+    */
+    template<class T>
+    struct MemoryAllocator;
+}
+#endif
+```
+
+Above is the memory pool automatically created by the project. All classes created in this project refer to this memory pool.  
+위는 프로젝트에서 자동생성하는 메모리 풀입니다. 이 프로젝트에서 만든 모든 클래스는 이 메모리 풀를 참조합니다.
+
+```cpp
+#include <vector>
+#include <memory>
+#include "MemoryPool.h"
+namespace Library
+{
+    class A
+    {
+    public:
+       explicit A(int32_t value = 0) : _value(value) {}
+    private:
+        int32_t _value;
+    }
+
+    class B
+    {
+    public:
+        explicit B() {}
+        void push(std::shared_ptr<A> value) {
+            _values.push_back(value);
+        }
+
+    private:
+        std::vector<std::shared_ptr<A>, Library::MemoryAllocator<A>> _values;
+    }
+}
+```
+
+```kotlin
+class A
+{
+    constructor(value : Int)
+}
+
+class B
+{
+    constructor()
+    fun push(value : A)
+}
+```
+
+C++ sample classes used in the library created in this project and Kotlin classes that mimic those classes.
+
+이 프로젝트에서 만든 라이브러리에서 쓰이는 C++ 샘플 클래스들과 그 클래스들을 모사한 Kotlin 클래스입니다. 
+
+To see how memory is allocated and deallocated in an automatic memory management language, we do the following:
+
+1. Allocate b, which is an instance of class B.
+2. Allocate a1, a2 instances of class A.
+3. Add a1,a2 to b.
+4. Deallocate a1, a2.
+5. Deallocate b.
+
+자동 메모리 관리 언어에서 메모리가 어떻게 할당 및 할당해제가 되는지 살펴보기 위해 아래의 작업을 수행합니다.
+
+1. class B의 인스턴스인 b을 할당합니다.
+2. class A의 인스턴스인 a1, a2를 할당합니다.
+3. b에 a1,a2를 추가합니다.
+4. a1, a2를 할당해제합니다.
+5. b를 할당해제합니다.
+
+```kotlin
+fun pushA(b : B)
+{
+    // 2. Create a1, a2
+    val a1 = A()
+    val a2 = A()
+    // 3. push a1, a2 to b
+    b.push(a1)
+    b.push(a2)
+}
+fun createB()
+{
+    // 1. Create b
+    val b = B()
+    pushA(b)
+    // 4. Remove a1, a2
+}
+fun main() {
+    createB()
+    // 5. Remove b
+}
+```
+
+To do the above in Kotlin, we run the main function in the example above.
+At this time, I will explain below how the memory pool changes according to each stage.
+
+코틀린에서 위의 작업을 수행하기 위해 위 예시의 main 함수를 실행합니다.
+이 때, 각 단계에 따라 메모리 풀이 어떻게 변하는 지 아래에서 설명하겠습니다.
+
+1. Create a B object, b, in Kotlin. After creating a std::shared_ptr for b in the memory pool, pass the handle to the shared_ptr to the object b.  
+The shared_ptr reference count of object b is 1.  
+Kotlin에서 B 객체인 b를 생성합니다. 메모리 풀에서 b에 대한 std::shared_ptr을 만든 뒤, shared_ptr에 대한 핸들을 b 오브젝트에 넘깁니다.  
+오브젝트 b의 shared_ptr 참조 계수는 1입니다.  
+
+![memory_pool_1](image/memory_pool_1.png)
+
+2. Create A objects a1, a2 in Kotlin.  
+After creating std::shared_ptr for a1 and a2 in the memory pool, the handle to shared_ptr is passed to a1 and a2 respectively.  
+The shared_ptr reference count of objects a1 and a2 is 1.  
+Kotlin에서 A 객체인 a1, a2를 생성합니다. 메모리 풀에서 a1, a2에 대한 std::shared_ptr로 만든 뒤, shared_ptr에 대한 핸들은 각각 a1, a2에 넘깁니다. 오브젝트 a1, a2의 shared_ptr 참조 계수는 1입니다.
+
+![memory_pool_2](image/memory_pool_2.png)
+
+3. In Kotlin, put a1, a2 into A vector(_values) of B.  
+   Make the first element of B a shared_ptr to A and refer to the original memory address of a1. The reference count to the original memory of a1 is incremented.  
+   Make the second element of B a shared_ptr to A and reference the original memory address of a2. The reference count to the original memory of a2 is increased.  
+   Kotlin에서 a1, a2를 B의 A vector(_values)에 넣습니다.  
+   B의 첫번째 원소를 A에 대한 shared_ptr로 만들고 a1의 원본 메모리 주소를 참조합니다. a1의 원본 메모리에 대한 참조 계수가 올라갑니다.  
+   B의 두 번째 원소를 A에 대한 shared_ptr로 만들고 a2의 원본 메모리 주소를 참조합니다. a2의 원본 메모리에 대한 참조 계수가 올라갑니다. 
+ 
+![memory_pool_3](image/memory_pool_3.png)
+
+4. Deallocate a1, a2 in Kotlin.  
+   The shared_ptr pointing to the original memory of a1, a2 disappears, and the reference count for a1, a2 decreases.  
+   Kotlin에서 a1, a2을 할당 해제합니다. a1, a2의 원본 메모리를 가리키는 shared_ptr이 사라지고 a1, a2에 대한 참조 계수는 줄어듭니다.
+
+![memory_pool_4](image/memory_pool_4.png)
+
+5. Deallocate B in Kotlin.  
+The shared_ptr pointing to b's original memory disappears. Since the reference count for b is zero, the original memory for b is deallocated.  
+When b's original memory is deallocated, the A vector in b is also deallocated.  
+All shared_ptr in A vector is also deallocated.  
+The original memory pointed to by shared_ptr is also deallocated because its reference count is 0.  
+Kotlin에서 B를 할당해제합니다.  
+b의 원본 메모리를 가리키는 shared_ptr이 사라집니다.  
+b에 대한 참조 계수가 0이므로 b의 원본 메모리가 할당해제됩니다.  
+b의 원본 메모리가 할당 해제되면 b 안의 A vector도 할당해제됩니다.  
+A vector 안에 있는 shared_ptr도 전부 할당해제됩니다.  
+shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 할당해제됩니다.
+
+![memory_pool_5](image/memory_pool_5.png)
 
 ## Sample Deliverable (결과물 예시)
 
@@ -727,8 +951,8 @@ namespace Vertebrate
 2. Jindo.hpp
 
 ```cpp
-#if !defined(__VERTEBRATE_MAMMALIA_DOG_20220530__)
-#define __VERTEBRATE_MAMMALIA_DOG_20220530__
+#if !defined(__VERTEBRATE_MAMMALIA_JINDO_20220530__)
+#define __VERTEBRATE_MAMMALIA_JINDO_20220530__
 
 #include <memory>
 #include <string>
@@ -777,5 +1001,5 @@ namespace Vertebrate
     }
 }
 
-#endif // __VERTEBRATE_MAMMALIA_DOG_20220530__
+#endif // __VERTEBRATE_MAMMALIA_JINDO_20220530__
 ```
