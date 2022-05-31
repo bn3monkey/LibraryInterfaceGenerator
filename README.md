@@ -899,6 +899,7 @@ shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 �
 #if !defined(__VERTEBRATE_MAMMALIA_DOG_20220530__)
 #define __VERTEBRATE_MAMMALIA_DOG_20220530__
 
+#include "../MemoryPool/MemoryPool.h"
 #include <memory>
 #include <string>
 
@@ -926,20 +927,20 @@ namespace Vertebrate
             * Property name : fur
             * \brief dog hair color
             */
-            virtual void setFur(Vertebrate::Mammalia::Dog::FurColor value);
-            virtual Vertebrate::Mammalia::Dog::FurColor getFur();
+            virtual void setFur(Vertebrate::Mammalia::Dog::FurColor value) = 0;
+            virtual Vertebrate::Mammalia::Dog::FurColor getFur()= 0;
 
             /* brief : barks when it sees dangerous objects.
              * @param obj hazard of the object
              * @return decibel of the barking sound
              */
-            virtual double bark(int32_t obj);
+            virtual double bark(int32_t obj) = 0;
 
             /* brief : Mate with other dog and produce new dog.
              * @param mate other dog
              * @return the new dog
              */
-            virtual std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate);
+            virtual std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate) = 0;
 
         }
     }
@@ -954,6 +955,7 @@ namespace Vertebrate
 #if !defined(__VERTEBRATE_MAMMALIA_JINDO_20220530__)
 #define __VERTEBRATE_MAMMALIA_JINDO_20220530__
 
+#include "../MemoryPool/MemoryPool.h"
 #include <memory>
 #include <string>
 
@@ -1002,4 +1004,360 @@ namespace Vertebrate
 }
 
 #endif // __VERTEBRATE_MAMMALIA_JINDO_20220530__
+```
+
+3. Vertebrate.h
+```cpp
+#if !defined(__VERTEBRATE_20220530__)
+#define __VERTEBRATE_20220530__
+
+#include "Mammalia/Dog.hpp"
+#include "Mammalia/Jindo.hpp"
+#include "MemoryPool/MemoryPool.h"
+
+#endif
+```
+
+4. VertebrateNativeInterface.h
+
+```cpp
+#if !defined(__VERTEBRATE_MAMMALIA_NATIVE_INTERFACE_20220530__)
+#define __VERTEBRATE_MAMMALIA_NATIVE_INTERFACE_20220530__
+
+#include <memory>
+#include <string>
+#include <cstdlib>
+
+#include <Vertebrate.h>
+
+#ifdef VERTEBRATE_EXPORT
+#define VERTEBRATE_API
+#else
+#define VERTEBRATE_API
+#endif
+
+namespace VertebrateAPI
+{
+    namespace Mammalia
+    {
+        namespace Dog
+        {
+            extern VERTEBRATE_EXPORT void* construct();
+            extern VERTEBRATE_EXPORT void release(void* self);
+
+            extern VERTEBRATE_EXPORT void setFur(void* self, int32_t value);
+            extern VERTEBRATE_EXPORT int32_t getFur(void* self);
+            extern VERTEBRATE_EXPORT double bark(void* self, int32_t obj);
+            extern VERTEBRATE_EXPORT void* cross(void* self, void* mate);
+        }
+
+        namespace Jindo
+        {
+            extern VERTEBRATE_EXPORT void* construct(int32_t age);
+            extern VERTEBRATE_EXPORT void release(void* self);
+
+            extern VERTEBRATE_EXPORT void setFur(void* self, int32_t value);
+            extern VERTEBRATE_EXPORT int32_t getFur(void* self);
+            extern VERTEBRATE_EXPORT double bark(void* self, int32_t obj);
+            extern VERTEBRATE_EXPORT void* cross(void* self, void* mate);
+
+            extern VERTEBRATE_EXPORT void guard(void* self, std::string address);
+        }
+    }
+}
+
+```
+
+5. VertebrateNativeInterfaceJNI.cpp
+
+```cpp
+#include <jni.h>
+#include <android/log.h>
+#include <string>
+
+#include <VertebrateNativeInterface.h>
+
+inline std::string toCString(JNIEnv* env, jstring j_str)
+{
+    const char* str = env->GetStringUTFChars((jstring)j_str, NULL);
+    std::string ret = std::string(str);
+    return ret;
+}
+
+inline jstring toJString(JNIEnv* env, const std::string& c_str)
+{
+    const char* str = c_str.data();
+    return env->NewStringUTF(str);
+}
+
+using namespace VertebrateAPI;
+
+extern "C" JNIEXPORT jlong JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_construct
+(JNIEnv* env, jobject _this)
+{
+    void* result = Mammalia::Dog::construct();
+    jlong jresult = (jlong)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_release
+(JNIEnv* env, jobject _this, jlong self)
+{
+    Mammalia::Dog::release((void *)self);
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_setFur
+(JNIEnv* env, jobject _this, jlong self, jint value)
+{
+    int32_t cvalue = (int32_t)value;
+    Mammalia::Dog::setFur((void *)self, cvalue);
+}
+
+extern "C" JNIEXPORT jint JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_getFur
+(JNIEnv* env, jobject _this, jlong self)
+{
+    int32_t result = Mammalia::Dog::getFur((void *)self);
+    jint jresult = (jint)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_bark
+(JNIEnv* env, jobject _this, jlong self, jint obj)
+{
+    int32_t cobj = (int32_t)obj;
+    double result = Mammalia::Dog::bark((void *)self, cobj);
+    jdouble jresult = (jdouble)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT jlong JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Dog_cross
+(JNIEnv* env, jobject _this, jlong self, jlong mate)
+{
+    void* cmate = (void *)mate;
+    void* result = Mammalia::Dog::cross((void *)self, cmate);
+    jlong jresult = (jlong)result;
+    return jresult;
+}
+
+
+extern "C" JNIEXPORT jlong JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_construct
+(JNIEnv* env, jobject _this, jint age)
+{
+    int32_t cage = (int32_t)age;
+    void* result = Mammalia::Jindo::construct(cage);
+    jlong jresult = (jlong)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_release
+(JNIEnv* env, jobject _this, jlong self)
+{
+    Mammalia::Jindo::release((void *)self);
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_setFur
+(JNIEnv* env, jobject _this, jlong self, jint value)
+{
+    int32_t cvalue = (int32_t)value;
+    Mammalia::Jindo::setFur((void *)self, cvalue);
+}
+
+extern "C" JNIEXPORT jint JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_getFur
+(JNIEnv* env, jobject _this, jlong self)
+{
+    int32_t result = Mammalia::Jindo::getFur((void *)self);
+    jint jresult = (jint)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_bark
+(JNIEnv* env, jobject _this, jlong self, jint obj)
+{
+    int32_t cobj = (int32_t)obj;
+    double result = Mammalia::Jindo::bark((void *)self, cobj);
+    jdouble jresult = (jdouble)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT jlong JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_cross
+(JNIEnv* env, jobject _this, jlong self, jlong mate)
+{
+    void* cmate = (void *)mate;
+    void* result = Mammalia::Jindo::cross((void *)self, cmate);
+    jlong jresult = (jlong)result;
+    return jresult;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vertebrate_vertebrate_Vertebratejni_Mammalia_Jindo_guard
+(JNIEnv* env, jobject _this, jlong self, jstring address)
+{
+    std::string caddress = toCString(env, address);
+    Mammalia::Jindo::guard((void *)self, caddress);
+}
+
+```
+
+6. VertebrateNativeInterfaceJNI.kt
+
+```kotlin
+package com.vertebrate.vertebrate;
+
+class Vertebratejni
+{
+    companion object {
+        init {
+            System.loadLibrary("Vertebratejni")
+        }
+
+        @Volatile private var instance : Vertebratejni? = null
+        @JvmStatic fun getInstance() : Vertebratejni = 
+            instance ?: synchronized(this) {
+                instance ?: Vertebratejni().also {
+                    instance = it
+                }
+            } 
+    }
+
+    external fun Mammalia_Dog_construct() : Long
+    external fun Mammalia_Dog_release(self : Long)
+
+    external fun Mammalia_Dog_setFur(self : Long, value : Int)
+    external fun Mammalia_Dog_getFur(self : Long) : Int
+
+    external fun Mammalia_Dog_bark(self : Long, obj : Int) : Double
+    external fun Mammalia_Dog_cross(self : Long, mate : Long) : Long
+
+    external fun Mammalia_Jindo_construct() : Long
+    external fun Mammalia_Jindo_release(self : Long)
+
+    external fun Mammalia_Jindo_setFur(self : Long, value : Int)
+    external fun Mammalia_Jindo_getFur(self : Long) : Int
+
+    external fun Mammalia_Jindo_bark(self : Long, obj : Int) : Double
+    external fun Mammalia_Jindo_cross(self : Long, mate : Long) : Long
+
+    external fun Mammalia_Jindo_guard(self : Long, address : String)
+
+}
+```
+
+6. Dog.kt
+
+```kotlin
+open class Dog
+{
+    private var self : Long
+    
+    internal fun getHandle() {
+        return self
+    }
+    construct() {
+        self = Vertebratejni.getInstance().Mammalia_Dog_construct()
+        require(self != 0L)
+    }
+    internal constructor(native_ptr : Long) {
+        self = native_ptr
+        require(self != 0L)
+    }
+
+    fun close() {
+        if (self != 0L)
+        {
+            Vertebratejni.getInstance().Mammalia_Dog_release(self)
+        }
+    }
+    
+    protected fun finalize() {
+        close()    
+    }
+
+    enum class FurColor(val idx : Int)
+    {
+        RED(0),
+        BLUE(1),
+        GREEN(2),
+    }
+
+    open var fur : FurColor
+        get() {
+            val idx = Vertebratejni.getInstance().Mammalia_Dog_getFur(self)
+            val ret = enumValues<FurColor>().find {
+                it.idx == idx
+            }
+            return ret!!
+        }
+        set(value) {
+            val idx = value.idx
+            Vertebratejni.getInstance().Mammalia_Dog_setFur(self, idx)
+        }
+
+    open fun bark(obj : Int) : Double
+    {
+        return Vertebratejni.getInstance().Mammalia_Dog_bark(self, obj)
+    }
+    open fun cross(mate : Dog) : Dog
+    {
+        val handle = Vertebratejni.getInstance().Mammalia_Dog_cross(self, mate.getHandle())
+        return Dog(handle)
+    }
+}
+```
+
+7. Jindo.kt
+
+```kotlin
+class Jindo : Dog()
+{
+    private var self : Long
+    
+    internal fun getHandle() {
+        return self
+    }
+    construct(age : Int) {
+        self = Vertebratejni.getInstance().Mammalia_Jindo_construct(age)
+        require(self != 0L)
+    }
+    internal constructor(native_ptr : Long) {
+        self = native_ptr
+        require(self != 0L)
+    }
+
+    fun close() {
+        if (self != 0L)
+        {
+            Vertebratejni.getInstance().Mammalia_Jindo_release(self)
+        }
+    }
+    
+    protected fun finalize() {
+        close()    
+    }
+
+    override var fur : FurColor
+        get() {
+            val idx = Vertebratejni.getInstance().Mammalia_Jindo_getFur(self)
+            val ret = enumValues<FurColor>().find {
+                it.idx == idx
+            }
+            return ret!!
+        }
+        set(value) {
+            val idx = value.idx
+            Vertebratejni.getInstance().Mammalia_Jindo_setFur(self, idx)
+        }
+
+    override fun bark(obj : Int) : Double
+    {
+        return Vertebratejni.getInstance().Mammalia_Jindo_bark(self, obj)
+    }
+    override fun cross(mate : Dog) : Dog
+    {
+        val handle = Vertebratejni.getInstance().Mammalia_Jindo_cross(self, mate.getHandle())
+        return Dog(handle)
+    }
+
+    fun guard(address : String) {
+        Vertebratejni.getInstance().Mammalia_Jindo_guard(self, address)
+    }
+}
 ```
