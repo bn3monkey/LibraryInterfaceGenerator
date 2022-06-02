@@ -162,18 +162,25 @@ This project converts the module structure modeled in JSON into the output below
                             "return" : "...",
                             "parameters" : [
                                 {
+                                    "order" : "parameter",
                                     "type" : "string",
                                     "name" : "paramA",
+                                    "io" : "in",
                                     "description" : "..."
+                                    
                                 },
                                 {
+                                    "order" : "parameter",
                                     "type" : "bool",
                                     "name" : "paramB",
+                                    "io" : "in",
                                     "description" : "..."
                                 },
                                 {
+                                    "order" : "parameter",
                                     "type" : "packageA/moduleB/interfaceA/EnumA",
                                     "name" : "paramC",
+                                    "io" : "in",
                                     "description" : "...",
                                 }
                             ]
@@ -201,13 +208,17 @@ This project converts the module structure modeled in JSON into the output below
                             "return" : "...",
                             "parameters" : [
                                 {
+                                    "order" : "parameter",
                                     "type" : "array<int32>",
                                     "name" : "paramA",
+                                    "io" : "out",
                                     "description" : "..."
                                 },
                                 {
+                                    "order" : "parameter",
                                     "type" : "array<bool>",
                                     "name" : "paramB",
+                                    "io" : "out",
                                     "description" : "..."
                                 }
                             ]
@@ -222,23 +233,31 @@ This project converts the module structure modeled in JSON into the output below
                     "return" : "...",
                     "parameters" : [
                         {
+                            "order" : "parameter",
                             "type" : "double",
                             "name" : "paramA",
+                            "io" : "in",
                             "description" : "..."
                         },
                         {
+                            "order" : "parameter",
                             "type" : "float",
                             "name" : "paramB",
+                            "io" : "in",
                             "description" : "..."
                         },
                         {
+                            "order" : "parameter",
                             "type" : "array<moduleB/interfaceA>",
                             "name" : "paramC",
+                            "io" : "in",
                             "description" : "..."
                         },
                         {
+                            "order" : "parameter",
                             "type" : "moduleB/classA",
                             "name" : "paramD",
+                            "io" : "out",
                             "description" : "..."
                         }
                     ]
@@ -415,10 +434,8 @@ The type of the |order|json object. Fixed as "class".|
 ### Type (타입)
 
 All types supported by the library are introduced below. Used in the "type" field of properties, methods, and parameters.
-Since this project does not support in/out parameters, implementation using tuples is recommended when multiple return values ​​are required.
 
 라이브러리에서 지원하는 모든 타입들을 아래에서 소개합니다. 프로퍼티, 메소드, 파라미터의 "type" 필드에서 사용됩니다. 
-이 프로젝트는 in/out parameter를 지원하지 않기 때문에, 다수의 리턴 값이 필요한 경우 튜플을 통한 구현을 추천합니다.
 
 |Type|Description|
 |:-:|:--|
@@ -434,7 +451,6 @@ Since this project does not support in/out parameters, implementation using tupl
 |enum|**Only enum within the library can be used.** Used as 'module/enum'. |
 |array\<T\>|Fixed array of type T|
 |vector\<T\>|dynamic array of type T|
-|tuple\<T1,T2,...>|Tuples of type T1, T2, ...|
 
 |타입|설명|
 |:-:|:--|
@@ -450,7 +466,6 @@ Since this project does not support in/out parameters, implementation using tupl
 |enum|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/enum'로 쓰임. |
 |array\<T\>|T 타입의 고정 배열|
 |vector\<T\>|T 타입의 동적 배열|
-|tuple\<T1,T2,...>|T1, T2, ... 타입의 튜플|
 
 ### Property (프로퍼티)
 
@@ -532,7 +547,8 @@ The type of the |order|json object. Fixed as "method".|
     "order" : "parameter",
     "type" : "int8",
     "name" : "paramA",
-    "description" : "..."
+    "description" : "...",
+    "io" : "in"
 }
 ```
 
@@ -542,6 +558,7 @@ The type of the |order|json object. Fixed by "parameter".|
 |name|Name of parameter|
 |type|Data type of the parameter|
 |description|Description of the role of the parameter|
+|io|The input/output direction of the parameter. "in" means an input parameter and "out" means an output parameter.|
 
 |*필드 이름*|*설명*|
 |:-:|:--|
@@ -549,6 +566,7 @@ The type of the |order|json object. Fixed by "parameter".|
 |name|파라미터의 이름|
 |type|파라미터의 데이터 타입|
 |description|파라미터의 역할에 대한 설명|
+|io|파라미터의 입출력 방향. "in"은 입력 파라미터, "out"은 출력 파라미터를 의미한다.|
 
 ## Library Memory Management (라이브러리 메모리 관리)
 
@@ -825,6 +843,7 @@ shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 �
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "obj",
+                                    "io" : "in",
                                     "description" : "hazard of the object"
                                 }
                             ]
@@ -840,6 +859,7 @@ shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 �
                                     "order" : "parameter",
                                     "type" : "Verbrate/Mammalia/Dog",
                                     "name" : "mate",
+                                    "io" : "in",
                                     "description" : "other dog"
                                 }
                             ]
@@ -863,6 +883,7 @@ shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 �
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "age",
+                                    "io" : "in",
                                     "description" : "age for the jindo dog"
                                 }
                             ]
@@ -878,6 +899,7 @@ shared_ptr이 가리키던 원본 메모리도 참조 계수가 0이 되므로 �
                                     "order" : "parameter",
                                     "type" : "string",
                                     "name" : "address",
+                                    "io" : "in",
                                     "description" : "home address to guard"
                                 }
                             ]
@@ -927,20 +949,20 @@ namespace Vertebrate
             * Property name : fur
             * \brief dog hair color
             */
-            virtual void setFur(Vertebrate::Mammalia::Dog::FurColor value) = 0;
+            virtual void setFur(const Vertebrate::Mammalia::Dog::FurColor value) = 0;
             virtual Vertebrate::Mammalia::Dog::FurColor getFur()= 0;
 
             /* brief : barks when it sees dangerous objects.
-             * @param obj hazard of the object
+             * @param[in] obj hazard of the object
              * @return decibel of the barking sound
              */
-            virtual double bark(int32_t obj) = 0;
+            virtual double bark(const int32_t obj) = 0;
 
             /* brief : Mate with other dog and produce new dog.
-             * @param mate other dog
+             * @param[in] mate other dog
              * @return the new dog
              */
-            virtual std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate) = 0;
+            virtual std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog>& mate) = 0;
 
         }
     }
@@ -970,7 +992,7 @@ namespace Vertebrate
         {
             /*
             * \brief constructor of the jindo dog
-            * @param age  age for the jindo dog
+            * @param[in] age  age for the jindo dog
             */
             explicit Jindo(const int age);
             virtual ~Jindo();
@@ -979,26 +1001,26 @@ namespace Vertebrate
             * Property name : fur
             * \brief dog hair color
             */
-            void setFur(Vertebrate::Mammalia::Dog::FurColor value) override;
+            void setFur(const Vertebrate::Mammalia::Dog::FurColor value) override;
             Vertebrate::Mammalia::Dog::FurColor getFur() override;
 
             /* \brief : barks when it sees dangerous objects.
-             * @param obj hazard of the object
+             * @param[in] obj hazard of the object
              * @return decibel of the barking sound
              */
             double bark(int32_t obj) override;
 
             /* \brief : Mate with other dog and produce new dog.
-             * @param mate other dog
+             * @param[in] mate other dog
              * @return the new dog
              */
-            std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog> mate) override;
+            std::shared_ptr<Vertebrate::Mammalia::Dog> cross(const std::shared_ptr<Vertebrate::Mammalia::Dog>& mate) override;
 
             /* \brief : guard the house
-            * @param address  home address to guard
+            * @param[in] address  home address to guard
             * @return none
             */
-            void guard(std::string address);
+            void guard(const std::string address);
         }
     }
 }
@@ -1045,23 +1067,23 @@ namespace VertebrateAPI
             extern VERTEBRATE_EXPORT void* construct();
             extern VERTEBRATE_EXPORT void release(void* self);
 
-            extern VERTEBRATE_EXPORT void setFur(void* self, int32_t value);
+            extern VERTEBRATE_EXPORT void setFur(void* self, const int32_t value);
             extern VERTEBRATE_EXPORT int32_t getFur(void* self);
-            extern VERTEBRATE_EXPORT double bark(void* self, int32_t obj);
-            extern VERTEBRATE_EXPORT void* cross(void* self, void* mate);
+            extern VERTEBRATE_EXPORT double bark(void* self, const int32_t obj);
+            extern VERTEBRATE_EXPORT void* cross(void* self, const void* mate);
         }
 
         namespace Jindo
         {
-            extern VERTEBRATE_EXPORT void* construct(int32_t age);
+            extern VERTEBRATE_EXPORT void* construct(const int32_t age);
             extern VERTEBRATE_EXPORT void release(void* self);
 
-            extern VERTEBRATE_EXPORT void setFur(void* self, int32_t value);
+            extern VERTEBRATE_EXPORT void setFur(void* self, const int32_t value);
             extern VERTEBRATE_EXPORT int32_t getFur(void* self);
-            extern VERTEBRATE_EXPORT double bark(void* self, int32_t obj);
-            extern VERTEBRATE_EXPORT void* cross(void* self, void* mate);
+            extern VERTEBRATE_EXPORT double bark(void* self, const int32_t obj);
+            extern VERTEBRATE_EXPORT void* cross(void* self, const void* mate);
 
-            extern VERTEBRATE_EXPORT void guard(void* self, std::string address);
+            extern VERTEBRATE_EXPORT void guard(void* self, const std::string& address);
         }
     }
 }
