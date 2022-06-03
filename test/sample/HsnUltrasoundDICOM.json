@@ -1,0 +1,175 @@
+{
+    "order" : "package",
+    "name" : "HsnUltraosoundDICOM",
+    "author" : "bn3monkey",
+    "description" : 
+        "A library to send ultrasound images to a DICOM supported server or query patients/studies.\nImebra DICOM Library was used internally.",
+    "childs" : [
+        {
+            "order" : "module",
+            "name" : "Configuration",
+            "description" : "Settings required to communicate with the dicom server",
+            "childs" : [
+                {
+                    "order" : "interface",
+                    "name" : "Parsable",
+                    "description" : "a interface to stringify class or parse string to object",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "stringify",
+                            "type" : "string",
+                            "description" : "stringfy this object to json format.",
+                            "return" : "String containing the object value",
+                            "parameters" : [
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "parse",
+                            "type" : "bool",
+                            "description" : "parse a json format string to this object",
+                            "return" : "whether the function execution is successful",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "content",
+                                    "type" : "string",
+                                    "description" : "string containing the object value",
+                                    "io" : "in"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ClientConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "DICOM-related settings for the current device",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "name" : "applicationEntityTitle",
+                            "description" : "Application Entity Title of DICOM Client",
+                            "readonly" : false,
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "readTimeout",
+                            "description" : "How long to wait for a read request",
+                            "readonly" : false,
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "writeTimeout",
+                            "description" : "How long to wait for a write request",
+                            "readonly" : false,
+                            "type" : "string"
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "NetworkConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Network settings on the local machine",
+                    "childs" : [
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ServerConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Basic settings for communicating with the server, such as IP, PORT, etc.",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "name" : "ipAddress",
+                            "description" : "IP of DICOM server",
+                            "readonly" : false,
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "port",
+                            "description" : "Port of DICOM server",
+                            "readonly" : false,
+                            "type" : "int32"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "applicationEntityTitle",
+                            "description" : "Application Entity Title of DICOM Server",
+                            "readonly" : false,
+                            "type" : "string"
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "StorageConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Settings for DICOM Storage Server",
+                    "childs" : [
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "StorageCommitmentConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Settings for DICOM Storage Commitment Server",
+                    "childs" : [
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ModalityWorklistConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Settings for DICOM Modality Worklist Server",
+                    "childs" : [
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "MPPSConfiguration",
+                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "description" : "Settings for DICOM MPPS Server",
+                    "childs" : [
+
+                    ]
+                }
+            ]
+        },
+        {
+            "order" : "module",
+            "name" : "Server",
+            "description" : "A set of classes for communicating with the DICOM server",
+            "childs" : [
+
+            ]
+        },
+        {
+            "order" : "module",
+            "name" : "Model",
+            "description" : "Data communicated with the DICOM server (images, patient/study information)",
+            "childs" : [
+
+            ]
+        },
+        {
+            "order" : "module",
+            "name" : "Model",
+            "description" : "Supports saving and loading DICOM Setting",
+            "chidls" : [
+
+            ]
+        }
+    ]
+}

@@ -90,6 +90,7 @@ namespace LibraryInterfaceGenerator
 
                     BUFFER_OVERFLOW,
                     BAD_ALLOCATION,
+					CANNOT_FIND_CLASSNAME
                 };
 
 
@@ -119,6 +120,8 @@ namespace LibraryInterfaceGenerator
                     "json object is not package, module, class, interface",
                     "json object is not method, property, parameters",
                     "buffer overflow",
+					"allocation fail",
+					"Cannot find class name"
                 };
         };
     }

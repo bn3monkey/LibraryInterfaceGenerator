@@ -27,6 +27,8 @@ namespace LibraryInterfaceGenerator
             {
                 static const char* Package = "package";
                 static const char* Module = "module";
+
+                static const char* Enum = "enum";
                 static const char* Class = "class";
                 static const char* Interface = "interface";
 
@@ -36,7 +38,8 @@ namespace LibraryInterfaceGenerator
 
                 inline bool isLibraryItem(const std::string& order) const {
                     return !strcmp(order.c_str(), Package) || 
-                        !strcmp(order.c_str(), Module) || 
+                        !strcmp(order.c_str(), Module) ||
+                        !strcmp(order.c_str(), Enum) || 
                         !strcmp(order.c_str(), Class) || 
                         !strcmp(order.c_str(), Interface);
                 }

@@ -2,6 +2,7 @@
 #define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_PATHTREE__
 
 #include <vector>
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
 
@@ -18,9 +19,9 @@ namespace LibraryInterfaceGenerator
         public:
             explicit ClassTable(const nlohmann::json& object);
 
-            std::vector<std::string> getModuleDependency(const std::string& class_name);
-            std::string getRelativeClassPath(const std::string& current_class_name, const std::string& target_class_name);
-            std::string getRelativeEnumPath(const std::string& current_class_name, const std::string& target_class_name, const std::string& target_enum_name);
+            std::vector<std::string> getModuleDependency(Error& error, const std::string& class_name);
+            std::string getRelativeClassPath(Error& error, const std::string& current_class_name, const std::string& target_class_name);
+            std::string getRelativeEnumPath(Error& error, const std::string& current_class_name, const std::string& target_class_name, const std::string& target_enum_name);
 
             inline operator bool() {
                 return !static_cast<bool>(_error);
@@ -34,7 +35,9 @@ namespace LibraryInterfaceGenerator
             struct Element
             {
                 static constexpr size_t size = 128;
-                char name[size];
+
+                size_t depth{0};
+                char name[size] = {0};
                 std::weak_ptr<Element> parent;
                 std::vector<std::shared_ptr<Element>> childs;
             };
