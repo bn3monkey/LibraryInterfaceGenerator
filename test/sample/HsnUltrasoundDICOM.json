@@ -152,7 +152,377 @@
             "name" : "Server",
             "description" : "A set of classes for communicating with the DICOM server",
             "childs" : [
-
+                {
+                    "order" : "class",
+                    "name" : "StorageServer",
+                    "description" : "A class that provides the function to save images to a DICOM server.",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "queueImage",
+                            "description" : "Stack the images to be sent in the queue",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/UltrasoundImage",
+                                    "name" : "image",
+                                    "io" : "in",
+                                    "description" : "ultrasound image to put in the queue"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "sendImage",
+                            "description" : "Send images stacked in the queue",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "StorageCommitmentServer",
+                    "description" : "A class that provides the function to commit images to a DICOM server.",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "commitImage",
+                            "description" : "commit the images in the server",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "name" : "image",
+                                    "io" : "in",
+                                    "description" : "ultrasound images to check the images"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "name" : "success_images",
+                                    "io" : "out",
+                                    "description" : "ultrasound images that store successfully in the server"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "name" : "failed_images",
+                                    "io" : "out",
+                                    "description" : "ultrasound images that fail to store in the server"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ModalityWorklistServer",
+                    "description" : "A class that provides the function to query patient information or study information",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "listPatients",
+                            "description" : "Get patient information that meets your criteria.",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/PatientFilter",
+                                    "name" : "filter",
+                                    "io" : "in",
+                                    "description" : "query"
+                                },
+                                {
+                                   "order" : "parameter",
+                                   "type" : "vector<HsnUltrasoundDICOM/Model/Patient>",
+                                   "name" : "patients",
+                                   "io" : "out",
+                                   "description" : "query results"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "listStudies",
+                            "description" : "Get studies information that meets your criteria.",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/PatientFilter",
+                                    "name" : "patientFilter",
+                                    "io" : "in",
+                                    "description" : "query"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/StudyFilter",
+                                    "name" : "studyFilter",
+                                    "io" : "in",
+                                    "description" : "query"
+                                },
+                                {
+                                   "order" : "parameter",
+                                   "type" : "vector<HsnUltrasoundDICOM/Model/Study>",
+                                   "name" : "studies",
+                                   "io" : "out",
+                                   "description" : "query results"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "MPPSServer",
+                    "description" : "",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "openStudy",
+                            "description" : "open the study.",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/Study",
+                                    "name" : "study",
+                                    "io" : "in",
+                                    "description" : "query"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "updateStudy",
+                            "description" : "open the study.",
+                            "return" : "code for use result",
+                            "type" : "int32",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Model/Study",
+                                    "name" : "study",
+                                    "io" : "in",
+                                    "description" : "query"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "name" : "outputMsg",
+                                    "io" : "out",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "order" : "module",
+            "name" : "Type",
+            "description" : "Types used by this library",
+            "childs" : [
+                {
+                    "order" : "class",
+                    "name" : "HsnDate",
+                    "description" : "data type for date",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "name" : "constructor",
+                            "description" : "",
+                            "return" : "",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "year",
+                                    "io" : "in",
+                                    "description" : "year"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "month",
+                                    "io" : "in",
+                                    "description" : "month"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "day",
+                                    "io" : "in",
+                                    "description" : "day"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "hour",
+                                    "io" : "in",
+                                    "description" : "hour"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "minute",
+                                    "io" : "in",
+                                    "description" : "minute"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "int32",
+                                    "name" : "second",
+                                    "io" : "in",
+                                    "description" : "second"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "year",
+                            "readonly" : false,
+                            "description" : "year"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "month",
+                            "readonly" : false,
+                            "description" : "month"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "day",
+                            "readonly" : false,
+                            "description" : "day"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "hour",
+                            "readonly" : false,
+                            "description" : "hour"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "minute",
+                            "readonly" : false,
+                            "description" : "minute"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "name" : "second",
+                            "readonly" : false,
+                            "description" : "second"
+                        }
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "Sex",
+                    "description" : "data type for sex",
+                    "values" : [
+                        "M/'M'",
+                        "F/'F'",
+                        "O/'O'"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "StudyStatus",
+                    "description" : "PENDING (Performed Procedure Step Status : IN_PROGRESS)\nOPEN (Performed Procedure Step Status : IN_PROGRESS)\nDISCONTINUED (Performed Procedure Step Status : DISCONTINUED)\nCLOSED (COMPLETED)\nARCHIVED (COMPLETED)",
+                    "values" : [
+                        "PENDING/0",
+                        "OPEN/1",
+                        "DISCONTINUED/2",
+                        "CLOSED/3",
+                        "ARCHIVED/4"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "DiscontinuedReason",
+                    "description" : "",
+                    "values" : [
+                        "NONE/0",
+			            "CANCELLED_BY_DOCTER/110500",
+			            "EQUIPMENT_FAILURE/110501",
+			            "INCORRECT_PROCEDURE_ORDERED/110502",
+			            "PATIENT_ALLERTGIC_TO_MEDIA_OR_CONTRAST/110503",
+			            "PATIENT_DIED/110504",
+			            "PATIENT_REFUSED_TO_CONTINUE_PROCEDURE/110505",
+			            "PATIENT_TAKEN_FOR_TREATMENT_OR_SURGERY/110506",
+			            "PATIENT_DID_NOT_ARRIVE/110507",
+			            "PATIENT_PREGNANT/110508",
+			            "CHANGE_OF_PROCEDURE_FOR_CORRECT_CHARGING/110509",
+			            "DUPLICATE_ORDER/110510",
+			            "NURSING_UNIT_CANCLE/110511",
+			            "INCORRECT_SIDE_ORDERED/110512",
+			            "DISCONTINUED_FOR_UNSPECIFIED_REASON/110513",
+			            "INCORRECT_WORKLIST_ENTRY_SELECTED/110514",
+			            "PATIENT_CONDITION_PREVENTED_CONTINUING/110515",
+			            "EQUIPMENT_CHANGE/110516"
+                    ]
+                }
             ]
         },
         {
@@ -160,12 +530,366 @@
             "name" : "Model",
             "description" : "Data communicated with the DICOM server (images, patient/study information)",
             "childs" : [
-
+                {
+                    "order" : "class",
+                    "name" : "Patient",
+                    "description" : "data about patients",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "firstName",
+                            "description" : "first(family) name of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "middleName",
+                            "description" : "middle name of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "lastName",
+                            "description" : "last name of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
+                            "readonly" : "false",
+                            "name" : "birthDate",
+                            "description" : "birth date of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/Sex",
+                            "readonly" : "false",
+                            "name" : "sex",
+                            "description" : "sex of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "float",
+                            "readonly" : "false",
+                            "name" : "weight",
+                            "description" : "weight of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "patientID",
+                            "description" : "ID of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "confidenciality",
+                            "description" : "confienciality of a patient"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "vector<HsnUltraosoundDICOM/Type/Exam>",
+                            "readonly" : "true",
+                            "name" : "exams",
+                            "description" : "exams of a patient"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "add exam to the patient",
+                            "name" : "addExam",
+                            "return" : "N/A",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltraosoundDICOM/Type/Exam",
+                                    "io" : "in",
+                                    "name" : "exam",
+                                    "description" : "exam that added to the patient"                                    
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "Study",
+                    "description" : "data about studies",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "ID",
+                            "description" : "ID of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "instanceUID",
+                            "description" : "instance uid of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
+                            "readonly" : "false",
+                            "name" : "date",
+                            "description" : "a study date"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/StudyStatus",
+                            "readonly" : "false",
+                            "name" : "status",
+                            "description" : "status of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/DiscontinuedReason",
+                            "readonly" : "true",
+                            "name" : "discontinuedReasons",
+                            "description" : "Discontinued reasons of a study"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "add discontinued reasons to the patient",
+                            "name" : "addDiscontinuedReason",
+                            "return" : "N/A",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltraosoundDICOM/Type/DiscontinuedReason",
+                                    "io" : "in",
+                                    "name" : "discontinuedReason",
+                                    "description" : "discontinued reason that added to the patient"                                    
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "clear discontinued reasons to the patient",
+                            "name" : "clearDiscontinuedReason",
+                            "return" : "N/A",
+                            "parameters" : 
+                            [
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "performedProcedureStepID",
+                            "description" : "performed procedure step io of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
+                            "readonly" : "false",
+                            "name" : "performedProcedureStepStartDate",
+                            "description" : "performed procedure step start date of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
+                            "readonly" : "false",
+                            "name" : "performedProcedureStepEndDate",
+                            "description" : "performed procedure step end date of a study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "referringPhysician",
+                            "description" : "referring physician of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "physicianOfRecord",
+                            "description" : "physician of record of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "description",
+                            "description" : "study description"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "accession",
+                            "description" : "accession number of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Model/Patient",
+                            "readonly" : "false",
+                            "name" : "patient",
+                            "description" : "Patient holding this study"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "vector<HsnUltrasoundDICOM/Model/Series>",
+                            "readonly" : "true",
+                            "name" : "series",
+                            "description" : "all serieses that are hold by this patient"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "add series to the patient",
+                            "name" : "addSeries",
+                            "return" : "N/A",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltraosoundDICOM/Model/Series",
+                                    "io" : "in",
+                                    "name" : "series",
+                                    "description" : "series that are hold by this patient"                                    
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "Series",
+                    "description" : "data about series",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "modality",
+                            "description" : "modality of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "bodyPartExamined",
+                            "description" : "body part examined of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "readonly" : "false",
+                            "name" : "number",
+                            "description" : "series number"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "instanceUID",
+                            "description" : "instance uid of a series"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Model/Exam",
+                            "readonly" : "false",
+                            "name" : "exam",
+                            "description" : "Exam holding this series"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                            "readonly" : "true",
+                            "name" : "ultrasoundImage",
+                            "description" : "all ultrasound iamges that are hold by this patient"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "add ultrasound image to the series",
+                            "name" : "addUltrasoundImage",
+                            "return" : "N/A",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltraosoundDICOM/Model/UltrasoundImage",
+                                    "io" : "in",
+                                    "name" : "ultrasoundImage",
+                                    "description" : "ultrasound Image that are hold by this series"                                    
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "UltrasoundImage",
+                    "description" : "ultrasound image data that can be sent to dicom",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "type" : "bool",
+                            "description" : "add ultrasound image to the series",
+                            "name" : "initialize",
+                            "return" : "whether the function execution is successful",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "vector<string>",
+                                    "io" : "in",
+                                    "name" : "imagePaths",
+                                    "description" : "ultrasound Image path that is saved in the local machine"                                    
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "io" : "out",
+                                    "name" : "outputMsg",
+                                    "description" : "Reasons when an error occurs in a function"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltraosoundDICOM/Model/Series",
+                            "readonly" : "false",
+                            "name" : "series",
+                            "description" : "series holding this ultrasound image"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : "false",
+                            "name" : "instanceUID",
+                            "description" : "instance uid of ultrasound image"
+                         },
+                         {
+                             "order" : "method",
+                             "type" : "bool",
+                             "description" : "check if ultrasound image is multi image",
+                             "name" : "isMultiImage",
+                             "return" : "whether ultrasound image is multi-image",
+                             "parameters" : []
+                         }
+                    ]
+                }
             ]
         },
         {
             "order" : "module",
-            "name" : "Model",
+            "name" : "Storage",
             "description" : "Supports saving and loading DICOM Setting",
             "chidls" : [
 

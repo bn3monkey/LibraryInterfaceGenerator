@@ -409,11 +409,11 @@ The type of the |order|json object. Fixed as "class".|
     "order" : "enum",
     "name" : "enumA",
     "description" : "...",
-    "values" : {
+    "values" : [
         "A/1",
         "B/2",
         "C/3"
-    }
+    ]
 }
 ```
 
