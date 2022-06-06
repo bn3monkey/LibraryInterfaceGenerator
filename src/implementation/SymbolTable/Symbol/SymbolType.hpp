@@ -1,7 +1,7 @@
 #if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_SYMBOLTYPE__)
 #define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_SYMBOLTYPE__
 
-#include "../../json/json.hpp"
+#include "../../../json/json.hpp"
 #include "../../Result/Result.hpp"
 #include "SymbolObject.hpp"
 #include <string>
@@ -10,125 +10,137 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
+        
         class SymbolType
         {
         public:
-            virtual std::string toCppType() = 0;
-            virtual std::string toJNIType() = 0;
-            virtual std::string toKotlinType() = 0;
+            virtual bool valid() { return false; }
+            virtual std::string toCppType() { return ""; };
+            virtual std::string toJNIType() { return ""; };
+            virtual std::string toKotlinType() { return ""; };
         };
 
-        class SymbolTypeVoid : SymbolType
+        class SymbolTypeVoid : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "void";}
             std::string toJNIType() override {return "void";}  
             std::string toKotlinType() override {return "Unit"; }
 
         };
-        class SymbolTypeInt8 : SymbolType
+
+        class SymbolTypeBool : public SymbolType
         {
         public:
+            bool valid() override { return true; }
+            std::string toCppType() override { return "bool"; }
+            std::string toJNIType() override { return "jboolean"; }
+            std::string toKotlinType() override { return "Boolean"; }
+        };
+
+        class SymbolTypeInt8 : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "int8_t";}
             std::string toJNIType() override {return "jbyte";}  
             std::string toKotlinType() override {return "Byte"; }       
         };
-        class SymbolTypeInt16 : SymbolType
+        class SymbolTypeInt16 : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "int16_t";}
             std::string toJNIType() override {return "jshort";}  
             std::string toKotlinType() override {return "Short"; }
         };
-        class SymbolTypeInt32 : SymbolType
+        class SymbolTypeInt32 : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "int32_t";}
             std::string toJNIType() override {return "jint";}  
             std::string toKotlinType() override {return "Int"; }
         };
-        class SymbolTypeInt64 : SymbolType
+        class SymbolTypeInt64 : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "int64_t";}
             std::string toJNIType() override {return "jlong";}  
             std::string toKotlinType() override {return "Long"; }
         };
-        class SymbolTypeDouble : SymbolType
+        class SymbolTypeDouble : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "double";}
             std::string toJNIType() override {return "jdouble";}  
             std::string toKotlinType() override {return "Double"; }
         };
-        class SymbolTypeFloat : SymbolType
+        class SymbolTypeFloat : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "float";}
             std::string toJNIType() override {return "jfloat";}  
             std::string toKotlinType() override {return "Float"; }
         };
-        class SymbolTypeString : SymbolType
+        class SymbolTypeString : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::string";}
             std::string toJNIType() override {return "jstring";}  
             std::string toKotlinType() override {return "String"; }
         };
-        class SymbolTypeEnum : SymbolType
+       
+        class SymbolTypeEnum : public SymbolType
         {
         public:
-            SymbolTypeEnum(std::string name, SymbolEnumTable& table) :
-                _name(name), _table(table) {};
+            bool valid() override { return true; }
+            SymbolTypeEnum(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
             std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto ret = object->getCppName();
                     return ret;
                 }
                 return "";
             }
-            std::string toJNIType() override {return "jint";}  
+            std::string toJNIType() override {
+                return "jint";
+            }
             std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto ret = object->getKotlinName();
                     return ret;
                 }
-                auto ret = "";
-             }
+                return "";
+            }
         private:
-            std::string _name;
-            SymbolEnumTable& _table;
+            std::weak_ptr<SymbolObject> _obj;
         };
-        class SymbolTypeObject: SymbolType
+        class SymbolTypeObject: public SymbolType
         {
         public:
-            SymbolTypeObject(std::string name, SymbolObjectTable& table) :
-                _name(name), _table(table) {};
+            bool valid() override { return true; }
+            SymbolTypeObject(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
             std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto ret = object->getCppName();
                     return ret;
                 }
                 return "";
             }
-            std::string toJNIType() override {return "jobject";}  
+            std::string toJNIType() override {
+                return "jint";
+            }
             std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto ret = object->getKotlinName();
                     return ret;
@@ -136,82 +148,105 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
         private:
-            std::string _name;
-            SymbolObjectTable& _table;
+            std::weak_ptr<SymbolObject> _obj;
         };
 
         template<class T>
-        class SymbolTypeArray : SymbolType, std::false_type
+        class SymbolTypeArray : public SymbolType
         {
-
+            
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt8> : SymbolType
+        class SymbolTypeArray <SymbolTypeBool> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
+            std::string toCppType() override { return "std::vector<bool>"; }
+            std::string toJNIType() override { return "jbooleanArray"; }
+            std::string toKotlinType() override { return "BooleanArray"; }
+        };
+
+        template<>
+        class SymbolTypeArray<SymbolTypeInt8> : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<char>";}
             std::string toJNIType() override {return "jbyteArray";}  
             std::string toKotlinType() override {return "ByteArray"; }    
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt16> : SymbolType
+        class SymbolTypeArray<SymbolTypeInt16> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int16_t>";}
             std::string toJNIType() override {return "jshortArray";}  
             std::string toKotlinType() override {return "ShortArray"; }    
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt32> : SymbolType
+        class SymbolTypeArray<SymbolTypeInt32> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int32_t>";}
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {return "IntArray"; }    
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt64> : SymbolType
+        class SymbolTypeArray<SymbolTypeInt64> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int64_t>";}
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {return "IntArray"; }    
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeFloat> : SymbolType
+        class SymbolTypeArray<SymbolTypeFloat> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<float>";}
             std::string toJNIType() override {return "jfloatArray";}  
             std::string toKotlinType() override {return "FloatArray"; }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeDouble> : SymbolType
+        class SymbolTypeArray<SymbolTypeDouble> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<double>";}
             std::string toJNIType() override {return "jdoubleArray";}  
             std::string toKotlinType() override {return "DoubleArray"; }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeEnum> : SymbolType
+        class SymbolTypeArray<SymbolTypeString> : public SymbolType
         {
         public:
-            SymbolTypeArray(std::string name, SymbolEnumTable& table) :
-                _name(name), _table(table) {};
+            bool valid() override { return true; }
+            std::string toCppType() override { return "std::vector<std::string>"; }
+            std::string toJNIType() override { return "jobjectArray"; }
+            std::string toKotlinType() override { return "Array<String>"; }
+        };
 
-            std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+        template<>
+        class SymbolTypeArray<SymbolTypeEnum> : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
+                _obj(obj) {};
+
+            std::string toCppType() override {   
+                if (auto object = _obj.lock())
                 {
                     auto name = object->getCppName();
                     std::string ret {"std::vector<"};
@@ -223,53 +258,45 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
-                    auto name = object->getKotlinName();
-                    std::string ret {"std::vector<"};
+                    auto name = object->getCppName();
+                    std::string ret{ "Array<" };
                     ret += name;
                     ret += ">";
                     return ret;
                 }
-                return "";    
+                return "";
             }
         private:
-            std::string _name;
-            SymbolEnumTable& _table;    
+            std::weak_ptr<SymbolObject> _obj;
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeObject> : SymbolType
+        class SymbolTypeArray<SymbolTypeObject> : public SymbolType
         {
         public:
-            SymbolTypeArray(std::string name, SymbolObjectTable& table) :
-                _name(name), _table(table) {};
+            bool valid() override { return true; }
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
+                _obj(obj) {};
+
             std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto name = object->getCppName();
-                    std::string ret {"std::vector<"};
+                    std::string ret{ "std::vector<" };
                     ret += name;
                     ret += ">";
                     return ret;
                 }
                 return "";
             }
-            std::string toJNIType() override {return "jobjectArray";}  
+            std::string toJNIType() override { return "jobjectArray"; }
             std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
-                    auto name = object->getKotlinName();
-                    std::string ret {"Array<"};
+                    auto name = object->getCppName();
+                    std::string ret{ "Array<" };
                     ret += name;
                     ret += ">";
                     return ret;
@@ -277,140 +304,120 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
         private:
-            std::string _name;
-            SymbolObjectTable& _table;
+            std::weak_ptr<SymbolObject> _obj;
         };
 
         template<class T>
-        class SymbolTypeVector : SymbolType, std::false_type
+        class SymbolTypeVector : SymbolType
         {
 
         };
 
-
         template<>
-        class SymbolTypeVector<SymbolTypeInt8> : SymbolType
+        class SymbolTypeVector <SymbolTypeBool> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
+            std::string toCppType() override { return "std::vector<bool>"; }
+            std::string toJNIType() override { return "jobject"; }
+            std::string toKotlinType() override { return "MutableList<Boolean>"; }
+        };
+
+        template<>
+        class SymbolTypeVector<SymbolTypeInt8> : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<char>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Byte>"; }    
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt16> : SymbolType
+        class SymbolTypeVector<SymbolTypeInt16> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int16_t>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Short>"; }    
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt32> : SymbolType
+        class SymbolTypeVector<SymbolTypeInt32> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int32_t>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Int>"; }    
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt64> : SymbolType
+        class SymbolTypeVector<SymbolTypeInt64> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<int64_t>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Long>"; }    
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeFloat> : SymbolType
+        class SymbolTypeVector<SymbolTypeFloat> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<float>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Float>"; }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeDouble> : SymbolType
+        class SymbolTypeVector<SymbolTypeDouble> : public SymbolType
         {
         public:
+            bool valid() override { return true; }
             std::string toCppType() override {return "std::vector<double>";}
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Double>"; }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeEnum> : SymbolType
+        class SymbolTypeVector<SymbolTypeString> : public SymbolType
         {
         public:
-            SymbolTypeVector(std::string name, SymbolEnumTable& table) :
-                _name(name), _table(table) {};
-            std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret {"std::vector<"};
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret {"MutableList<"};
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-        private:
-            std::string _name;
-            SymbolEnumTable& _table;    
+            bool valid() override { return true; }
+            std::string toCppType() override { return "std::vector<std::string>"; }
+            std::string toJNIType() override { return "jobject"; }
+            std::string toKotlinType() override { return "MutableList<String>"; }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeObject> : SymbolType
+        class SymbolTypeVector<SymbolTypeEnum> : public SymbolType
         {
         public:
-            SymbolTypeVector(std::string name, SymbolObjectTable& table) :
-                _name(name), _table(table) {};
+            bool valid() override { return true; }
+            SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
+                _obj(obj) {};
+
             std::string toCppType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
                     auto name = object->getCppName();
-                    std::string ret {"std::vector<"};
+                    std::string ret{ "std::vector<" };
                     ret += name;
                     ret += ">";
                     return ret;
                 }
                 return "";
             }
-            std::string toJNIType() override {return "jobject";}  
+            std::string toJNIType() override { return "jobject"; }
             std::string toKotlinType() override {
-                auto object_iter = _table.find(_name);
-                if (object_iter == _table.end())
-                    return "";
-                if (auto object = object_iter->second.lock())
+                if (auto object = _obj.lock())
                 {
-                    auto name = object->getKotlinName();
-                    std::string ret {"MutableList<"};
+                    auto name = object->getCppName();
+                    std::string ret{ "MutableList<" };
                     ret += name;
                     ret += ">";
                     return ret;
@@ -418,8 +425,57 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
         private:
-            std::string _name;
-            SymbolObjectTable& _table;
+            std::weak_ptr<SymbolObject> _obj;
+        };
+
+        template<>
+        class SymbolTypeVector<SymbolTypeObject> : public SymbolType
+        {
+        public:
+            bool valid() { return true; }
+            SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
+                _obj(obj) {};
+
+            std::string toCppType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto name = object->getCppName();
+                    std::string ret{ "std::vector<" };
+                    ret += name;
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+            std::string toJNIType() override { return "jobject"; }
+            std::string toKotlinType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto name = object->getCppName();
+                    std::string ret{ "MutableList<" };
+                    ret += name;
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+        private:
+            std::weak_ptr<SymbolObject> _obj;
+        };
+
+        std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> makeType(
+            const std::string& type,
+            const SymbolObjectTable& objectTable,
+            const SymbolEnumTable& enumTable
+            );
+
+        class HasSymbolType
+        {
+        public:
+            std::unique_ptr<SymbolType> type;
+            Result change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable);
+        protected:
+            std::string _type;
         };
     }
 }

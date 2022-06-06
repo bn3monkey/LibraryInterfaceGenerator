@@ -7,23 +7,28 @@
 #include <string>
 #include <unordered_map>
 #include "SymbolObject.hpp"
+#include "../../Auxiliary/Definition.hpp"
+#include <sstream>
+#include <iostream>
 
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolEnum : public HasResult, SymbolObject
+        class SymbolEnum : public HasResult, public SymbolObject
         {
         public:
-            const std::vector<std::string>& module_paths;
+            const std::vector<std::string>& parentModules;
+            std::vector<std::string> parentObjects;
+
             std::string name;
             std::string description;
             std::unordered_map<std::string, int> values;
 
             explicit SymbolEnum(const nlohmann::json& object,
-                const std::vector<std::string> module_paths,
-                SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+                const std::vector<std::string>& module_paths,
+                std::vector<std::string>& object_paths
+                );
 
             Tag getTag() override { return Tag::Enum; }
             std::string getCppName() override;

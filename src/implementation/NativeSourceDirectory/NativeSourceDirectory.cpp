@@ -3,26 +3,18 @@
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
-NativeSourceDirectory::NativeSourceDirectory(std::string json_content, std::string root_dir_path)
-{
-    try
-    {  
-        _object = nlohmann::json::parse(json_content);
-    }
-    catch(const std::exception& e)
-    {
-        _result = Result(Result::Code::JSON_PARSE_FAIL, e.what());
-    }
-  
+NativeSourceDirectory::NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path)
+{  
     _include_dir_path = root_dir_path + "/include";
     _src_dir_path = root_dir_path + "/src";
 }
 
 Result NativeSourceDirectory::make()
 {
-
+    return Result(Result::Code::SUCCESS);
 }
 
+/*
 // 1. Class Table 제작 (Class, Interface, enum class)
 Result NativeSourceDirectory::createClassTable(const nlohmann::json& object)
 {
@@ -302,16 +294,18 @@ Result NativeSourceDirectory::createGlobalMethod(const nlohmann::json& object, s
 Result NativeSourceDirectory::createMethod(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
 {
 
+    return Result(Result::Code::SUCCESS);
 }
 
 // 6. Parameter 제작
 Result NativeSourceDirectory::createParameter(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
 {
-
+    return Result(Result::Code::SUCCESS);
 }
 
 // 7. Property 제작
 Result NativeSourceDirectory::createProperty(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
 {
-
+    return Result(Result::Code::SUCCESS);
 }
+*/

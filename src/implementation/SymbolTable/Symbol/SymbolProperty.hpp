@@ -6,7 +6,6 @@
 #include "SymbolObject.hpp"
 #include "SymbolType.hpp"
 #include "../../Auxiliary/Definition.hpp"
-
 #include <memory>
 #include <string>
 
@@ -14,18 +13,17 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolProperty : public HasResult
+        class SymbolProperty : public HasResult, public HasSymbolType
         {
         public:
             
-            const std::unique_ptr<SymbolType> type;
-            const std::string name;
-            const bool readonly;
-            const std::string description;
+            // std::unique_ptr<SymbolType> type;
+            std::string name;
+            bool readonly;
+            std::string description;
 
-            explicit SymbolProperty(const nlohmann::json& object,
-                SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+            explicit SymbolProperty(const nlohmann::json& object);
+
         };
     }
 }

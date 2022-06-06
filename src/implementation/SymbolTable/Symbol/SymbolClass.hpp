@@ -10,36 +10,49 @@
 #include "SymbolMethod.hpp"
 #include <memory>
 #include <string>
+#include "../../Auxiliary/Definition.hpp"
+
 
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolClass : public HasResult, SymbolObject
+        class SymbolClass : public HasResult, public SymbolObject
         {
         public:
-            const std::vector<std::string>& module_paths;
-            const std::string name;
-            const std::string description;
-            const std::vector<std::string> base;
+            const std::vector<std::string>& parentModules;
+            std::vector<std::string> parentObjects;
 
-            const std::vector<SymbolMethod> methods;
-            const std::vector<SymbolProperty> properties;
+            bool isInterface;
+            std::string name;
+            std::string description;
+            
+            std::vector<std::weak_ptr<SymbolClass>> bases;
 
-            const std::vector<SymbolMethod> getBaseMethod();
-            const std::vector<SymbolProperty> getBaseProperties();
+            std::vector<std::shared_ptr<SymbolEnum>> enums;
+            std::vector<std::shared_ptr<SymbolMethod>> methods;
+            std::vector<std::shared_ptr<SymbolProperty>> properties;
+
+            std::vector<std::shared_ptr<SymbolMethod>> getBaseMethod();
+            std::vector<std::shared_ptr<SymbolProperty>> getBaseProperties();
 
             explicit SymbolClass(const nlohmann::json& object,
+                bool isInterface,
                 const std::vector<std::string>& module_paths,
+                std::vector<std::string>& object_paths,
                 SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+                SymbolEnumTable& enumTable,
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
 
             Tag getTag() override { return Tag::Class; }
             std::string getCppName() override;
             std::string getKotlinName() override;
 
+            Result change(SymbolObjectTable& objectTable);
         private:
-            SymbolObjectTable& _objectTable;
+            std::vector<std::string> _bases;
+
+            void addEnumTable(SymbolEnumTable& enumTable, std::shared_ptr<SymbolEnum>& value);
         };
     }
 }

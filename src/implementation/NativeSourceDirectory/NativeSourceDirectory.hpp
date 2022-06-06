@@ -5,7 +5,7 @@
 
 #include "../FileSystem/FileSystem.hpp"
 #include "../Result/Result.hpp"
-#include "../../json/json.hpp"
+#include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
 
 
@@ -16,7 +16,7 @@ namespace LibraryInterfaceGenerator
         class NativeSourceDirectory
         {
         public:
-            explicit NativeSourceDirectory(std::string json_content, std::string root_dir_path = ".");
+            explicit NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path = ".");
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
@@ -52,6 +52,7 @@ namespace LibraryInterfaceGenerator
             // 클래스, 인터페이스, 열거 클래스가 파라미터일 경우, 헤더 파일의 상대적 위치 분석이 필요.
             
             // 1. Class Table 제작 (Class, Interface, enum class)
+            /*
             Result createClassTable(const nlohmann::json& object);
 
             // 2. Module Directory 제작
@@ -81,6 +82,7 @@ namespace LibraryInterfaceGenerator
 
             // 7. Property 제작
             Result createInterfaceProperty(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
+            */
             
         };
     }

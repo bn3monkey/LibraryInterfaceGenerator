@@ -20,15 +20,54 @@ LibraryInterfaceGenerator::Implementation::SymbolTable::SymbolTable(const nlohma
 		return;
 	}
 
+	SymbolObjectTable objectTable;
+	SymbolEnumTable enumTable;
+	std::vector<std::weak_ptr<HasSymbolType>> hasTypes;
+
 	_package = std::make_shared<LibraryInterfaceGenerator::Implementation::SymbolPackage>(
 		object,
-		_objectTable,
-		_enumTable
+		objectTable,
+		enumTable,
+		hasTypes
 		);
 
+	_result = _package->toResult();
+	if (!_result)
+	{
+		return;
+	}
+
+	for (auto& hasTypePtr : hasTypes)
+	{
+		if (auto hasType = hasTypePtr.lock())
+		{
+			_result = hasType->change(objectTable, enumTable);
+			if (!_result)
+			{
+				return;
+			}
+		}
+	}
+
+	for (auto& objectptr : objectTable)
+	{
+		if (auto object = objectptr.second.lock())
+		{
+			auto clazz = std::dynamic_pointer_cast<SymbolClass>(object);
+			if (clazz)
+			{
+				_result = clazz->change(objectTable);
+				if (!_result)
+				{
+					return;
+				}
+			}
+		}
+	}
 }
 
 const LibraryInterfaceGenerator::Implementation::SymbolPackage& LibraryInterfaceGenerator::Implementation::SymbolTable::getPackage()
 {
 	return *(_package.get());
 }
+

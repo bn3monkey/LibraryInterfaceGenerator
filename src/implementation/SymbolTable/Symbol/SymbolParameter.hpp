@@ -7,12 +7,14 @@
 #include "SymbolType.hpp"
 #include <memory>
 #include <string>
+#include "../../Auxiliary/Definition.hpp"
+
 
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolParameter : public HasResult
+        class SymbolParameter : public HasResult, public HasSymbolType
         {
         public:
             enum IO
@@ -20,14 +22,12 @@ namespace LibraryInterfaceGenerator
                 IN,
                 OUT,
             };
-            const std::unique_ptr<SymbolType> type;
-            const std::string name;
-            const std::string description;
-            const IO io;
+            // std::unique_ptr<SymbolType> type;
+            std::string name;
+            std::string description;
+            IO io;
 
-            explicit SymbolParameter(const nlohmann::json& object,
-                SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+            explicit SymbolParameter(const nlohmann::json& object);
         };
     }
 }

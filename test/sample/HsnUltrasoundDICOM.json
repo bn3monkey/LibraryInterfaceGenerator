@@ -1,6 +1,6 @@
 {
     "order" : "package",
-    "name" : "HsnUltraosoundDICOM",
+    "name" : "HsnUltrasoundDICOM",
     "author" : "bn3monkey",
     "description" : 
         "A library to send ultrasound images to a DICOM supported server or query patients/studies.\nImebra DICOM Library was used internally.",
@@ -13,6 +13,7 @@
                 {
                     "order" : "interface",
                     "name" : "Parsable",
+                    "base" : [],
                     "description" : "a interface to stringify class or parse string to object",
                     "childs" : [
                         {
@@ -45,7 +46,7 @@
                 {
                     "order" : "class",
                     "name" : "ClientConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "DICOM-related settings for the current device",
                     "childs" : [
                         {
@@ -74,7 +75,7 @@
                 {
                     "order" : "class",
                     "name" : "NetworkConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Network settings on the local machine",
                     "childs" : [
 
@@ -83,7 +84,7 @@
                 {
                     "order" : "class",
                     "name" : "ServerConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Basic settings for communicating with the server, such as IP, PORT, etc.",
                     "childs" : [
                         {
@@ -112,14 +113,14 @@
                             "name" : "codePage",
                             "description" : "",
                             "readonly" : false,
-                            "type" : "HsnUltraosoundDICOM/Type/CodePage"
+                            "type" : "HsnUltrasoundDICOM/Type/CodePage"
                         }
                     ]
                 },
                 {
                     "order" : "class",
                     "name" : "StorageConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Storage Server",
                     "childs" : [
 
@@ -128,7 +129,7 @@
                 {
                     "order" : "class",
                     "name" : "StorageCommitmentConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Storage Commitment Server",
                     "childs" : [
 
@@ -137,7 +138,7 @@
                 {
                     "order" : "class",
                     "name" : "ModalityWorklistConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Modality Worklist Server",
                     "childs" : [
 
@@ -146,7 +147,7 @@
                 {
                     "order" : "class",
                     "name" : "MPPSConfiguration",
-                    "base" : "HsnUltrasoundDICOM/Configuration/Parsable",
+                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM MPPS Server",
                     "childs" : [
 
@@ -162,6 +163,7 @@
                 {
                     "order" : "class",
                     "name" : "StorageServer",
+                    "base" : [],
                     "description" : "A class that provides the function to save images to a DICOM server.",
                     "childs" : [
                         {
@@ -208,6 +210,7 @@
                 {
                     "order" : "class",
                     "name" : "StorageCommitmentServer",
+                    "base" : [],
                     "description" : "A class that provides the function to commit images to a DICOM server.",
                     "childs" : [
                         {
@@ -252,6 +255,7 @@
                 {
                     "order" : "class",
                     "name" : "ModalityWorklistServer",
+                    "base" : [],
                     "description" : "A class that provides the function to query patient information or study information",
                     "childs" : [
                         {
@@ -263,7 +267,7 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/PatientFilter",
+                                    "type" : "HsnUltrasoundDICOM/Filter/PatientFilter",
                                     "name" : "filter",
                                     "io" : "in",
                                     "description" : "query"
@@ -293,14 +297,14 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/PatientFilter",
+                                    "type" : "HsnUltrasoundDICOM/Filter/PatientFilter",
                                     "name" : "patientFilter",
                                     "io" : "in",
                                     "description" : "query"
                                 },
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/StudyFilter",
+                                    "type" : "HsnUltrasoundDICOM/Filter/StudyFilter",
                                     "name" : "studyFilter",
                                     "io" : "in",
                                     "description" : "query"
@@ -326,6 +330,7 @@
                 {
                     "order" : "class",
                     "name" : "MPPSServer",
+                    "base" : [],
                     "description" : "",
                     "childs" : [
                         {
@@ -386,6 +391,7 @@
                 {
                     "order" : "class",
                     "name" : "HsnDate",
+                    "base" : [],
                     "description" : "data type for date",
                     "childs" : [
                         {
@@ -584,74 +590,114 @@
         },
         {
             "order" : "module",
+            "name" : "Filter",
+            "description" : "Query filter of dicom data",
+            "childs" : [
+                {
+                    "order" : "class",
+                    "name" : "PatientFilter",
+                    "description" : "filter about patient",
+                    "childs" : [
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "StudyFilter",
+                    "description" : "filter about study",
+                    "childs" : [
+                        
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "SeriesFilter",
+                    "description" : "filter about series",
+                    "childs" : [
+                        
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "UltrasoundImageFilter",
+                    "description" : "filter about ultrasoundimage",
+                    "childs" : [
+                        
+                    ]
+                }
+            ]
+        },
+        {
+            "order" : "module",
             "name" : "Model",
             "description" : "Data communicated with the DICOM server (images, patient/study information)",
             "childs" : [
                 {
                     "order" : "class",
                     "name" : "Patient",
+                    "base" : [],
                     "description" : "data about patients",
                     "childs" : [
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "firstName",
                             "description" : "first(family) name of a patient"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "middleName",
                             "description" : "middle name of a patient"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "lastName",
                             "description" : "last name of a patient"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
                             "name" : "birthDate",
                             "description" : "birth date of a patient"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/Sex",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/Sex",
+                            "readonly" : false,
                             "name" : "sex",
                             "description" : "sex of a patient"
                         },
                         {
                             "order" : "property",
                             "type" : "float",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "weight",
                             "description" : "weight of a patient"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "patientID",
                             "description" : "ID of a patient"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "confidenciality",
                             "description" : "confienciality of a patient"
                         },
                         {
                             "order" : "property",
-                            "type" : "vector<HsnUltraosoundDICOM/Type/Exam>",
-                            "readonly" : "true",
+                            "type" : "vector<HsnUltrasoundDICOM/Model/Study>",
+                            "readonly" : true,
                             "name" : "exams",
                             "description" : "exams of a patient"
                         },
@@ -665,7 +711,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltraosoundDICOM/Type/Exam",
+                                    "type" : "HsnUltrasoundDICOM/Model/Study",
                                     "io" : "in",
                                     "name" : "exam",
                                     "description" : "exam that added to the patient"                                    
@@ -677,40 +723,41 @@
                 {
                     "order" : "class",
                     "name" : "Study",
+                    "base" : [],
                     "description" : "data about studies",
                     "childs" : [
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "ID",
                             "description" : "ID of a study"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "instanceUID",
                             "description" : "instance uid of a study"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
                             "name" : "date",
                             "description" : "a study date"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/StudyStatus",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/StudyStatus",
+                            "readonly" : false,
                             "name" : "status",
                             "description" : "status of a study"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/DiscontinuedReason",
-                            "readonly" : "true",
+                            "type" : "HsnUltrasoundDICOM/Type/DiscontinuedReason",
+                            "readonly" : true,
                             "name" : "discontinuedReasons",
                             "description" : "Discontinued reasons of a study"
                         },
@@ -724,7 +771,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltraosoundDICOM/Type/DiscontinuedReason",
+                                    "type" : "HsnUltrasoundDICOM/Type/DiscontinuedReason",
                                     "io" : "in",
                                     "name" : "discontinuedReason",
                                     "description" : "discontinued reason that added to the patient"                                    
@@ -744,63 +791,63 @@
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "performedProcedureStepID",
                             "description" : "performed procedure step io of a study"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
                             "name" : "performedProcedureStepStartDate",
                             "description" : "performed procedure step start date of a study"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Type/HsnDate",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
                             "name" : "performedProcedureStepEndDate",
                             "description" : "performed procedure step end date of a study"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "referringPhysician",
                             "description" : "referring physician of a physician"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "physicianOfRecord",
                             "description" : "physician of record of a physician"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "description",
                             "description" : "study description"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "accession",
                             "description" : "accession number of a physician"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Model/Patient",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Model/Patient",
+                            "readonly" : false,
                             "name" : "patient",
                             "description" : "Patient holding this study"
                         },
                         {
                             "order" : "property",
                             "type" : "vector<HsnUltrasoundDICOM/Model/Series>",
-                            "readonly" : "true",
+                            "readonly" : true,
                             "name" : "series",
                             "description" : "all serieses that are hold by this patient"
                         },
@@ -814,7 +861,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltraosoundDICOM/Model/Series",
+                                    "type" : "HsnUltrasoundDICOM/Model/Series",
                                     "io" : "in",
                                     "name" : "series",
                                     "description" : "series that are hold by this patient"                                    
@@ -826,47 +873,48 @@
                 {
                     "order" : "class",
                     "name" : "Series",
+                    "base" : [],
                     "description" : "data about series",
                     "childs" : [
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "modality",
                             "description" : "modality of a physician"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "bodyPartExamined",
                             "description" : "body part examined of a physician"
                         },
                         {
                             "order" : "property",
                             "type" : "int32",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "number",
                             "description" : "series number"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "instanceUID",
                             "description" : "instance uid of a series"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Model/Exam",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Model/Study",
+                            "readonly" : false,
                             "name" : "exam",
                             "description" : "Exam holding this series"
                         },
                         {
                             "order" : "property",
                             "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
-                            "readonly" : "true",
+                            "readonly" : true,
                             "name" : "ultrasoundImage",
                             "description" : "all ultrasound iamges that are hold by this patient"
                         },
@@ -880,7 +928,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltraosoundDICOM/Model/UltrasoundImage",
+                                    "type" : "HsnUltrasoundDICOM/Model/UltrasoundImage",
                                     "io" : "in",
                                     "name" : "ultrasoundImage",
                                     "description" : "ultrasound Image that are hold by this series"                                    
@@ -892,6 +940,7 @@
                 {
                     "order" : "class",
                     "name" : "UltrasoundImage",
+                    "base" : [],
                     "description" : "ultrasound image data that can be sent to dicom",
                     "childs" : [
                         {
@@ -920,15 +969,15 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltraosoundDICOM/Model/Series",
-                            "readonly" : "false",
+                            "type" : "HsnUltrasoundDICOM/Model/Series",
+                            "readonly" : false,
                             "name" : "series",
                             "description" : "series holding this ultrasound image"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "instanceUID",
                             "description" : "instance uid of ultrasound image"
                          },
@@ -948,7 +997,7 @@
             "order" : "module",
             "name" : "Storage",
             "description" : "Supports saving and loading DICOM Setting",
-            "chidls" : [
+            "childs" : [
 
             ]
         }

@@ -9,25 +9,27 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include "../../Auxiliary/Definition.hpp"
+
 
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolMethod : public HasResult
+        class SymbolMethod : public HasResult, public HasSymbolType
         {
         public:
-            const std::vector<std::string> module_paths;
-            std::unique_ptr<SymbolType> type;
+            const std::vector<std::string>& parentModules;
+            // std::unique_ptr<SymbolType> type;
             std::string name;
             std::string description;
             std::string return_description;
-            std::vector<SymbolParameter> parameters;
+            std::vector<std::shared_ptr<SymbolParameter>> parameters;
 
             explicit SymbolMethod(const nlohmann::json& object,
-                std::vector<std::string>& module_paths,
-                SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+                const std::vector<std::string>& module_paths,
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
+
         };
     }
 }

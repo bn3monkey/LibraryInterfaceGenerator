@@ -5,11 +5,11 @@
 #include "../../Result/Result.hpp"
 #include "../../Auxiliary/Definition.hpp"
 #include "SymbolClass.hpp"
-#include "SymbolInterface.hpp"
 #include "SymbolEnum.hpp"
 #include "SymbolMethod.hpp"
 #include <vector>
 #include <string>
+#include "../../Auxiliary/Definition.hpp"
 
 
 namespace LibraryInterfaceGenerator
@@ -19,20 +19,25 @@ namespace LibraryInterfaceGenerator
         class SymbolModule : public HasResult
         {
         public:
-            const std::vector<std::string> module_paths;
-            const std::string name;
-            const std::string description;
+            std::vector<std::string> modules;
+            std::string name;
+            std::string description;
 
-            const std::vector<std::shared_ptr<SymbolClass>> classes; 
-            const std::vector<std::shared_ptr<SymbolInterface>> interfaces;
-            const std::vector<std::shared_ptr<SymbolMethod>> globla_methods;
-            const std::vector<std::shared_ptr<SymbolModule>> submodules;
-            const std::vector<std::shared_ptr<SymbolEnum>> enums;
+            std::vector<std::shared_ptr<SymbolClass>> classes;
+            std::vector<std::shared_ptr<SymbolClass>> interfaces;
+            std::vector<std::shared_ptr<SymbolMethod>> globla_methods;
+            std::vector<std::shared_ptr<SymbolModule>> submodules;
+            std::vector<std::shared_ptr<SymbolEnum>> enums;
 
             explicit SymbolModule(const nlohmann::json& object,
-                std::vector<std::string> module_paths,
+                std::vector<std::string>& parentModules,
                 SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+                SymbolEnumTable& enumTable,
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
+
+        private:
+            void addEnumTable(SymbolEnumTable& enumTable, std::shared_ptr<SymbolEnum>& value);
+            void addObjectTable(SymbolObjectTable& objectTable, std::shared_ptr<SymbolClass>& value);
         };
     }
 }

@@ -12,6 +12,7 @@ namespace LibraryInterfaceGenerator
         enum class Code : int32_t
         {
             SUCCESS = 0,
+            FAIL = 1,
         };
 
         inline operator bool() const { return _code != Code::SUCCESS; } 

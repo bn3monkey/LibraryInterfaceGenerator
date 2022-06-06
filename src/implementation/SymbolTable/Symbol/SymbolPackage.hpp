@@ -7,6 +7,7 @@
 #include "SymbolModule.hpp"
 #include <vector>
 #include <string>
+#include "../../Auxiliary/Definition.hpp"
 
 
 namespace LibraryInterfaceGenerator
@@ -16,14 +17,15 @@ namespace LibraryInterfaceGenerator
         class SymbolPackage : public HasResult
         {
         public:
-            const std::string name;
-            const std::string author;
-            const std::string description;
-            const std::vector<SymbolModule> modules;
+            std::string name;
+            std::string author;
+            std::string description;
+            std::vector<std::shared_ptr<SymbolModule>> modules;
 
             explicit SymbolPackage(const nlohmann::json& object,
                 SymbolObjectTable& objectTable,
-                SymbolEnumTable& enumTable);
+                SymbolEnumTable& enumTable,
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
         };
     }
 }

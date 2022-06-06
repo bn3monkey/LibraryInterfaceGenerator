@@ -6,7 +6,6 @@
 #include "Symbol/SymbolPackage.hpp"
 #include "Symbol/SymbolModule.hpp"
 #include "Symbol/SymbolType.hpp"
-#include "Symbol/SymbolInterface.hpp"
 #include "Symbol/SymbolObject.hpp"
 #include "Symbol/SymbolClass.hpp"
 #include "Symbol/SymbolEnum.hpp"
@@ -27,9 +26,12 @@ namespace LibraryInterfaceGenerator
             const SymbolPackage& getPackage();
         private:
             std::shared_ptr<SymbolPackage> _package;
-            SymbolObjectTable _objectTable;
-            SymbolEnumTable _enumTable;
-        }
+            
+            // SymbolObjectTable _objectTable;
+            // SymbolEnumTable _enumTable;
+            // std::vector<HasSymbolType&> _hasTypes;
+        
+        };
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include "LibraryInterfaceGeneratorWindow.h"
 #include <fstream>
+#include <filesystem>
 
 using namespace std;
 
@@ -10,10 +11,21 @@ int main()
 {
 	cout << "Hello CMake." << endl;
 
+	using std::filesystem::current_path;
+	auto currentPath = current_path();
+	auto currentPathStr = currentPath.native();
+
 	std::string content;
 
 	{
-		std::ifstream ifs("../../../test/sample/HsnUltrasoundDICOM.json");
+		// build ..\\
+		// out ..\..\
+		// LibraryInerfaceGenerator ..\..\..\
+		// LibraryInterfaceGenreatorWindow ..\..\..\..\
+		// prj ..\..\..\..\..\
+		// LibraryInterfacegnerartor ..\\..\\..\\..\\..\\..\\
+
+		std::ifstream ifs("..\\..\\..\\..\\..\\..\\test\\sample\\HsnUltrasoundDICOM.json");
 		if (ifs.is_open())
 		{
 			ifs.seekg(0, ifs.end);

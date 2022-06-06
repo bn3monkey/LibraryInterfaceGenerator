@@ -21,7 +21,9 @@ namespace LibraryInterfaceGenerator
                 static const char* Type = "type";
                 static const char* ReadOnly = "readonly";
                 static const char* Parameters = "parameters";
-    
+                static const char* IO = "io";
+                static const char* Return = "return";
+                static const char* Base = "base";
             }
             namespace Order
             {
