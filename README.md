@@ -447,7 +447,7 @@ All types supported by the library are introduced below. Used in the "type" fiel
 |float|32bit real|
 |double|64-bit real|
 |string|Commonly used string|
-|class|**Only classes or interfaces within the library can be used.** Used as 'module/class'. |
+|object|**Only classes or interfaces within the library can be used.** Used as 'module/class'. |
 |enum|**Only enum within the library can be used.** Used as 'module/enum'. |
 |array\<T\>|Fixed array of type T|
 |vector\<T\>|dynamic array of type T|
@@ -462,7 +462,7 @@ All types supported by the library are introduced below. Used in the "type" fiel
 |float|32bit 실수|
 |double|64bit 실수|
 |string|일반적으로 사용하는 문자열|
-|class|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/class'로 쓰임. |
+|object|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/class'로 쓰임. |
 |enum|**라이브러리 내부의 클래스나 인터페이스만 사용 가능함.**'  module/enum'로 쓰임. |
 |array\<T\>|T 타입의 고정 배열|
 |vector\<T\>|T 타입의 동적 배열|

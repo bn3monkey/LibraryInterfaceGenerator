@@ -1,5 +1,5 @@
-#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_IERROR__)
-#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_IERROR__
+#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_RESULT__)
+#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_RESULT__
 
 namespace LibraryInterfaceGenerator
 {
@@ -76,7 +76,7 @@ namespace LibraryInterfaceGenerator
 	    	return ret;
 	    }
 
-        class Error
+        class Result
         {
             public:
                 enum class Code : int32_t
@@ -98,13 +98,13 @@ namespace LibraryInterfaceGenerator
                 inline operator bool() const { return _code != Code::SUCCESS; } 
                 std::string toString() const {return _reason;}
 
-                explicit Error(const Code code = Code::SUCCESS) : _code(code) {
+                explicit Result(const Code code = Code::SUCCESS) : _code(code) {
                     _reason = default_reason[static_cast<size_t>(code)];
                 }
-                explicit Error(const Code code, const std::string& reason) : _code(code), _reason(reason) {}
+                explicit Result(const Code code, const std::string& reason) : _code(code), _reason(reason) {}
 
                 template<class ...Args>
-                explicit Error(const Code code, const char* format, Args... args) : _code(code)
+                explicit Result(const Code code, const char* format, Args... args) : _code(code)
                 {
                     _reason = format_string(format, args...);
                 }
@@ -123,6 +123,15 @@ namespace LibraryInterfaceGenerator
 					"allocation fail",
 					"Cannot find class name"
                 };
+        };
+
+        class HasResult
+        {
+        public:
+            operator bool() {return _result;}
+            Result& toResult() {return _result;}
+        protected:
+            return _result;
         };
     }
 }

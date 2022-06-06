@@ -70,6 +70,8 @@
         "xutility": "cpp",
         "stack": "cpp",
         "deque": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "fstream": "cpp",
+        "iostream": "cpp"
     }
 }

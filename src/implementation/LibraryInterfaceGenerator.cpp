@@ -1,24 +1,22 @@
 #include "../include/LibraryInterfaceGenerator.hpp"
 
-using namespace LibraryInterfaceGenerator;
-
-Error createNativeSourceDirectory(const std::string& json_content)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDirectory(const std::string& json_content)
 {
 
 }
-Error createAPIDocumentation(const std::string& json_content)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createAPIDocumentation(const std::string& json_content)
 {
 
 }
-Error createNativeInterface(const std::string& json_content)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeInterface(const std::string& json_content)
 {
 
 }
-Error createWrapper(const std::string& json_content, Framework env)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createWrapper(const std::string& json_content, Framework env)
 {
 
 }
-Error createSourceDirectory(const std::string& json_content, Framework env)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createSourceDirectory(const std::string& json_content, Framework env)
 {
 
 }
