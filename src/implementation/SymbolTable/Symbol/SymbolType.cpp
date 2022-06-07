@@ -1,15 +1,5 @@
 #include "SymbolType.hpp"
 
-bool hasPrefix(const std::string& type, std::string prefix)
-{
-	return type.compare(0, prefix.size(), prefix.data()) == 0;
-}
-bool hasPostfix(const std::string& type, std::string postfix)
-{
-	const size_t start = type.size() - postfix.size();
-	return type.compare(start, type.size(), postfix.data()) == 0;
-}
-
 std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::makeType(
 	const std::string& type,
 	const SymbolObjectTable& objectTable,

@@ -43,7 +43,11 @@ Result NativeSourceDirectory::make()
         result = createModule(*submodule, _include_dir_path, _src_dir_path);
         if (!result)
             return result;
-    } 
+    }
+
+    result = createIncludeFile(package, _include_dir_path);
+    if (!result)
+        return result;
 
     return result;
 }
@@ -74,148 +78,245 @@ Result NativeSourceDirectory::createModule(const SymbolModule& object, std::stri
             return result;
     }
 
+    auto& interfaces = object.interfaces;
+    for (auto& interfaze : interfaces)
+    {
+        auto result = createInterfaceFile(*interfaze, include_path);
+        if (!result)
+            return result;
+    }
+
+    auto& classes = object.classes;
+    for (auto& clazz : classes)
+    {
+        auto result = createClassFile(*clazz, include_path, src_path);
+        if (!result)
+            return result;
+    }
+
+    auto& enums = object.enums;
+    for (auto& enumm : enums)
+    {
+        auto result = createEnumFile(*enumm, include_path);
+        if (!result)
+            return result;
+    }
+
+    auto& global_methods = object.globla_methods;
+    for (auto& global_method : global_methods)
+    {
+        auto result = createMethodFile(*global_method, include_path, src_path);
+        if (!result)
+            return result;
+    }
+
     return result;
 }
 
-/*
-Result NativeSourceDirectory::createInterfaceFile(const nlohmann::json& object, std::string& parent_dir_path)
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceFile(const SymbolClass& object, std::string& parent_include_path)
 {
-    auto name_iter = _object.find(Field::Name);
-    if (name_iter == _object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_NAME);
-    }
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += object.name;
+    header_path += ".hpp";
 
-    auto name = name_iter->get<std::string>();
+    Result result;
+    std::string header_content;
+    result = createInterfaceFileContent(object, header_content);
+    if (!result)
+        return result;
 
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassFile(const SymbolClass& object, std::string& parent_include_path, std::string& parent_src_path)
+{
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += object.name;
+    header_path += ".hpp";
+
+    std::string src_path{ parent_src_path };
+    src_path += delimeter;
+    src_path += object.name;
+    src_path += ".cpp";
+
+    Result result;
     std::string header_content;
     std::string cpp_content;
-    Result ret = createInterface(_object, header_content, cpp_content);
-    if (!ret)
-    {
-        return ret;
-    }
-    {
-        std::string header_path {parent_dir_path};
-        header_path += "/";
-        header_path += name;
-        header_path += ".hpp";
-        auto ret = FileSystem::createFile(header_path, header_content);
-        if (!ret)
-            return ret;
-    }
-    {
-        std::string cpp_path {parent_dir_path};
-        cpp_path += "/";
-        cpp_path += name;
-        cpp_path += ".cpp";
-        auto ret = FileSystem::createFile(cpp_path, cpp_content);
-        if (!ret)
-            return ret; 
-    }
+    result = createClassFileContent(object, header_content, cpp_content);
+    if (!result)
+        return result;
+
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    result = FileSystem::createFile(src_path, cpp_content);
+    if (!result)
+        return result;
+
+    return Result();
 }
-Result NativeSourceDirectory::createClassFile(const nlohmann::json& object, std::string& parent_dir_path)
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumFile(const SymbolEnum& object, std::string& parent_include_path)
 {
-    auto name_iter = object.find(Field::Name);
-    if (name_iter == object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_NAME);
-    }
-    auto name = name_iter->get<std::string>();
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += object.name;
+    header_path += ".hpp";
+
+    Result result;
+    std::string header_content;
+    result = createEnumFileContent(object, header_content);
+    if (!result)
+        return result;
+
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFile(const SymbolMethod& object, std::string& parent_include_path, std::string& parent_src_path)
+{
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += object.name;
+    header_path += ".hpp";
+
+    std::string src_path{ parent_src_path };
+    src_path += delimeter;
+    src_path += object.name;
+    src_path += ".cpp";
+
+    Result result;
     std::string header_content;
     std::string cpp_content;
-    Result ret = createClass(object, header_content, cpp_content);
-    if (!ret)
-    {
-        return ret;
-    }
-    {
-        std::string header_path {parent_dir_path};
-        header_path += "/";
-        header_path += name;
-        header_path += ".hpp";
-        auto ret = FileSystem::createFile(header_path, header_content);
-        if (!ret)
-            return ret;
-    }
-    {
-        std::string cpp_path {parent_dir_path};
-        cpp_path += "/";
-        cpp_path += name;
-        cpp_path += ".cpp";
-        auto ret = FileSystem::createFile(cpp_path, cpp_content);
-        if (!ret)
-            return ret; 
-    }
-}
-Result NativeSourceDirectory::createEnumFile(const nlohmann::json& object, std::string& parent_dir_path)
-{
-    auto name_iter = object.find(Field::Name);
-    if (name_iter == object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_NAME);
-    }
-    auto name = name_iter->get<std::string>();
+    result = createMethodFileContent(object, header_content, cpp_content);
+    if (!result)
+        return result;
 
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    result = FileSystem::createFile(src_path, cpp_content);
+    if (!result)
+        return result;
+
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createIncludeFile(const SymbolPackage& package, std::string& parent_include_path)
+{
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += package.name;
+    header_path += ".hpp";
+
+    Result result;
     std::string header_content;
-    Result ret = createGlobalEnum(object, header_content);
-    if (!ret)
-    {
-        return ret;
-    }
-    {
-        std::string header_path {parent_dir_path};
-        header_path += "/";
-        header_path += name;
-        header_path += ".hpp";
-        auto ret = FileSystem::createFile(header_path, header_content);
-        if (!ret)
-            return ret;
-    }
+    result = createIncludeFileContent(package, parent_include_path, header_content);
+    if (!result)
+        return result;
+
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    return Result();
 }
-Result NativeSourceDirectory::createMethodFile(const nlohmann::json& object, std::string& parent_dir_path)
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceFileContent(const SymbolClass& object, std::string& header_content)
 {
-    auto name_iter = object.find(Field::Name);
-    if (name_iter == object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_NAME);
-    }
-    auto name = name_iter->get<std::string>();
-
-    std::string header_content;
-    std::string cpp_content;
-    Result ret = createGlobalMethod(object, header_content, cpp_content);
-    if (!ret)
-    {
-        return ret;
-    }
-    {
-        std::string header_path {parent_dir_path};
-        header_path += "/";
-        header_path += name;
-        header_path += ".hpp";
-        auto ret = FileSystem::createFile(header_path, header_content);
-        if (!ret)
-            return ret;
-    }
-    {
-        std::string cpp_path {parent_dir_path};
-        cpp_path += "/";
-        cpp_path += name;
-        cpp_path += ".cpp";
-        auto ret = FileSystem::createFile(cpp_path, cpp_content);
-        if (!ret)
-            return ret; 
-    }
+    header_content = "";
+    return Result();
 }
 
-// 3. Interface 제작
-Result NativeSourceDirectory::createInterface(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassFileContent(const SymbolClass& object, std::string& header_content, std::string& cpp_content)
 {
-
+    header_content = "";
+    cpp_content = "";
+    return Result();
 }
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumFileContent(const SymbolEnum& object, std::string& header_content)
+{
+    header_content = "";
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFileContent(const SymbolMethod& object, std::string& header_content, std::string& cpp_content)
+{
+    header_content = "";
+    cpp_content = "";
+    return Result();
+}
+
+
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content)
+{
+    /*
+    std::stringstream ss;
+    std::string indent;
+    std::vector<std::string> moduleNames;
+    {
+        DefineOnce(ss, moduleNames, indent);
+        {
+        }
+    }
+    */
+    std::stringstream ss;
+    {
+        ss << "/*\n";
+        ss << " * Library Name : ";
+        ss << package.name;
+        ss << "\n";
+        ss << " * Author : ";
+        ss << package.author;
+        ss << "\n";
+        ss << " * Brief : ";
+        ss << package.description;
+        ss << "\n";
+        ss << "*/\n\n";
+
+        ss << "#if !defined(__";
+        ss << package.name;
+        ss << "__)\n";
+        ss << "#define __";
+        ss << package.name;
+        ss << "__\n\n";
+        
+        std::vector<std::string> includeFiles;
+        Result result = FileSystem::findAllFilePath(parent_include_path, includeFiles, { ".h", ".hpp" });
+        if (!result)
+            return result;
+
+        for (auto& includeFile : includeFiles)
+        {
+            std::replace(includeFile.begin(), includeFile.end(), '\\', '/');
+
+            ss << "#include \"";
+            ss << includeFile;
+            ss << "\"\n";
+        }
+
+        ss << "\n#endif\n";
+    }
+    header_content = ss.str();
+    return Result();
+}
+
 
 // 4. Class 제작
+/*
 Result NativeSourceDirectory::createClass(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
 {
     // 헤더 : 
@@ -262,38 +363,5 @@ Result NativeSourceDirectory::createClass(const nlohmann::json& object, std::str
     // 3.1 중복 포함 방지 닫기
 
     
-}
-            
-// 5. Enum 제작
-Result createGlobalEnum(const nlohmann::json& object, std::string& header_content)
-{
-
-}
-Result NativeSourceDirectory::createEnum(const nlohmann::json& object, std::string& header_content)
-{
-
-}
-
-// 5. Method 제작
-Result NativeSourceDirectory::createGlobalMethod(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
-{
-
-}            
-Result NativeSourceDirectory::createMethod(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
-{
-
-    return Result(Result::Code::SUCCESS);
-}
-
-// 6. Parameter 제작
-Result NativeSourceDirectory::createParameter(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
-{
-    return Result(Result::Code::SUCCESS);
-}
-
-// 7. Property 제작
-Result NativeSourceDirectory::createProperty(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
-{
-    return Result(Result::Code::SUCCESS);
 }
 */

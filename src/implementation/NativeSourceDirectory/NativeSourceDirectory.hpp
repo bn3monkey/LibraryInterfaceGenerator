@@ -7,6 +7,8 @@
 #include "../Result/Result.hpp"
 #include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
+#include "../Auxiliary/StringHelper.hpp"
+#include <algorithm>
 
 
 namespace LibraryInterfaceGenerator
@@ -51,35 +53,46 @@ namespace LibraryInterfaceGenerator
             //         D.cpp/
             // 클래스, 인터페이스, 열거 클래스가 파라미터일 경우, 헤더 파일의 상대적 위치 분석이 필요.
             
-            
             // 1. Module Directory 제작
             Result createModule(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path);
 
-            Result createInterfaceFile(const nlohmann::json& object, std::string& parent_dir_path);
-            Result createClassFile(const nlohmann::json& object, std::string& parent_dir_path);
-            Result createEnumFile(const nlohmann::json& object, std::string& parent_dir_path);
-            Result createMethodFile(const nlohmann::json& object, std::string& parent_dir_path);
+            Result createInterfaceFile(const SymbolClass& object, std::string& parent_include_path);
+            Result createClassFile(const SymbolClass& object, std::string& parent_include_path, std::string& parent_src_path);
+            Result createEnumFile(const SymbolEnum& object, std::string& parent_include_path);
+            Result createMethodFile(const SymbolMethod& object, std::string& parent_include_path, std::string& parent_src_path);
+            Result createIncludeFile(const SymbolPackage& package, std::string& parent_include_path);
 
-            // 2. Interface 제작
-            Result createInterface(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
+            // 2. Interface 전문 제작
+            Result createInterfaceFileContent(const SymbolClass& object, std::string& header_content);
 
-            // 3. Class 제작
-            Result createClass(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
+            // 3. Class 전문 제작
+            Result createClassFileContent(const SymbolClass& object, std::string& header_content, std::string& cpp_content);
             
-            // 4. Enum 제작
-            Result createGlobalEnum(const nlohmann::json& object, std::string& header_content);
-            Result createEnum(const nlohmann::json& object, std::string& header_content);
-
-            // 5. Method 제작
-            Result createGlobalMethod(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
-            Result createMethod(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
-
-            // 6. Parameter 제작
-            Result createParameter(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
-
-            // 7. Property 제작
-            Result createInterfaceProperty(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
+            // 4. Enum 전문 제작
+            Result createEnumFileContent(const SymbolEnum& object, std::string& header_content);
             
+            // 5. Method 전문 제작
+            Result createMethodFileContent(const SymbolMethod& object, std::string& header_content, std::string& cpp_content);
+
+            // 6. 전체 파일의 include file
+            Result createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content);
+
+            // 7. Code Block 제작
+            /*
+            // Enum Block 생성
+            Result createEnumBlock(const SymbolEnum& object, std::vector<std::string>& header_content);            
+            // Method Block 생성
+            Result createInterfaceMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content);
+            Result createClassMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
+            Result createDerivedMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
+            // Parameter Block 생성
+            Result createParameterBlock(const SymbolParameter& object, std::string& content);
+            // Property Block 생성
+            Result createInterfacePropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content);
+            Result createClassPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
+            Result createDerivedPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
+            Result addPropertyDataBlock(const SymbolProperty& object, std::vector<std::string>& properties);
+            */
         };
     }
 }

@@ -3,6 +3,7 @@
 
 #include "../../../json/json.hpp"
 #include "../../Result/Result.hpp"
+#include "../../Auxiliary/StringHelper.hpp"
 #include "SymbolObject.hpp"
 #include <string>
 

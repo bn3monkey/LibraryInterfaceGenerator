@@ -69,4 +69,35 @@ Result FileSystem::createFile(std::string& path, std::string& content)
     }
     
     return Result(Result::Code::SUCCESS);
-}   
+}
+
+Result LibraryInterfaceGenerator::Implementation::FileSystem::findAllFilePath(const std::string& path, std::vector<std::string>& file_paths, const std::vector<std::string>& postfixes)
+{
+    auto original_path = std::filesystem::current_path();
+    {
+        std::filesystem::current_path(std::filesystem::path{ path });
+        auto new_path = std::filesystem::current_path();
+
+        auto root_directory = std::filesystem::recursive_directory_iterator{ "." };
+        for (const auto& iter : root_directory)
+        {
+            if (!iter.is_directory())
+            {
+                auto& filepath = iter.path();
+                auto& temp_path_str = filepath.string();
+                std::string path_str = std::string(temp_path_str.begin() + 2, temp_path_str.end());
+
+                for (auto& postfix : postfixes)
+                {
+                    if (hasPostfix(path_str, postfix))
+                    {
+                        file_paths.push_back(path_str);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    std::filesystem::current_path(original_path);
+    return Result();
+}
