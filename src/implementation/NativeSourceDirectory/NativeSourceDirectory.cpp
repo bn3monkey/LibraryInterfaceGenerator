@@ -3,93 +3,81 @@
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
-NativeSourceDirectory::NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path)
-{  
-    _include_dir_path = root_dir_path + "/include";
-    _src_dir_path = root_dir_path + "/src";
+#ifdef __linux__
+char* delimeter = "/";
+#elif _WIN32
+char* delimeter = "\\";
+#else
+char* delimeter = "/";
+#endif
+
+
+NativeSourceDirectory::NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path) : _symbolTable(symbolTable)
+{
+    _include_dir_path = root_dir_path;
+    _include_dir_path += delimeter;
+    _include_dir_path += "include";
+    _src_dir_path = root_dir_path;
+    _src_dir_path += delimeter;
+    _src_dir_path += "src";
+
+    FileSystem::createDirectories(root_dir_path);
 }
 
 Result NativeSourceDirectory::make()
 {
-    return Result(Result::Code::SUCCESS);
+    auto& package = _symbolTable.getPackage();
+    auto& modules = package.modules;
+
+    Result result{ Result::Code::SUCCESS };
+
+    result = FileSystem::createDirectory(_include_dir_path);
+    if (!result)
+        return result;
+    result = FileSystem::createDirectory(_src_dir_path);
+    if (!result)
+        return result;
+
+    for (auto& submodule : modules)
+    {
+        result = createModule(*submodule, _include_dir_path, _src_dir_path);
+        if (!result)
+            return result;
+    } 
+
+    return result;
+}
+
+Result NativeSourceDirectory::createModule(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path)
+{
+    std::string include_path{ parent_include_path };
+    include_path += delimeter;
+    include_path += object.name;
+
+    std::string src_path{ parent_src_path };
+    src_path += delimeter;
+    src_path += object.name;
+
+    Result result;
+    result = FileSystem::createDirectory(include_path);
+    if (!result)
+        return result;
+    result = FileSystem::createDirectory(src_path);
+    if (!result)
+        return result;
+
+    auto& submodules = object.submodules;
+    for (auto& submodule : submodules)
+    {
+        auto result = createModule(*submodule, include_path, src_path);
+        if (!result)
+            return result;
+    }
+
+    return result;
 }
 
 /*
-// 1. Class Table 제작 (Class, Interface, enum class)
-Result NativeSourceDirectory::createClassTable(const nlohmann::json& object)
-{
-
-}
-
-// 2. Module Directory 제작
-Result NativeSourceDirectory::createModule(const nlohmann::json& object, std::string& parent_dir_path)
-{
-    auto order_iter = object.find(Field::Order);
-    if (order_iter == object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_ORDER);
-    }
-
-    auto order = order_iter->get<std::string>(); 
-
-    auto name_iter = object.find(Field::Name);
-    if (name_iter == object.end())
-    {
-        return Result(Result::Code::JSON_OBJECT_HAS_NO_NAME);
-    }
-
-    auto name = name_iter->get<std::string>();
-    
-    auto dir_path {parent_dir_path};
-    dir_path += "/";
-    dir_path += name;
-
-    {
-        auto ret = FileSystem::createDirectory(dir_path);
-        if (!ret)
-            return ret;
-    }
-
-    auto child_iter = object.find(Field::Childs);
-    if (child_iter == object.end())
-    {
-        return Result(Result::Code::SUCCESS);
-    }
-
-    auto childs = *child_iter;
-    for (auto& child : childs)
-    {
-        auto order_iter = object.find(Field::Order);
-        if (order_iter == object.end())
-        {
-            return Result(Result::Code::JSON_OBJECT_HAS_NO_ORDER);
-        }
-
-        auto order = order_iter->get<std::string>();
-
-        if (order == Order::Module)
-        {
-            Result ret = createModule(child, dir_path);
-            if (!ret)
-            {
-                return ret; 
-            }
-        }
-        else if (order == Order::Interface)
-        {
-            
-        }
-        else if (order == Order::Class)
-        {
-            
-        }
-        else if (order == Order::Enum)
-        {
-            
-        }
-    }
-}
-
 Result NativeSourceDirectory::createInterfaceFile(const nlohmann::json& object, std::string& parent_dir_path)
 {
     auto name_iter = _object.find(Field::Name);

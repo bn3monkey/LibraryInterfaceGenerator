@@ -66,7 +66,7 @@ LibraryInterfaceGenerator::Implementation::SymbolTable::SymbolTable(const nlohma
 	}
 }
 
-const LibraryInterfaceGenerator::Implementation::SymbolPackage& LibraryInterfaceGenerator::Implementation::SymbolTable::getPackage()
+const LibraryInterfaceGenerator::Implementation::SymbolPackage& LibraryInterfaceGenerator::Implementation::SymbolTable::getPackage() const
 {
 	return *(_package.get());
 }

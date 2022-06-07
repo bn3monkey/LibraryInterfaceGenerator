@@ -1,5 +1,6 @@
 #include "../include/LibraryInterfaceGenerator.hpp"
 #include "SymbolTable/SymbolTable.hpp"
+#include "NativeSourceDirectory/NativeSourceDirectory.hpp"
 
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDirectory(const std::string& json_content)
 {
@@ -14,6 +15,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	{
 		return Error(Error::Code::FAIL, e.what());
 	}
+
 	SymbolTable symbolTable{ object };
 	if (!symbolTable)
 	{
@@ -21,7 +23,12 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	auto& package = symbolTable.getPackage();
+	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{symbolTable, ".\\library"};
+	auto result = nativeSourceDirectory.make();
+	if (!result)
+	{
+		return Error(Error::Code::FAIL, result.toString());
+	}
 
 	return Error(Error::Code::SUCCESS);
 }

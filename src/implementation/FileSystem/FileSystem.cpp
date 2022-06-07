@@ -8,7 +8,41 @@ Result FileSystem::createDirectory(std::string& path)
     bool ret = std::filesystem::create_directory(path_obj);
     if (!ret)
     {
-        return Result(Result::Code::DIRECTORY_CREATION_FAIL, "Directory cannot be created (%s)", path.c_str());
+        if (std::filesystem::exists(path_obj))
+        {
+            std::filesystem::remove_all(path_obj);
+            ret = std::filesystem::create_directory(path_obj);
+            if(!ret)
+            {
+                return Result(Result::Code::DIRECTORY_CREATION_FAIL, "Directory cannot be created (%s)", path.c_str());
+            }
+        }
+        else
+        {
+            return Result(Result::Code::DIRECTORY_CREATION_FAIL, "Directory cannot be created (%s)", path.c_str());
+        }
+    }
+    return Result(Result::Code::SUCCESS);
+}
+Result FileSystem::createDirectories(std::string& path)
+{
+    auto path_obj = std::filesystem::path{ path };
+    bool ret = std::filesystem::create_directories(path_obj);
+    if (!ret)
+    {
+        if (std::filesystem::exists(path_obj))
+        {
+            std::filesystem::remove_all(path_obj);
+            ret = std::filesystem::create_directories(path_obj);
+            if (!ret)
+            {
+                return Result(Result::Code::DIRECTORY_CREATION_FAIL, "Directory cannot be created (%s)", path.c_str());
+            }
+        }
+        else
+        {
+            return Result(Result::Code::DIRECTORY_CREATION_FAIL, "Directory cannot be created (%s)", path.c_str());
+        }
     }
     return Result(Result::Code::SUCCESS);
 }
@@ -18,7 +52,7 @@ Result FileSystem::createFile(std::string& path, std::string& content)
         std::ofstream ofstream{path};
         if (!ofstream.is_open())
         {
-            Result(Result::Code::FILE_CREATION_FAIL, "File cannot be created (%s)", path.c_str());
+            return Result(Result::Code::FILE_CREATION_FAIL, "File cannot be created (%s)", path.c_str());
         }
     
         constexpr size_t block_size {4096};

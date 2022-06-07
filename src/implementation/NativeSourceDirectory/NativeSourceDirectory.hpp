@@ -25,7 +25,7 @@ namespace LibraryInterfaceGenerator
             Result make();
 
         private:
-            nlohmann::json _object;
+            const SymbolTable& _symbolTable;
             Result _result;
             std::string _include_dir_path;
             std::string _src_dir_path; 
@@ -51,25 +51,22 @@ namespace LibraryInterfaceGenerator
             //         D.cpp/
             // 클래스, 인터페이스, 열거 클래스가 파라미터일 경우, 헤더 파일의 상대적 위치 분석이 필요.
             
-            // 1. Class Table 제작 (Class, Interface, enum class)
-            /*
-            Result createClassTable(const nlohmann::json& object);
-
-            // 2. Module Directory 제작
-            Result createModule(const nlohmann::json& object, std::string& parent_dir_path);
+            
+            // 1. Module Directory 제작
+            Result createModule(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path);
 
             Result createInterfaceFile(const nlohmann::json& object, std::string& parent_dir_path);
             Result createClassFile(const nlohmann::json& object, std::string& parent_dir_path);
             Result createEnumFile(const nlohmann::json& object, std::string& parent_dir_path);
             Result createMethodFile(const nlohmann::json& object, std::string& parent_dir_path);
 
-            // 3. Interface 제작
+            // 2. Interface 제작
             Result createInterface(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
 
-            // 4. Class 제작
+            // 3. Class 제작
             Result createClass(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
             
-            // 5. Enum 제작
+            // 4. Enum 제작
             Result createGlobalEnum(const nlohmann::json& object, std::string& header_content);
             Result createEnum(const nlohmann::json& object, std::string& header_content);
 
@@ -82,7 +79,6 @@ namespace LibraryInterfaceGenerator
 
             // 7. Property 제작
             Result createInterfaceProperty(const nlohmann::json& object, std::string& header_content, std::string& cpp_content);
-            */
             
         };
     }

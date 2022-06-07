@@ -23,7 +23,7 @@ namespace LibraryInterfaceGenerator
         {
         public:
             explicit SymbolTable(const nlohmann::json& object);
-            const SymbolPackage& getPackage();
+            const SymbolPackage& getPackage() const;
         private:
             std::shared_ptr<SymbolPackage> _package;
             
