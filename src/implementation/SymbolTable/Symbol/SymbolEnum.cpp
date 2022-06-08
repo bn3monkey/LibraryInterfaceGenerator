@@ -46,21 +46,10 @@ LibraryInterfaceGenerator::Implementation::SymbolEnum::SymbolEnum(
 			std::string key;
 			std::getline(ss, key, '/');
 
-			std::string value_str;
-			std::getline(ss, value_str, '/');
-			
-			int32_t value;
-			std::stringstream ss2{ value_str };
-			try
-			{
-				ss2 >> value;
-			}
-			catch (std::exception& e)
-			{
-				_result = Result(Result::Code::JSON_OBJECT_HAS_INVALID_VALUE);
-				return;
-			}
-			values[key] = value;
+			std::string value;
+			std::getline(ss, value, '/');
+
+			values.push_back({ key, value });
 		}
 	}
 
@@ -80,7 +69,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName()
 		value += "::";
 	}
 	value += name;
-	return name;
+	return value;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName()
@@ -97,5 +86,5 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName
 		value += ".";
 	}
 	value += name;
-	return name;
+	return value;
 }

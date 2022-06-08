@@ -69,7 +69,7 @@ namespace LibraryInterfaceGenerator
             Result createInterfaceFile(const SymbolClass& object, std::string& parent_include_path);
             Result createClassFile(const SymbolClass& object, std::string& parent_include_path, std::string& parent_src_path);
             Result createEnumFile(const SymbolEnum& object, std::string& parent_include_path);
-            Result createMethodFile(const SymbolMethod& object, std::string& parent_include_path, std::string& parent_src_path);
+            Result createMethodFile(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path);
             Result createIncludeFile(const SymbolPackage& package, std::string& parent_include_path);
 
             // 2. Interface 전문 제작
@@ -82,7 +82,7 @@ namespace LibraryInterfaceGenerator
             Result createEnumFileContent(const SymbolEnum& object, std::string& header_content);
             
             // 5. Method 전문 제작
-            Result createMethodFileContent(const SymbolMethod& object, std::string& header_content, std::string& cpp_content);
+            Result createMethodFileContent(const SymbolModule& object, std::string& header_content, std::string& cpp_content);
 
             // 6. 전체 파일의 include file
             Result createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content);
@@ -104,7 +104,7 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& method);
 
             std::string createDestructorDeclaration(const SymbolClass& clazz);
-            std::vector<std::string> createDesturtorDefinition(const SymbolClass& clazz);
+            std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
             
             std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
             std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
@@ -124,7 +124,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
             
-            std::string addPropertyDataBlock(const SymbolProperty& object);
+            std::string createPropertyField(const SymbolProperty& object);
 
             // Property, Method의 범위
             std::string createScope(const SymbolMethod& method);

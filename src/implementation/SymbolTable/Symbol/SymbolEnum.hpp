@@ -10,6 +10,7 @@
 #include "../../Auxiliary/Definition.hpp"
 #include <sstream>
 #include <iostream>
+#include <utility>
 
 namespace LibraryInterfaceGenerator
 {
@@ -23,7 +24,7 @@ namespace LibraryInterfaceGenerator
 
             std::string name;
             std::string description;
-            std::unordered_map<std::string, int> values;
+            std::vector<std::pair<std::string, std::string>> values;
 
             explicit SymbolEnum(const nlohmann::json& object,
                 const std::vector<std::string>& module_paths,

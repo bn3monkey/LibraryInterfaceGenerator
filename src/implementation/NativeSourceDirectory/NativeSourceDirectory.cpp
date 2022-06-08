@@ -103,9 +103,9 @@ Result NativeSourceDirectory::createModule(const SymbolModule& object, std::stri
     }
 
     auto& global_methods = object.globla_methods;
-    for (auto& global_method : global_methods)
+    if (!global_methods.empty())
     {
-        auto result = createMethodFile(*global_method, include_path, src_path);
+        auto result = createMethodFile(object, include_path, src_path);
         if (!result)
             return result;
     }
@@ -183,7 +183,7 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createE
     return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFile(const SymbolMethod& object, std::string& parent_include_path, std::string& parent_src_path)
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFile(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path)
 {
     std::string header_path{ parent_include_path };
     header_path += delimeter;
@@ -256,9 +256,10 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
         
         {
             DefineNamespace defineNamespace {ss, object.parentModules, indent};
-            Comment comment{ ss, indent };
-            comment.add(object);
-            
+            {
+                Comment comment{ ss, indent };
+                comment.add(object);
+            }
             {
                 std::string objectName {"class "};
                 objectName += object.name;
@@ -267,7 +268,10 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
                 defineObject.addLine("public:");
                 for (auto& enumObject : object.enums)
                 {
-                    comment.add(*enumObject);
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*enumObject);
+                    }
                     auto lines = createEnumDefinition(*enumObject);
                     for(auto& line : lines)
                     {
@@ -276,7 +280,10 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
                 }
                 for(auto& propertyObject : object.properties)
                 {
-                    comment.add(*propertyObject);
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*propertyObject);
+                    }
                     auto lines = createInterfacePropertyDeclaration(*propertyObject);
                     for(auto& line : lines)
                     {
@@ -285,7 +292,10 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
                 }
                 for (auto& methodObject : object.methods)
                 {
-                    comment.add(*methodObject);
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*methodObject);
+                    }
                     auto line = createInterfaceMethodDeclaration(object, *methodObject);
                     defineObject.addLine(line);
                 }
@@ -344,8 +354,205 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
     // 3.1 중복 포함 방지 닫기
 
 */
-    header_content = "";
-    cpp_content = "";
+    std::stringstream ss;
+    std::string indent;
+
+    auto& methods = object.methods;
+    auto baseMethods = object.getBaseMethods();
+    auto& properties = object.properties;
+    auto& baseProperties = object.getBaseProperties();
+
+
+    {
+        DefineOnce defineOnce{ ss, object.parentModules, object.name, indent };
+
+        {
+
+            DefineInclude defineInclude{ ss, indent };
+
+            defineInclude.addExternal("cstdint");
+            defineInclude.addExternal("vector");
+            defineInclude.addExternal("string");
+            defineInclude.addExternal("memory");
+
+            ss << "\n";
+            // 전방 선언하거나 헤더 포함!           
+        }
+
+        {
+            DefineNamespace defineNamespace{ ss, object.parentModules, indent };
+            {
+                Comment comment{ ss, indent };
+                comment.add(object);
+            }
+            {
+                std::string objectName{ "class " };
+                objectName += object.name;
+                if (!object.bases.empty())
+                {
+                    objectName += " : ";
+                    for (auto& wbaseClass : object.bases)
+                    {
+                        if (auto baseClass = wbaseClass.lock())
+                        {
+                            objectName += "public ";
+                            objectName += baseClass->getCppName();
+                            objectName += ", ";
+                        }
+                    }
+                    objectName.pop_back();
+                    objectName.pop_back();
+                }
+
+                DefineObject defineObject{ ss, objectName, indent };
+
+                defineObject.addLine("public:");
+                for (auto& enumObject : object.enums)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*enumObject);
+                    }
+                    auto lines = createEnumDefinition(*enumObject);
+                    for (auto& line : lines)
+                    {
+                        defineObject.addLine(line);
+                    }
+                }
+
+                auto line = createDestructorDeclaration(object);
+                defineObject.addLine(line);
+
+                for (auto& propertyObject : properties)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*propertyObject);
+                    }
+                    auto lines = createClassPropertyDeclaration(*propertyObject);
+                    for (auto& line : lines)
+                    {
+                        defineObject.addLine(line);
+                    }
+                }
+
+                for (auto& basePropertyObject : baseProperties)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*basePropertyObject);
+                    }
+                    auto lines = createDerivedPropertyDeclaration(*basePropertyObject);
+                    for (auto& line : lines)
+                    {
+                        defineObject.addLine(line);
+                    }
+                }
+
+
+                for (auto& methodObject : methods)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*methodObject);
+                    }
+                    auto line = createClassMethodDeclaration(object, *methodObject);
+                    defineObject.addLine(line);
+                }
+
+                for (auto& baseMethod : baseMethods)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*baseMethod);
+                    }
+                    auto line = createDerivedMethodDeclaration(*baseMethod);
+                    defineObject.addLine(line);                    
+                }
+
+                defineObject.addLine("\n");
+                defineObject.addLine("private:");
+
+                for (auto& propertyObject : object.properties)
+                {
+                    auto line = createPropertyField(*propertyObject);
+                    defineObject.addLine(line);
+                }
+            }
+        }
+    }
+    header_content = ss.str();
+
+    ss.str("");
+    {
+        DefineInclude defineInclude{ ss, indent };
+
+        // out of src directory
+        std::string prefix = "../";
+        std::string postfix = "include/";
+        for (size_t idx = 1; idx < object.parentModules.size(); idx++)
+        {
+            prefix += "../";
+            postfix += object.parentModules[idx];
+            postfix += "/";
+        }
+
+        postfix += object.name;
+        postfix += ".hpp";
+
+        std::string header_path = prefix;
+        header_path += postfix;
+
+        defineInclude.addInternal(header_path);
+
+        ss << "\n";
+
+        auto ret = createDestructorDefinition(object);
+        for (auto& line : ret)
+        {
+            ss << indent << line << "\n";
+        }
+        ss << "\n";
+        
+        for (auto& method : methods)
+        {
+            auto ret = createClassMethodDefinition(object, *method);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
+        }
+        for (auto& method : baseMethods)
+        {
+            auto ret = createClassMethodDefinition(object, *method);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
+        }
+        for (auto& prop : properties)
+        {
+            auto ret = createPropertyDefinition(object, *prop);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
+        }
+        for (auto& prop : baseProperties)
+        {
+            auto ret = createPropertyDefinition(object, *prop);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
+        }
+    }
+    cpp_content = ss.str();
+
     return Result();
 }
 
@@ -372,12 +579,14 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createE
         
         {
             DefineNamespace defineNamespace {ss, object.parentModules, indent};
-            Comment comment{ ss, indent };
-            comment.add(object);
+            {
+                Comment comment{ ss, indent };
+                comment.add(object);
+            }
             auto ret = createEnumDefinition(object);
             for (auto& line : ret)
             {
-                ss << line << "\n";
+                ss << indent << line << "\n";
             }
         }
     }
@@ -385,13 +594,13 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createE
     return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFileContent(const SymbolMethod& object, std::string& header_content, std::string& cpp_content)
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFileContent(const SymbolModule& object, std::string& header_content, std::string& cpp_content)
 {
     std::stringstream ss;
     std::string indent;
     
     {
-        DefineOnce defineOnce{ ss, object.parentModules, object.name, indent };
+        DefineOnce defineOnce{ ss, object.moduleNames, "", indent };
 
         {
             
@@ -407,29 +616,30 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
         }
         
         {
-            DefineNamespace defineNamespace {ss, object.parentModules, indent};
-            Comment comment{ ss, indent };
-            comment.add(object);
-            auto ret = createStaticMethodDeclaration(object);
-            for (auto& line : ret)
+            DefineNamespace defineNamespace {ss, object.moduleNames, indent};
+            for (auto& method : object.globla_methods)
             {
-                ss << line << "\n";
+                {
+                    Comment comment{ ss, indent };
+                    comment.add(*method);
+                }
+                ss << indent << createStaticMethodDeclaration(*method) << "\n\n";
             }
         }       
     }
     header_content = ss.str();
     
-    ss.clear();
+    ss.str("");
     {
         DefineInclude defineInclude{ ss, indent };
 
         // out of src directory
         std::string prefix = "../";
         std::string postfix = "include/";
-        for (size_t idx = 1; idx < object.parentModules.size(); idx++)
+        for (size_t idx = 1; idx < object.moduleNames.size(); idx++)
         {
             prefix += "../";
-            postfix += object.parentModules[idx];
+            postfix += object.moduleNames[idx];
             postfix += "/";
         }
 
@@ -442,10 +652,14 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
         defineInclude.addInternal(header_path);
 
         ss << "\n";
-        auto ret = createStaticMethodDefinition(object);
-        for (auto& line : ret)
+        for (auto& method : object.globla_methods)
         {
-            ss << line << "\n";
+            auto ret = createStaticMethodDefinition(*method);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
         }
     }
     cpp_content = ss.str();
@@ -498,7 +712,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
     for (auto& value : object.values)
     {
         std::stringstream ss;
-        ss << " " << value.first << " = " << value.second << ",";
+        ss << "    " << value.first << " = " << value.second << ",";
         ret.push_back(ss.str());
     }
     ret.push_back("}");
@@ -555,8 +769,8 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
     }
     else
     {
-        method += "virtual ";
-        method = createMethodDeclaration(object);
+        method = "virtual ";
+        method += createMethodDeclaration(object);
         method += "= 0;";
     }
     return method;
@@ -624,7 +838,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
     return ret;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDesturtorDefinition(const SymbolClass& clazz)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDestructorDefinition(const SymbolClass& clazz)
 {
     std::vector<std::string> ret;
     std::string name = createScope(clazz);
@@ -721,11 +935,13 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
 {
     std::string setter{ "void set" };
+    setter += propertyName;
     setter += "(";
     setter += object.type->toCppType();
     if (!object.type->isPrimitive())
         setter += "&";
     setter += " value)";
+    return setter;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
@@ -745,7 +961,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
 
     std::string propertyName = createPropertyName(object);
 
-    std::string getter = createPropertySetterDeclaration(propertyName, object);
+    std::string getter = createPropertyGetterDeclaration(propertyName, object);
     getter += ";";
     ret.push_back(getter);
 
@@ -766,7 +982,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
     std::string propertyName = createPropertyName(object);
 
     std::string getter = "virtual ";
-    getter += createPropertySetterDeclaration(propertyName, object);
+    getter += createPropertyGetterDeclaration(propertyName, object);
     getter += "= 0;";
     ret.push_back(getter);
 
@@ -787,7 +1003,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
 
     std::string propertyName = createPropertyName(object);
 
-    std::string getter = createPropertySetterDeclaration(propertyName, object);
+    std::string getter = createPropertyGetterDeclaration(propertyName, object);
     getter += " override;";
     ret.push_back(getter);
 
@@ -818,8 +1034,9 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
         getter += "&";
     getter += " ";
     getter += scope;
+    getter += "get";
     getter += propertyName;
-    getter += "();";
+    getter += "()";
 
     ret.push_back(getter);
     ret.push_back("{");
@@ -842,7 +1059,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
         setter += object.type->toCppType();
         if (!object.type->isPrimitive())
             setter += "&";
-        setter += " value);";
+        setter += " value)";
         ret.push_back(setter);
         ret.push_back("{");
 
@@ -857,11 +1074,12 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
     return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addPropertyDataBlock(const SymbolProperty& object)
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyField(const SymbolProperty& object)
 {
     std::string line{ object.type->toCppType() };
     line += " _";
     line += object.name;
+    line += ";";
     return line;
 }
 
@@ -876,6 +1094,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
     }
     return scope;
 }
+
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createScope(const SymbolClass& clazz)
 {
     std::string scope;

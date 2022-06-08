@@ -33,8 +33,8 @@ namespace LibraryInterfaceGenerator
             std::vector<std::shared_ptr<SymbolMethod>> methods;
             std::vector<std::shared_ptr<SymbolProperty>> properties;
 
-            std::vector<std::shared_ptr<SymbolMethod>> getBaseMethod();
-            std::vector<std::shared_ptr<SymbolProperty>> getBaseProperties();
+            std::vector<std::shared_ptr<SymbolMethod>> getBaseMethods() const;
+            std::vector<std::shared_ptr<SymbolProperty>> getBaseProperties() const;
 
             explicit SymbolClass(const nlohmann::json& object,
                 bool isInterface,

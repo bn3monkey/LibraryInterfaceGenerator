@@ -2,14 +2,42 @@
 
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
-std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolMethod>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseMethod()
+std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolMethod>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseMethods() const
 {
-	return std::vector<std::shared_ptr<SymbolMethod>>();
+	std::vector<std::shared_ptr<SymbolMethod>> ret{};
+	for (auto& wbase : bases)
+	{
+		if (auto base = wbase.lock())
+		{
+			auto& methods = base->methods;
+			for (auto& method : methods)
+			{
+				if (method->name != "constructor")
+				{
+					ret.push_back(method);
+				}
+			}
+			auto base_methods = base->getBaseMethods();
+			ret.insert(ret.end(), base_methods.begin(), base_methods.end());
+		}
+	}
+	return ret;
 }
 
-std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolProperty>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseProperties()
+std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolProperty>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseProperties() const
 {
-	return std::vector<std::shared_ptr<SymbolProperty>>();
+	std::vector<std::shared_ptr<SymbolProperty>> ret{};
+	for (auto& wbase : bases)
+	{
+		if (auto base = wbase.lock())
+		{
+			auto& properties = base->properties;
+			ret.insert(ret.end(), properties.begin(), properties.end());
+			auto base_properties = base->getBaseProperties();
+			ret.insert(ret.end(), base_properties.begin(), base_properties.end());
+		}
+	}
+	return ret;
 }
 
 LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
@@ -159,7 +187,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName()
 		value += "::";
 	}
 	value += name;
-	return name;
+	return value;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinName()
@@ -176,7 +204,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinNam
 		value += ".";
 	}
 	value += name;
-	return name;
+	return value;
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SymbolClass::change(SymbolObjectTable& objectTable)
