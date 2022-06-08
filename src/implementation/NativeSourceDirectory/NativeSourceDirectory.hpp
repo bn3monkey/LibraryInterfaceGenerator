@@ -12,15 +12,6 @@
 #include <algorithm>
 #include <set>
 
-
-namespace LibraryInterfaceGenerator
-{
-    namespace Implementation
-    {
-        class NativeSourceDirectory;
-    }
-}
-
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
@@ -131,8 +122,8 @@ namespace LibraryInterfaceGenerator
             std::string createScope(const SymbolClass& clazz);
 
             // 특정 헤더에서 상대적 헤더 위치 찾기
-            std::set<std::string> collectDeclarations(const SymbolClass& clazz);
-            std::set<std::string> collectDeclarations(const SymbolMethod& method);
+            //std::set<std::string> collectDeclarations(const SymbolClass& clazz);
+            //std::set<std::string> collectDeclarations(const SymbolMethod& method);
             
         };
     }

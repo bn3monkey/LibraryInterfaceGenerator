@@ -1114,6 +1114,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
     return scope;
 }
 
+/*
 std::set<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::collectDeclarations(const SymbolClass& clazz)
 {
     return std::set<std::string>();
@@ -1123,5 +1124,5 @@ std::set<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDir
 {
     return std::set<std::string>();
 }
-
+*/
 

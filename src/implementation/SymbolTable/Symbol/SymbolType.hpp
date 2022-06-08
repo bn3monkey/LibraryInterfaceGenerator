@@ -20,6 +20,7 @@ namespace LibraryInterfaceGenerator
             virtual bool requiredDeclaration() { return false; }
 
             virtual std::string toCppType() { return ""; };
+            virtual std::string toCppInterfaceType() { return ""; }
             virtual std::string toJNIType() { return ""; };
             virtual std::string toKotlinType() { return ""; };
         };
@@ -32,6 +33,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "void";}
+            std::string toCppInterfaceType() override { return "void"; }
             std::string toJNIType() override {return "void";}  
             std::string toKotlinType() override {return "Unit"; }
 
@@ -45,6 +47,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override { return "bool"; }
+            std::string toCppInterfaceType() override { return "bool"; }
             std::string toJNIType() override { return "jboolean"; }
             std::string toKotlinType() override { return "Boolean"; }
         };
@@ -57,6 +60,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "int8_t";}
+            std::string toCppInterfaceType() override { return "int8_t"; }
             std::string toJNIType() override {return "jbyte";}  
             std::string toKotlinType() override {return "Byte"; }       
         };
@@ -68,6 +72,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "int16_t";}
+            std::string toCppInterfaceType() override { return "int16_t"; }
             std::string toJNIType() override {return "jshort";}  
             std::string toKotlinType() override {return "Short"; }
         };
@@ -79,6 +84,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "int32_t";}
+            std::string toCppInterfaceType() override { return "int32_t"; }
             std::string toJNIType() override {return "jint";}  
             std::string toKotlinType() override {return "Int"; }
         };
@@ -90,6 +96,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "int64_t";}
+            std::string toCppInterfaceType() override { return "int64_t"; }
             std::string toJNIType() override {return "jlong";}  
             std::string toKotlinType() override {return "Long"; }
         };
@@ -101,6 +108,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "double";}
+            std::string toCppInterfaceType() override { return "double"; }
             std::string toJNIType() override {return "jdouble";}  
             std::string toKotlinType() override {return "Double"; }
         };
@@ -112,6 +120,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "float";}
+            std::string toCppInterfaceType() override { return "float"; }
             std::string toJNIType() override {return "jfloat";}  
             std::string toKotlinType() override {return "Float"; }
         };
@@ -123,6 +132,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::string";}
+            std::string toCppInterfaceType() override { return "std::string"; }
             std::string toJNIType() override {return "jstring";}  
             std::string toKotlinType() override {return "String"; }
         };
@@ -143,6 +153,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toCppInterfaceType() override { return "int32_t"; }
             std::string toJNIType() override {
                 return "jint";
             }
@@ -175,8 +186,9 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toCppInterfaceType() override { return "void*"; }
             std::string toJNIType() override {
-                return "jint";
+                return "jlong";
             }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
@@ -205,6 +217,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override { return "std::vector<bool>"; }
+            std::string toCppInterfaceType() override { return "std::vector<bool>"; }
             std::string toJNIType() override { return "jbooleanArray"; }
             std::string toKotlinType() override { return "BooleanArray"; }
         };
@@ -218,6 +231,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<char>";}
+            std::string toCppInterfaceType() override { return "std::vector<char>"; }
             std::string toJNIType() override {return "jbyteArray";}  
             std::string toKotlinType() override {return "ByteArray"; }    
         };
@@ -231,6 +245,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int16_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
             std::string toJNIType() override {return "jshortArray";}  
             std::string toKotlinType() override {return "ShortArray"; }    
         };
@@ -244,6 +259,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int32_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {return "IntArray"; }    
         };
@@ -257,6 +273,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int64_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {return "IntArray"; }    
         };
@@ -270,6 +287,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<float>";}
+            std::string toCppInterfaceType() override { return "std::vector<float>"; }
             std::string toJNIType() override {return "jfloatArray";}  
             std::string toKotlinType() override {return "FloatArray"; }
         };
@@ -283,6 +301,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<double>";}
+            std::string toCppInterfaceType() override { return "std::vector<double>"; }
             std::string toJNIType() override {return "jdoubleArray";}  
             std::string toKotlinType() override {return "DoubleArray"; }
         };
@@ -296,6 +315,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override { return "std::vector<std::string>"; }
+            std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
             std::string toJNIType() override { return "jobjectArray"; }
             std::string toKotlinType() override { return "Array<String>"; }
         };
@@ -321,6 +341,9 @@ namespace LibraryInterfaceGenerator
                     return ret;
                 }
                 return "";
+            }
+            std::string toCppInterfaceType() override { 
+                return "std::vector<int>"; 
             }
             std::string toJNIType() override {return "jintArray";}  
             std::string toKotlinType() override {
@@ -360,7 +383,10 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toJNIType() override { return "jobjectArray"; }
+            std::string toCppInterfaceType() override {
+                return "std::vector<void*>";
+            }
+            std::string toJNIType() override { return "jlongArray"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -391,6 +417,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override { return "std::vector<bool>"; }
+            std::string toCppInterfaceType() override { return "std::vector<bool>"; }
             std::string toJNIType() override { return "jobject"; }
             std::string toKotlinType() override { return "MutableList<Boolean>"; }
         };
@@ -404,6 +431,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<char>";}
+            std::string toCppInterfaceType() override { return "std::vector<char>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Byte>"; }    
         };
@@ -417,6 +445,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int16_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Short>"; }    
         };
@@ -430,6 +459,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int32_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Int>"; }    
         };
@@ -443,6 +473,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<int64_t>";}
+            std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Long>"; }    
         };
@@ -456,6 +487,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<float>";}
+            std::string toCppInterfaceType() override { return "std::vector<float>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Float>"; }
         };
@@ -469,6 +501,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override {return "std::vector<double>";}
+            std::string toCppInterfaceType() override { return "std::vector<double>"; }
             std::string toJNIType() override {return "jobject";}  
             std::string toKotlinType() override {return "MutableList<Double>"; }
         };
@@ -482,6 +515,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             std::string toCppType() override { return "std::vector<std::string>"; }
+            std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
             std::string toJNIType() override { return "jobject"; }
             std::string toKotlinType() override { return "MutableList<String>"; }
         };
@@ -508,6 +542,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toCppInterfaceType() override { return "std::vector<int>"; }
             std::string toJNIType() override { return "jobject"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
@@ -546,6 +581,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
             std::string toJNIType() override { return "jobject"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
