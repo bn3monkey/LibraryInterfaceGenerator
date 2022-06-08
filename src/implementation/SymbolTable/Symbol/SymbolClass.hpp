@@ -29,6 +29,7 @@ namespace LibraryInterfaceGenerator
             
             std::vector<std::weak_ptr<SymbolClass>> bases;
 
+            std::vector<std::shared_ptr<SymbolMethod>> constructors;
             std::vector<std::shared_ptr<SymbolEnum>> enums;
             std::vector<std::shared_ptr<SymbolMethod>> methods;
             std::vector<std::shared_ptr<SymbolProperty>> properties;

@@ -100,8 +100,8 @@ namespace LibraryInterfaceGenerator
             std::string createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
             std::string createDerivedMethodDeclaration(const SymbolMethod& object);
 
-            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& method);
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& method);
+            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object);
 
             std::string createDestructorDeclaration(const SymbolClass& clazz);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);

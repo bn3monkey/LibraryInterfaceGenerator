@@ -71,7 +71,7 @@ LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 
 			if (order == Order::Parameter)
 			{
-				std::vector<std::string> paths = { name };
+				//std::vector<std::string> paths = { name };
 				auto tempParameter = std::make_shared<SymbolParameter>(
 					child
 					);

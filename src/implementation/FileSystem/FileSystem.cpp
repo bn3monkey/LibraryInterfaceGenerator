@@ -63,7 +63,7 @@ Result FileSystem::createFile(std::string& path, std::string& content)
         for (const char* ptr = data; written_size < size; ptr += block_size)
         {
             size_t writing_size = size - written_size >= block_size ? block_size : size - written_size;
-            ofstream.write(data, writing_size);
+            ofstream.write(ptr, writing_size);
             written_size += writing_size;
         }
     }

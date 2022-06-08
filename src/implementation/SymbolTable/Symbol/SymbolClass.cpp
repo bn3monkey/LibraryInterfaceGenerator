@@ -10,13 +10,7 @@ std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolMet
 		if (auto base = wbase.lock())
 		{
 			auto& methods = base->methods;
-			for (auto& method : methods)
-			{
-				if (method->name != "constructor")
-				{
-					ret.push_back(method);
-				}
-			}
+			ret.insert(ret.end(), methods.begin(), methods.end());
 			auto base_methods = base->getBaseMethods();
 			ret.insert(ret.end(), base_methods.begin(), base_methods.end());
 		}
@@ -92,6 +86,21 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 			return;
 		}
 
+		nlohmann::json constructorObject;
+		constructorObject["name"] = "constructor";
+		constructorObject["type"] = "void";
+		constructorObject["description"] = "";
+		constructorObject["return"] = "";
+		constructorObject["parameters"] = nlohmann::json::array();
+
+		auto defaultConstructor = std::make_shared<SymbolMethod>(
+			constructorObject,
+			parentModules,
+			hasTypes
+			);
+		constructors.push_back(defaultConstructor);
+		hasTypes.push_back(defaultConstructor);
+
 		auto& childs = *iter;
 		for (const auto& child : childs)
 		{
@@ -142,7 +151,15 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 				if (!_result)
 					return;
 
-				methods.push_back(tempMethod);
+				if (tempMethod->name != "constructor")
+				{
+					methods.push_back(tempMethod);
+				}
+				else
+				{
+					if (!tempMethod->parameters.empty())
+						constructors.push_back(tempMethod);
+				}
 				hasTypes.push_back(tempMethod);
 			}
 			else if (order == Order::Property)

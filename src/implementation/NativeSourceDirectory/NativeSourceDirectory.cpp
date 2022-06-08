@@ -357,6 +357,7 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
     std::stringstream ss;
     std::string indent;
 
+    auto& constructors = object.constructors;
     auto& methods = object.methods;
     auto baseMethods = object.getBaseMethods();
     auto& properties = object.properties;
@@ -420,9 +421,19 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
                     }
                 }
 
-                auto line = createDestructorDeclaration(object);
-                defineObject.addLine(line);
-
+                for (auto& constructor : constructors)
+                {
+                    {
+                        Comment comment{ ss, indent };
+                        comment.add(*constructor);
+                    }
+                    auto line = createConstructorDeclaration(object, *constructor);
+                    defineObject.addLine(line);
+                }
+                {
+                    auto line = createDestructorDeclaration(object);
+                    defineObject.addLine(line);
+                }
                 for (auto& propertyObject : properties)
                 {
                     {
@@ -506,6 +517,16 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
         defineInclude.addInternal(header_path);
 
         ss << "\n";
+
+        for (auto& constructor : constructors)
+        {
+            auto ret = createConstructorDefinition(object, *constructor);
+            for (auto& line : ret)
+            {
+                ss << indent << line << "\n";
+            }
+            ss << "\n";
+        }
 
         auto ret = createDestructorDefinition(object);
         for (auto& line : ret)
@@ -715,7 +736,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
         ss << "    " << value.first << " = " << value.second << ",";
         ret.push_back(ss.str());
     }
-    ret.push_back("}");
+    ret.push_back("};");
     return ret;
 }
 
@@ -746,33 +767,19 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
 {   
     std::string method;
-    if (object.name == "constructor")
-    {
-        method = createConstructorDeclaration(clazz, object);
-        method += ";";
-    }
-    else
-    {
-        method = createMethodDeclaration(object);
-        method += ";";
-    }
+    method = createMethodDeclaration(object);
+    method += ";";
     return method;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
 {
     std::string method;
-    if (object.name == "constructor")
-    {
-        method = createConstructorDeclaration(clazz, object);
-        method += ";";
-    }
-    else
-    {
-        method = "virtual ";
-        method += createMethodDeclaration(object);
-        method += "= 0;";
-    }
+
+    method = "virtual ";
+    method += createMethodDeclaration(object);
+    method += "= 0;";
+    
     return method;
 }
 
@@ -781,45 +788,36 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedMethodDeclaration(const SymbolMethod& object)
 {
     std::string method;
-    if (object.name == "constructor")
-    {
-        // omit
-        return "";
-    }
-    else
-    {
-        method = createMethodDeclaration(object);
-        method += " override;";
-    }
+    method = createMethodDeclaration(object);
+    method += " override;";
+    
     return method;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& method)
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
 {
     std::string constructor;
-    constructor = "explict ";
+    constructor = "explicit ";
     constructor += clazz.name;
     constructor += "(";
-    if (!method.parameters.empty())
+     if (!object.parameters.empty())
     {
-        std::string parameters;
-        parameters += createParametersDefinition(method);
+        constructor += createParametersDefinition(object);
     }
 
-    constructor += ")";
+    constructor += ");";
     return constructor;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& method)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object)
 {
     std::vector<std::string> ret;
     std::string constructor = createScope(clazz);
     constructor += clazz.name;
     constructor += "(";
-    if (!method.parameters.empty())
+    if (!object.parameters.empty())
     {
-        std::string parameters;
-        parameters += createParametersDefinition(method);
+        constructor += createParametersDefinition(object);
     }
 
     constructor += ")";

@@ -104,7 +104,7 @@ LibraryInterfaceGenerator::Implementation::DefineObject::DefineObject(std::strin
 LibraryInterfaceGenerator::Implementation::DefineObject::~DefineObject()
 {
 	_indent.erase(_indent.end() - indent_size, _indent.end());
-	_ss << _indent << "}\n";
+	_ss << _indent << "};\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::DefineObject::addLine(const std::string& line)
@@ -151,7 +151,7 @@ void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolModule&
 void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolClass& obj)
 {
 	auto descriptions = tokenize(obj.description);
-	_ss << _indent << "* \\brief :\n";
+	_ss << _indent << "* \\brief \n";
 	for (auto& line : descriptions)
 	{
 		_ss << _indent << "*     " << line << "\n";
@@ -160,7 +160,7 @@ void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolClass& 
 void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolEnum& obj)
 {
 	auto descriptions = tokenize(obj.description);
-	_ss << _indent << "* \\brief :\n";
+	_ss << _indent << "* \\brief \n";
 	for (auto& line : descriptions)
 	{
 		_ss << _indent << "*     " << line << "\n";
@@ -170,7 +170,7 @@ void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolEnum& o
 void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolMethod& obj)
 {
 	auto descriptions = tokenize(obj.description);
-	_ss << _indent << "* \\brief :\n";
+	_ss << _indent << "* \\brief \n";
 	for (auto& line : descriptions)
 	{
 		_ss << _indent << "*     " << line << "\n";
@@ -193,7 +193,7 @@ void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolPropert
 {
 	_ss << _indent << "* property name : " << obj.name << "\n";
 	auto descriptions = tokenize(obj.description);
-	_ss << _indent << "* \\brief :\n";
+	_ss << _indent << "* \\brief \n";
 	for (auto& line : descriptions)
 	{
 		_ss << _indent << "*     " << line << "\n";
