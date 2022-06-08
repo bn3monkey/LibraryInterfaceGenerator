@@ -274,43 +274,74 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
     }
     */
     std::stringstream ss;
+    std::string indent;
     {
-        ss << "/*\n";
-        ss << " * Library Name : ";
-        ss << package.name;
-        ss << "\n";
-        ss << " * Author : ";
-        ss << package.author;
-        ss << "\n";
-        ss << " * Brief : ";
-        ss << package.description;
-        ss << "\n";
-        ss << "*/\n\n";
-
-        ss << "#if !defined(__";
-        ss << package.name;
-        ss << "__)\n";
-        ss << "#define __";
-        ss << package.name;
-        ss << "__\n\n";
-        
-        std::vector<std::string> includeFiles;
-        Result result = FileSystem::findAllFilePath(parent_include_path, includeFiles, { ".h", ".hpp" });
-        if (!result)
-            return result;
-
-        for (auto& includeFile : includeFiles)
+        DefineOnce defineOnce{ ss, {}, package.name, indent };
         {
-            std::replace(includeFile.begin(), includeFile.end(), '\\', '/');
-
-            ss << "#include \"";
-            ss << includeFile;
-            ss << "\"\n";
+            Comment comment{ ss, indent };
+            comment.add(package);
         }
 
-        ss << "\n#endif\n";
+        {
+            DefineInclude defineInclude{ ss, indent };
+            std::vector<std::string> includeFiles;
+            Result result = FileSystem::findAllFilePath(parent_include_path, includeFiles, { ".h", ".hpp" });
+            if (!result)
+                return result;
+
+            for (auto& includeFile : includeFiles)
+            {
+                defineInclude.addInternal(includeFile);
+            }
+        }
+
     }
     header_content = ss.str();
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumBlock(const SymbolEnum& object, std::vector<std::string>& header_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParameterBlock(const SymbolParameter& object, std::string& content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfacePropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
+{
+    return Result();
+}
+
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addPropertyDataBlock(const SymbolProperty& object, std::vector<std::string>& properties)
+{
     return Result();
 }
 

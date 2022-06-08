@@ -8,6 +8,7 @@
 #include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
+#include "NativeSourceStream.hpp"
 #include <algorithm>
 
 
@@ -78,7 +79,7 @@ namespace LibraryInterfaceGenerator
             Result createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content);
 
             // 7. Code Block 제작
-            /*
+            
             // Enum Block 생성
             Result createEnumBlock(const SymbolEnum& object, std::vector<std::string>& header_content);            
             // Method Block 생성
@@ -92,7 +93,7 @@ namespace LibraryInterfaceGenerator
             Result createClassPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
             Result createDerivedPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
             Result addPropertyDataBlock(const SymbolProperty& object, std::vector<std::string>& properties);
-            */
+            
         };
     }
 }
