@@ -10,7 +10,16 @@
 #include "../Auxiliary/StringHelper.hpp"
 #include "NativeSourceStream.hpp"
 #include <algorithm>
+#include <set>
 
+
+namespace LibraryInterfaceGenerator
+{
+    namespace Implementation
+    {
+        class NativeSourceDirectory;
+    }
+}
 
 namespace LibraryInterfaceGenerator
 {
@@ -81,18 +90,49 @@ namespace LibraryInterfaceGenerator
             // 7. Code Block 제작
             
             // Enum Block 생성
-            Result createEnumBlock(const SymbolEnum& object, std::vector<std::string>& header_content);            
+            std::vector<std::string> createEnumDefinition(const SymbolEnum& object);
+
             // Method Block 생성
-            Result createInterfaceMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content);
-            Result createClassMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
-            Result createDerivedMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
+            std::string createMethodDeclaration(const SymbolMethod& object);
+
+            std::string createStaticMethodDeclaration(const SymbolMethod& object);
+            std::string createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            std::string createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            std::string createDerivedMethodDeclaration(const SymbolMethod& object);
+
+            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& method);
+            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& method);
+
+            std::string createDestructorDeclaration(const SymbolClass& clazz);
+            std::vector<std::string> createDesturtorDefinition(const SymbolClass& clazz);
+            
+            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
+            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
+
             // Parameter Block 생성
-            Result createParameterBlock(const SymbolParameter& object, std::string& content);
+            std::string createParametersDefinition(const SymbolMethod& parameters);
+            std::string createParameterDefinition(const SymbolParameter& object);
+            
             // Property Block 생성
-            Result createInterfacePropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content);
-            Result createClassPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
-            Result createDerivedPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content);
-            Result addPropertyDataBlock(const SymbolProperty& object, std::vector<std::string>& properties);
+            std::string createPropertyName(const SymbolProperty& object);
+            std::string createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
+            std::string createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
+
+            std::vector<std::string> createClassPropertyDeclaration(const SymbolProperty& object);
+            std::vector<std::string> createInterfacePropertyDeclaration(const SymbolProperty& object);
+            std::vector<std::string> createDerivedPropertyDeclaration(const SymbolProperty& object);
+
+            std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
+            
+            std::string addPropertyDataBlock(const SymbolProperty& object);
+
+            // Property, Method의 범위
+            std::string createScope(const SymbolMethod& method);
+            std::string createScope(const SymbolClass& clazz);
+
+            // 특정 헤더에서 상대적 헤더 위치 찾기
+            std::set<std::string> collectDeclarations(const SymbolClass& clazz);
+            std::set<std::string> collectDeclarations(const SymbolMethod& method);
             
         };
     }

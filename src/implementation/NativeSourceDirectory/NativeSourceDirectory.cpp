@@ -235,12 +235,115 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
 
 Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceFileContent(const SymbolClass& object, std::string& header_content)
 {
-    header_content = "";
+    std::stringstream ss;
+    std::string indent;
+    
+    {
+        DefineOnce defineOnce{ ss, object.parentModules, object.name, indent };
+
+        {
+            
+            DefineInclude defineInclude{ ss, indent };
+            
+            defineInclude.addExternal("cstdint");
+            defineInclude.addExternal("vector");
+            defineInclude.addExternal("string");
+            defineInclude.addExternal("memory");
+
+            ss << "\n";
+            // 전방 선언하거나 헤더 포함!           
+        }
+        
+        {
+            DefineNamespace defineNamespace {ss, object.parentModules, indent};
+            Comment comment{ ss, indent };
+            comment.add(object);
+            
+            {
+                std::string objectName {"class "};
+                objectName += object.name;
+                DefineObject defineObject {ss, objectName, indent};
+
+                defineObject.addLine("public:");
+                for (auto& enumObject : object.enums)
+                {
+                    comment.add(*enumObject);
+                    auto lines = createEnumDefinition(*enumObject);
+                    for(auto& line : lines)
+                    {
+                        defineObject.addLine(line);
+                    }
+                }
+                for(auto& propertyObject : object.properties)
+                {
+                    comment.add(*propertyObject);
+                    auto lines = createInterfacePropertyDeclaration(*propertyObject);
+                    for(auto& line : lines)
+                    {
+                        defineObject.addLine(line);
+                    }
+                }
+                for (auto& methodObject : object.methods)
+                {
+                    comment.add(*methodObject);
+                    auto line = createInterfaceMethodDeclaration(object, *methodObject);
+                    defineObject.addLine(line);
+                }
+            }
+        }
+    }
+    header_content = ss.str();
     return Result();
 }
 
 Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassFileContent(const SymbolClass& object, std::string& header_content, std::string& cpp_content)
 {
+    // 4. Class 제작
+/*
+    // 헤더 :
+
+
+    // 심볼 테이블 기능
+    // 1. 특정 클래스의 네임 스페이스풀 불러오기
+    // 2. enum, class, interface의 상대적 헤더파일 불러오기 <- 안에 넣자..
+
+    // 1. 전역 전처리
+    // 1.1. 중복 포함 방지 풀 생성
+    // 1.2. 공통 헤더를 헤더 풀에 넣기. (메모리풀 토글 통해 강제 포함), 메모리, 스트링 무조건 포함
+    // 1.3. 네임 스페이스 풀 생성 (심볼테이블에서 가지고 와야할듯)
+
+    // 2.클래스 전처리
+    // 2.1 클래스 이름 가져오기
+    // 2.2 베이스 인터페이스 및 클래스에서 필요한 거 쌓기
+    // 2.2.1 베이스 인터페이스 및 클래스 파일 경로를 헤더풀에 추가
+    // 2.2.2 베이스에 있는 프로퍼티 불러서 베이스 프로퍼티 풀에 넣기
+    // 2.2.3 베이스에 있는 메소드 불러서 베이스 메소드 풀에 넣기
+    // 2.2.3.1 베이스에 있는 메소드의 파라미터, 프로퍼티에서
+    //         enum, class, interface 타입이 있으면 해당 타입의 위치를 헤더풀에 넣기
+    // 2.3 본인의 메소드 프로퍼티 불러서 프로퍼티 풀에 넣기
+    // 2.3.1 프로퍼티의 타입이 클래스, 인터페이스, enum이면 헤더 풀에 위치 넣기
+    // 2.4 메소드 풀에 생성자가 따로 없으면 기본 생성자 넣기
+    // 2.4.1
+    // 2.4 base 프로퍼티 풀과  private data 생성해서 쌓기
+    // 2.5 enum 풀에 넣기
+
+    // 3. 쓰기
+    // 3.1 중복 포함 방지 열기
+    //  3.2 헤더 풀 넣기
+    //   3.3 네임스페이스 열기
+    //    3.4 클래스 이름, 베이스 클래스 및 인터페이스 넣고 열기
+    //     3.5 생성자, 소멸자 넣기
+    //     3.6 베이스 프로퍼티 함수 넣기
+    //     3.7 프로퍼티 넣기
+    //     3.7 베이스 메소드 넣기
+    //     3.8 메소드 넣기
+    //     3.9 private에 프로퍼티 데이터 넣기
+    //    3.4 클래스 닫기
+    //   3.3 네임스페이스 닫기
+    //  3.2 헤더 풀 닫기
+    // 3.1 중복 포함 방지 닫기
+
+*/
     header_content = "";
     cpp_content = "";
     return Result();
@@ -248,14 +351,105 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
 
 Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumFileContent(const SymbolEnum& object, std::string& header_content)
 {
-    header_content = "";
+    std::stringstream ss;
+    std::string indent;
+    
+    {
+        DefineOnce defineOnce{ ss, object.parentModules, object.name, indent };
+
+        {
+            
+            DefineInclude defineInclude{ ss, indent };
+            
+            defineInclude.addExternal("cstdint");
+            defineInclude.addExternal("vector");
+            defineInclude.addExternal("string");
+            defineInclude.addExternal("memory");
+
+            ss << "\n";
+            // 전방 선언하거나 헤더 포함!           
+        }
+        
+        {
+            DefineNamespace defineNamespace {ss, object.parentModules, indent};
+            Comment comment{ ss, indent };
+            comment.add(object);
+            auto ret = createEnumDefinition(object);
+            for (auto& line : ret)
+            {
+                ss << line << "\n";
+            }
+        }
+    }
+    header_content = ss.str();
     return Result();
 }
 
 Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodFileContent(const SymbolMethod& object, std::string& header_content, std::string& cpp_content)
 {
-    header_content = "";
-    cpp_content = "";
+    std::stringstream ss;
+    std::string indent;
+    
+    {
+        DefineOnce defineOnce{ ss, object.parentModules, object.name, indent };
+
+        {
+            
+            DefineInclude defineInclude{ ss, indent };
+            
+            defineInclude.addExternal("cstdint");
+            defineInclude.addExternal("vector");
+            defineInclude.addExternal("string");
+            defineInclude.addExternal("memory");
+
+            ss << "\n";
+            // 전방 선언하거나 헤더 포함!           
+        }
+        
+        {
+            DefineNamespace defineNamespace {ss, object.parentModules, indent};
+            Comment comment{ ss, indent };
+            comment.add(object);
+            auto ret = createStaticMethodDeclaration(object);
+            for (auto& line : ret)
+            {
+                ss << line << "\n";
+            }
+        }       
+    }
+    header_content = ss.str();
+    
+    ss.clear();
+    {
+        DefineInclude defineInclude{ ss, indent };
+
+        // out of src directory
+        std::string prefix = "../";
+        std::string postfix = "include/";
+        for (size_t idx = 1; idx < object.parentModules.size(); idx++)
+        {
+            prefix += "../";
+            postfix += object.parentModules[idx];
+            postfix += "/";
+        }
+
+        postfix += object.name;
+        postfix += ".hpp";
+        
+        std::string header_path = prefix;
+        header_path += postfix;
+
+        defineInclude.addInternal(header_path);
+
+        ss << "\n";
+        auto ret = createStaticMethodDefinition(object);
+        for (auto& line : ret)
+        {
+            ss << line << "\n";
+        }
+    }
+    cpp_content = ss.str();
+
     return Result();
 }
 
@@ -263,16 +457,7 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
 
 Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content)
 {
-    /*
-    std::stringstream ss;
-    std::string indent;
-    std::vector<std::string> moduleNames;
-    {
-        DefineOnce(ss, moduleNames, indent);
-        {
-        }
-    }
-    */
+
     std::stringstream ss;
     std::string indent;
     {
@@ -300,99 +485,426 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
     return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumBlock(const SymbolEnum& object, std::vector<std::string>& header_content)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumDefinition(const SymbolEnum& object)
 {
-    return Result();
+    std::vector<std::string> ret;
+
+    std::string name{ "enum class " };
+    name += object.name;
+    ret.push_back(name);
+   
+    ret.push_back("{");
+
+    for (auto& value : object.values)
+    {
+        std::stringstream ss;
+        ss << " " << value.first << " = " << value.second << ",";
+        ret.push_back(ss.str());
+    }
+    ret.push_back("}");
+    return ret;
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content)
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createMethodDeclaration(const SymbolMethod& object)
 {
-    return Result();
+    std::string method{ "" };
+    method += object.type->toCppType();
+    method += " ";
+    method += object.name;
+    method += "(";
+
+    if (!object.parameters.empty())
+    {
+        method += createParametersDefinition(object);
+    }
+
+    method += ")";
+    return method;
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createStaticMethodDeclaration(const SymbolMethod& object)
 {
-    return Result();
+    std::string method = createMethodDeclaration(object);
+    method += ";";
+    return method;
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedMethodBlock(const SymbolMethod& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
-{
-    return Result();
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
+{   
+    std::string method;
+    if (object.name == "constructor")
+    {
+        method = createConstructorDeclaration(clazz, object);
+        method += ";";
+    }
+    else
+    {
+        method = createMethodDeclaration(object);
+        method += ";";
+    }
+    return method;
 }
 
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParameterBlock(const SymbolParameter& object, std::string& content)
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
 {
-    return Result();
-}
-
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfacePropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content)
-{
-    return Result();
-}
-
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
-{
-    return Result();
-}
-
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertyBlock(const SymbolProperty& object, std::vector<std::string>& header_content, std::vector<std::string>& cpp_content)
-{
-    return Result();
-}
-
-Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addPropertyDataBlock(const SymbolProperty& object, std::vector<std::string>& properties)
-{
-    return Result();
+    std::string method;
+    if (object.name == "constructor")
+    {
+        method = createConstructorDeclaration(clazz, object);
+        method += ";";
+    }
+    else
+    {
+        method += "virtual ";
+        method = createMethodDeclaration(object);
+        method += "= 0;";
+    }
+    return method;
 }
 
 
-// 4. Class 제작
-/*
-Result NativeSourceDirectory::createClass(const nlohmann::json& object, std::string& header_content, std::string& cpp_content)
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedMethodDeclaration(const SymbolMethod& object)
 {
-    // 헤더 : 
-
-
-    // 심볼 테이블 기능
-    // 1. 특정 클래스의 네임 스페이스풀 불러오기
-    // 2. enum, class, interface의 상대적 헤더파일 불러오기 <- 안에 넣자..
-
-    // 1. 전역 전처리
-    // 1.1. 중복 포함 방지 풀 생성
-    // 1.2. 공통 헤더를 헤더 풀에 넣기. (메모리풀 토글 통해 강제 포함), 메모리, 스트링 무조건 포함
-    // 1.3. 네임 스페이스 풀 생성 (심볼테이블에서 가지고 와야할듯)
-
-    // 2.클래스 전처리
-    // 2.1 클래스 이름 가져오기
-    // 2.2 베이스 인터페이스 및 클래스에서 필요한 거 쌓기
-    // 2.2.1 베이스 인터페이스 및 클래스 파일 경로를 헤더풀에 추가
-    // 2.2.2 베이스에 있는 프로퍼티 불러서 베이스 프로퍼티 풀에 넣기
-    // 2.2.3 베이스에 있는 메소드 불러서 베이스 메소드 풀에 넣기
-    // 2.2.3.1 베이스에 있는 메소드의 파라미터, 프로퍼티에서 
-    //         enum, class, interface 타입이 있으면 해당 타입의 위치를 헤더풀에 넣기
-    // 2.3 본인의 메소드 프로퍼티 불러서 프로퍼티 풀에 넣기
-    // 2.3.1 프로퍼티의 타입이 클래스, 인터페이스, enum이면 헤더 풀에 위치 넣기
-    // 2.4 메소드 풀에 생성자가 따로 없으면 기본 생성자 넣기
-    // 2.4.1 
-    // 2.4 base 프로퍼티 풀과  private data 생성해서 쌓기
-    // 2.5 enum 풀에 넣기
-
-    // 3. 쓰기
-    // 3.1 중복 포함 방지 열기
-    //  3.2 헤더 풀 넣기
-    //   3.3 네임스페이스 열기
-    //    3.4 클래스 이름, 베이스 클래스 및 인터페이스 넣고 열기
-    //     3.5 생성자, 소멸자 넣기
-    //     3.6 베이스 프로퍼티 함수 넣기
-    //     3.7 프로퍼티 넣기
-    //     3.7 베이스 메소드 넣기
-    //     3.8 메소드 넣기
-    //     3.9 private에 프로퍼티 데이터 넣기
-    //    3.4 클래스 닫기
-    //   3.3 네임스페이스 닫기
-    //  3.2 헤더 풀 닫기
-    // 3.1 중복 포함 방지 닫기
-
-    
+    std::string method;
+    if (object.name == "constructor")
+    {
+        // omit
+        return "";
+    }
+    else
+    {
+        method = createMethodDeclaration(object);
+        method += " override;";
+    }
+    return method;
 }
-*/
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& method)
+{
+    std::string constructor;
+    constructor = "explict ";
+    constructor += clazz.name;
+    constructor += "(";
+    if (!method.parameters.empty())
+    {
+        std::string parameters;
+        parameters += createParametersDefinition(method);
+    }
+
+    constructor += ")";
+    return constructor;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& method)
+{
+    std::vector<std::string> ret;
+    std::string constructor = createScope(clazz);
+    constructor += clazz.name;
+    constructor += "(";
+    if (!method.parameters.empty())
+    {
+        std::string parameters;
+        parameters += createParametersDefinition(method);
+    }
+
+    constructor += ")";
+    ret.push_back(constructor);
+    ret.push_back("{");
+    ret.push_back("");
+    ret.push_back("}");
+    return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDestructorDeclaration(const SymbolClass& clazz)
+{
+    std::string ret = "virtual ~";
+    ret += clazz.name;
+    ret += "();";
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDesturtorDefinition(const SymbolClass& clazz)
+{
+    std::vector<std::string> ret;
+    std::string name = createScope(clazz);
+    name += "~";
+    name += clazz.name;
+    name += "()";
+    ret.push_back(name);
+    ret.push_back("{");
+    ret.push_back(" // Release Resources;");
+    ret.push_back("}");
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createStaticMethodDefinition(const SymbolMethod& object)
+{
+    std::vector<std::string> ret;
+    std::string method{ "" };
+    method += object.type->toCppType();
+    method += " ";
+    method += createScope(object);
+    method += object.name;
+    method += "(";
+
+    if (!object.parameters.empty())
+    {
+        method += createParametersDefinition(object);
+    }
+
+    method += ")";
+    ret.push_back(method);
+    ret.push_back("{");
+    ret.push_back("");
+    ret.push_back("}");
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object)
+{
+    std::vector<std::string> ret;
+    std::string method{ "" };
+    method += object.type->toCppType();
+    method += " ";
+    method += createScope(clazz);
+    method += object.name;
+    method += "(";
+
+    if (!object.parameters.empty())
+    {
+        method += createParametersDefinition(object);
+    }
+
+    method += ")";
+    ret.push_back(method);
+    ret.push_back("{");
+    ret.push_back("");
+    ret.push_back("}");
+    return ret;
+}
+
+
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParametersDefinition(const SymbolMethod& object)
+{
+    std::string line;
+    for (auto& parameter : object.parameters)
+    {
+        line += createParameterDefinition(*parameter);
+        line += ", ";
+    }
+    line.pop_back();
+    line.pop_back();
+    return line;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParameterDefinition(const SymbolParameter& object)
+{
+    std::string content = object.io == SymbolParameter::IO::IN ? "const " : "";
+    content += object.type->toCppType();
+    content += object.type->isPrimitive() ? " " : "& ";
+    content += object.name;
+    return content;
+}
+
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyName(const SymbolProperty& object)
+{
+    std::string propertyName = object.name;
+    char firstChar = propertyName[0];
+    if ('a' <= firstChar && firstChar <= 'z')
+        firstChar += ('A' - 'a');
+    propertyName[0] = firstChar;
+    return propertyName;
+}
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
+{
+    std::string setter{ "void set" };
+    setter += "(";
+    setter += object.type->toCppType();
+    if (!object.type->isPrimitive())
+        setter += "&";
+    setter += " value)";
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
+{
+    std::string getter{ object.type->toCppType() };
+    if (!object.type->isPrimitive())
+        getter += "&";
+    getter += " get";
+    getter += propertyName;
+    getter += "()";
+    return getter;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassPropertyDeclaration(const SymbolProperty& object)
+{
+    std::vector<std::string> ret;
+
+    std::string propertyName = createPropertyName(object);
+
+    std::string getter = createPropertySetterDeclaration(propertyName, object);
+    getter += ";";
+    ret.push_back(getter);
+
+    if (!object.readonly)
+    {
+        std::string setter = createPropertySetterDeclaration(propertyName, object);
+        setter += ";";
+        ret.push_back(setter);
+    }
+
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfacePropertyDeclaration(const SymbolProperty& object)
+{
+    std::vector<std::string> ret;
+
+    std::string propertyName = createPropertyName(object);
+
+    std::string getter = "virtual ";
+    getter += createPropertySetterDeclaration(propertyName, object);
+    getter += "= 0;";
+    ret.push_back(getter);
+
+    if (!object.readonly)
+    {
+        std::string setter = "virtual ";
+        setter += createPropertySetterDeclaration(propertyName, object);
+        setter += "= 0;";
+        ret.push_back(setter);
+    }
+
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertyDeclaration(const SymbolProperty& object)
+{
+    std::vector<std::string> ret;
+
+    std::string propertyName = createPropertyName(object);
+
+    std::string getter = createPropertySetterDeclaration(propertyName, object);
+    getter += " override;";
+    ret.push_back(getter);
+
+    if (!object.readonly)
+    {
+        std::string setter = createPropertySetterDeclaration(propertyName, object);
+        setter += " override;";
+        ret.push_back(setter);
+    }
+
+    return ret;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object)
+{
+    std::vector<std::string> ret;
+
+    std::string scope = createScope(clazz);
+
+    std::string propertyName = object.name;
+    char firstChar = propertyName[0];
+    if ('a' <= firstChar && firstChar <= 'z')
+        firstChar += ('A' - 'a');
+    propertyName[0] = firstChar;
+
+    std::string getter = object.type->toCppType();
+    if (!object.type->isPrimitive())
+        getter += "&";
+    getter += " ";
+    getter += scope;
+    getter += propertyName;
+    getter += "();";
+
+    ret.push_back(getter);
+    ret.push_back("{");
+
+    std::string return_line{ "   return _" };
+    return_line += object.name;
+    return_line += ";";
+
+    ret.push_back(return_line);
+
+    ret.push_back("}");
+
+    if (!object.readonly)
+    {
+        std::string setter{ "void " };
+        setter += scope;
+        setter += "set";
+        setter += propertyName;
+        setter += "(";
+        setter += object.type->toCppType();
+        if (!object.type->isPrimitive())
+            setter += "&";
+        setter += " value);";
+        ret.push_back(setter);
+        ret.push_back("{");
+
+        std::string return_line{ "   _" };
+        return_line += object.name;
+        return_line += " = value;";
+        ret.push_back(return_line);
+
+        ret.push_back("}");
+    }
+
+    return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addPropertyDataBlock(const SymbolProperty& object)
+{
+    std::string line{ object.type->toCppType() };
+    line += " _";
+    line += object.name;
+    return line;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createScope(const SymbolMethod& method)
+{
+    std::string scope;
+    auto& moduleNames = method.parentModules;
+    for (auto& moduleName : moduleNames)
+    {
+        scope += moduleName;
+        scope += "::";
+    }
+    return scope;
+}
+std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createScope(const SymbolClass& clazz)
+{
+    std::string scope;
+    auto& moduleNames = clazz.parentModules;
+    auto& objectNames = clazz.parentObjects;
+    for (auto& moduleName : moduleNames)
+    {
+        scope += moduleName;
+        scope += "::";
+    }
+    for (auto& objectName : objectNames)
+    {
+        scope += objectName;
+        scope += "::";
+    }
+    scope += clazz.name;
+    scope += "::";
+
+    return scope;
+}
+
+std::set<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::collectDeclarations(const SymbolClass& clazz)
+{
+    return std::set<std::string>();
+}
+
+std::set<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::collectDeclarations(const SymbolMethod& method)
+{
+    return std::set<std::string>();
+}
+
+

@@ -72,6 +72,8 @@
         "deque": "cpp",
         "queue": "cpp",
         "fstream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "random": "cpp",
+        "set": "cpp"
     }
 }

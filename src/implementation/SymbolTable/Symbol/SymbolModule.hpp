@@ -19,7 +19,7 @@ namespace LibraryInterfaceGenerator
         class SymbolModule : public HasResult
         {
         public:
-            std::vector<std::string> modules;
+            std::vector<std::string> moduleNames; // include itself
             std::string name;
             std::string description;
 

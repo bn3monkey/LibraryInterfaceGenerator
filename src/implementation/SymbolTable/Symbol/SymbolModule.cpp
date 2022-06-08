@@ -19,8 +19,8 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 		name = iter->get<std::string>();
 	}
 
-	modules = parentModules;
-	modules.push_back(name);
+	moduleNames = parentModules;
+	moduleNames.push_back(name);
 
 	{
 		auto iter = object.find(Field::Description);
@@ -60,7 +60,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 				//SymbolEnum temp{ child, parentModules, objects };
 				auto tempEnum = std::make_shared<SymbolEnum>(
 					child,
-					modules,
+					moduleNames,
 					objects
 					);
 
@@ -90,7 +90,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 				auto tempInterface = std::make_shared<SymbolClass>(
 					child,
 					true,
-					modules,
+					moduleNames,
 					objects,
 					objectTable,
 					enumTable,
@@ -122,7 +122,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 				auto tempClass = std::make_shared<SymbolClass>(
 					child,
 					false,
-					modules,
+					moduleNames,
 					objects,
 					objectTable,
 					enumTable,
@@ -140,7 +140,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 			{
 				auto tempMethod = std::make_shared<SymbolMethod>(
 					child,
-					modules,
+					moduleNames,
 					hasTypes
 				);
 
@@ -156,7 +156,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 
 				auto tempModule = std::make_shared<SymbolModule>(
 					child,
-					modules,
+					moduleNames,
 					objectTable,
 					enumTable,
 					hasTypes

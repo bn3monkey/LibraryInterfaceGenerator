@@ -7,6 +7,43 @@
     "childs" : [
         {
             "order" : "module",
+            "name" : "HsnUltrasoundDICOM",
+            "description" : "Global Method of HsnUltrasoundDICOM",
+            "childs" : [
+                {
+                    "order" : "method",
+                    "name" : "initialize",
+                    "type" : "bool",
+                    "description" : "intialize library",
+                    "return" : "whether library is initialized",
+                    "parameters" : [
+
+                    ]
+                },
+                {
+                    "order" : "method",
+                    "name" : "release",
+                    "type" : "void",
+                    "description" : "release library",
+                    "return" : "whether library is released",
+                    "parameters" : [
+
+                    ]
+                },
+                {
+                    "order" : "method",
+                    "type" : "bool",
+                    "name" : "isInitialized",
+                    "description" : "check if library is initialized",
+                    "return" : "whether library is initialized",
+                    "parameters" : [
+
+                    ]
+                }
+            ]
+        },
+        {
+            "order" : "module",
             "name" : "Configuration",
             "description" : "Settings required to communicate with the dicom server",
             "childs" : [
