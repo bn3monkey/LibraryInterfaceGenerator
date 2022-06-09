@@ -13,9 +13,9 @@ namespace LibraryInterfaceGenerator
     {
         namespace FileSystem
         {
-            Result createDirectory(std::string& path);
-            Result createDirectories(std::string& path);
-            Result createFile(std::string& path, std::string& content);
+            Result createDirectory(const std::string& path);
+            Result createDirectories(const std::string& path);
+            Result createFile(const std::string& path, const std::string& content);
             Result findAllFilePath(const std::string& path, std::vector<std::string>& file_paths, const std::vector<std::string>& postfixes);
         }
     }

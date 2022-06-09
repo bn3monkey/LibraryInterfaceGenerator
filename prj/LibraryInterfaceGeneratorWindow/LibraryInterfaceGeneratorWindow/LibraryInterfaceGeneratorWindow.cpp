@@ -42,7 +42,9 @@ int main()
 		}
 	}
 
-	LibraryInterfaceGenerator::createNativeSourceDirectory(content);
+	std::string root_dir_path = ".\\library";
+	LibraryInterfaceGenerator::createRootDirectory(root_dir_path);
+	LibraryInterfaceGenerator::createNativeSourceDirectory(content, root_dir_path);
 
 	return 0;
 }

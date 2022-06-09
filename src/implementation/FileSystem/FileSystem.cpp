@@ -2,7 +2,7 @@
 
 using namespace LibraryInterfaceGenerator::Implementation;
 
-Result FileSystem::createDirectory(std::string& path)
+Result FileSystem::createDirectory(const std::string& path)
 {
     auto path_obj = std::filesystem::path{path};
     bool ret = std::filesystem::create_directory(path_obj);
@@ -24,7 +24,7 @@ Result FileSystem::createDirectory(std::string& path)
     }
     return Result(Result::Code::SUCCESS);
 }
-Result FileSystem::createDirectories(std::string& path)
+Result FileSystem::createDirectories(const std::string& path)
 {
     auto path_obj = std::filesystem::path{ path };
     bool ret = std::filesystem::create_directories(path_obj);
@@ -46,7 +46,7 @@ Result FileSystem::createDirectories(std::string& path)
     }
     return Result(Result::Code::SUCCESS);
 }
-Result FileSystem::createFile(std::string& path, std::string& content)
+Result FileSystem::createFile(const std::string& path, const std::string& content)
 {
     {
         std::ofstream ofstream{path};

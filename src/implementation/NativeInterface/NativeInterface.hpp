@@ -32,9 +32,7 @@ namespace LibraryInterfaceGenerator
 
             Result createInterfaceFile(const SymbolPackage& symbolObject, std::string& parent_include_path);
             Result createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content);
-            Result createMemoryPoolHeaderFile();
-            Result createMemoryPoolSourceFile();
-
+            
             void wrapPackageScope(const SymbolPackage& symbolObject, std::stringstream& ss);
             void wrapModuleScope(const SymbolModule& symbolObject, std::stringstream& ss, std::string& indent);
 
@@ -73,7 +71,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::string> createPropertyDeclaration(const SymbolProperty& object);
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
-        }
+        };
     }
 }
 

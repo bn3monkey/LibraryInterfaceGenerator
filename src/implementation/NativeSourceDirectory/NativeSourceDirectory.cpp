@@ -4,15 +4,15 @@ using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
 #ifdef __linux__
-char* delimeter = "/";
+static char* delimeter = "/";
 #elif _WIN32
-char* delimeter = "\\";
+static char* delimeter = "\\";
 #else
-char* delimeter = "/";
+static char* delimeter = "/";
 #endif
 
 
-NativeSourceDirectory::NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path) : _symbolTable(symbolTable)
+NativeSourceDirectory::NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path) : _symbolTable(symbolTable), _libDirectory(libDirectory)
 {
     _include_dir_path = root_dir_path;
     _include_dir_path += delimeter;
@@ -21,7 +21,6 @@ NativeSourceDirectory::NativeSourceDirectory(const SymbolTable& symbolTable, std
     _src_dir_path += delimeter;
     _src_dir_path += "src";
 
-    FileSystem::createDirectories(root_dir_path);
 }
 
 Result NativeSourceDirectory::make()
@@ -251,7 +250,6 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
             defineInclude.addExternal("memory");
 
             ss << "\n";
-            // 전방 선언하거나 헤더 포함!           
         }
         
         {
@@ -515,6 +513,18 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
         header_path += postfix;
 
         defineInclude.addInternal(header_path);
+        if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log))
+        {
+            auto header_path = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::Log, object);
+            defineInclude.addInternal(header_path);
+        }
+        if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
+        {
+            auto header_path = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::MemoryPool, object);
+            defineInclude.addInternal(header_path);
+        }
+
+        // 전방 선언하거나 헤더 포함!
 
         ss << "\n";
 
@@ -671,6 +681,16 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
         header_path += postfix;
 
         defineInclude.addInternal(header_path);
+        if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log))
+        {
+            auto header_path = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::Log, object);
+            defineInclude.addInternal(header_path);
+        }
+        if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
+        {
+            auto header_path = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::MemoryPool, object);
+            defineInclude.addInternal(header_path);
+        }
 
         ss << "\n";
         for (auto& method : object.globla_methods)

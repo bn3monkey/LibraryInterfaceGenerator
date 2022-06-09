@@ -8,6 +8,7 @@
 #include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
+#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp";
 #include "NativeSourceStream.hpp"
 #include <algorithm>
 #include <set>
@@ -19,7 +20,7 @@ namespace LibraryInterfaceGenerator
         class NativeSourceDirectory
         {
         public:
-            explicit NativeSourceDirectory(const SymbolTable& symbolTable, std::string root_dir_path = ".");
+            explicit NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path = ".");
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
@@ -28,11 +29,21 @@ namespace LibraryInterfaceGenerator
             Result make();
 
         private:
+            const NativeExternalLibraryDirectory& _libDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
             std::string _include_dir_path;
             std::string _src_dir_path; 
-
+            
+            // lib/ external library or source code
+            //   libraryA/
+            //   libraryB/
+            //   log/
+            //     log.hpp
+            //     log.cpp
+            //   memorypool/
+            //     memorypool.hpp
+            //     memorypool.cpp
             // include/
             //     LibraryName.hpp
             //  module/
@@ -120,6 +131,7 @@ namespace LibraryInterfaceGenerator
             // Property, Method의 범위
             std::string createScope(const SymbolMethod& method);
             std::string createScope(const SymbolClass& clazz);
+
 
             // 특정 헤더에서 상대적 헤더 위치 찾기
             //std::set<std::string> collectDeclarations(const SymbolClass& clazz);
