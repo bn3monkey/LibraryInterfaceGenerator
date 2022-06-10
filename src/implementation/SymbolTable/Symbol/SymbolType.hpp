@@ -15,6 +15,45 @@ namespace LibraryInterfaceGenerator
         class SymbolType
         {
         public:
+            enum class Name
+            {
+                INVALID, 
+                VOID,
+                BOOL,
+                INT8,
+                INT16,
+                INT32,
+                INT64,
+                FLOAT,
+                DOUBLE,
+                STRING,
+                ENUM,
+                OBJECT,
+
+                BOOLARRAY,
+                INT8ARRAY,
+                INT16ARRAY,
+                INT32ARRAY,
+                INT64ARRAY,
+                FLOATARRAY,
+                DOUBLEARRAY,
+                STRINGARRAY,
+                ENUMARRAY,
+                OBJECTARRAY,
+
+                BOOLVECTOR,
+                INT8VECTOR,
+                INT16VECTOR,
+                INT32VECTOR,
+                INT64VECTOR,
+                FLOATVECTOR,
+                DOUBLEVECTOR,
+                STRINGVECTOR,
+                ENUMVECTOR,
+                OBJECTVECTOR,
+            };
+
+            virtual Name getTypeName() {return Name::INVALID;}
             virtual bool valid() { return false; }
             virtual bool isPrimitive() { return false; }
             virtual bool requiredDeclaration() { return false; }
@@ -32,6 +71,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::VOID;}
             std::string toCppType() override {return "void";}
             std::string toCppInterfaceType() override { return "void"; }
             std::string toJNIType() override {return "void";}  
@@ -46,6 +86,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::BOOL;}
             std::string toCppType() override { return "bool"; }
             std::string toCppInterfaceType() override { return "bool"; }
             std::string toJNIType() override { return "jboolean"; }
@@ -59,6 +100,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT8;}
             std::string toCppType() override {return "int8_t";}
             std::string toCppInterfaceType() override { return "int8_t"; }
             std::string toJNIType() override {return "jbyte";}  
@@ -71,6 +113,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT16;}
             std::string toCppType() override {return "int16_t";}
             std::string toCppInterfaceType() override { return "int16_t"; }
             std::string toJNIType() override {return "jshort";}  
@@ -83,6 +126,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT32;}
             std::string toCppType() override {return "int32_t";}
             std::string toCppInterfaceType() override { return "int32_t"; }
             std::string toJNIType() override {return "jint";}  
@@ -95,6 +139,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT64;}
             std::string toCppType() override {return "int64_t";}
             std::string toCppInterfaceType() override { return "int64_t"; }
             std::string toJNIType() override {return "jlong";}  
@@ -107,6 +152,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::DOUBLE;}
             std::string toCppType() override {return "double";}
             std::string toCppInterfaceType() override { return "double"; }
             std::string toJNIType() override {return "jdouble";}  
@@ -119,6 +165,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return true; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::FLOAT;}
             std::string toCppType() override {return "float";}
             std::string toCppInterfaceType() override { return "float"; }
             std::string toJNIType() override {return "jfloat";}  
@@ -131,6 +178,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::STRING;}
             std::string toCppType() override {return "std::string";}
             std::string toCppInterfaceType() override { return "std::string"; }
             std::string toJNIType() override {return "jstring";}  
@@ -144,6 +192,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return true; }
 
+            Name getTypeName() override {return Name::ENUM;}
             SymbolTypeEnum(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
             std::string toCppType() override {
                 if (auto object = _obj.lock())
@@ -175,6 +224,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return true; }
 
+            Name getTypeName() override {return Name::OBJECT;}
             SymbolTypeObject(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
             std::string toCppType() override {
                 if (auto object = _obj.lock())
@@ -216,6 +266,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::BOOLARRAY;}
             std::string toCppType() override { return "std::vector<bool>"; }
             std::string toCppInterfaceType() override { return "std::vector<bool>"; }
             std::string toJNIType() override { return "jbooleanArray"; }
@@ -230,6 +281,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT8ARRAY;}
             std::string toCppType() override {return "std::vector<char>";}
             std::string toCppInterfaceType() override { return "std::vector<char>"; }
             std::string toJNIType() override {return "jbyteArray";}  
@@ -244,6 +296,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT16ARRAY;}
             std::string toCppType() override {return "std::vector<int16_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
             std::string toJNIType() override {return "jshortArray";}  
@@ -258,6 +311,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT32ARRAY;}
             std::string toCppType() override {return "std::vector<int32_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
             std::string toJNIType() override {return "jintArray";}  
@@ -272,6 +326,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT64ARRAY;}
             std::string toCppType() override {return "std::vector<int64_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
             std::string toJNIType() override {return "jintArray";}  
@@ -286,6 +341,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::FLOATARRAY;}
             std::string toCppType() override {return "std::vector<float>";}
             std::string toCppInterfaceType() override { return "std::vector<float>"; }
             std::string toJNIType() override {return "jfloatArray";}  
@@ -300,6 +356,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::DOUBLEARRAY;}
             std::string toCppType() override {return "std::vector<double>";}
             std::string toCppInterfaceType() override { return "std::vector<double>"; }
             std::string toJNIType() override {return "jdoubleArray";}  
@@ -314,6 +371,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::STRINGARRAY;}
             std::string toCppType() override { return "std::vector<std::string>"; }
             std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
             std::string toJNIType() override { return "jobjectArray"; }
@@ -331,6 +389,7 @@ namespace LibraryInterfaceGenerator
             SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
                 _obj(obj) {};
 
+            Name getTypeName() override {return Name::ENUMARRAY;}
             std::string toCppType() override {   
                 if (auto object = _obj.lock())
                 {
@@ -372,13 +431,14 @@ namespace LibraryInterfaceGenerator
             SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
                 _obj(obj) {};
 
+            Name getTypeName() override {return Name::OBJECTARRAY;}
             std::string toCppType() override {
                 if (auto object = _obj.lock())
                 {
                     auto name = object->getCppName();
                     std::string ret{ "std::vector<std::shared_ptr<" };
                     ret += name;
-                    ret += ">>";
+                    ret += ">*>";
                     return ret;
                 }
                 return "";
@@ -416,6 +476,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::BOOLVECTOR;}
             std::string toCppType() override { return "std::vector<bool>"; }
             std::string toCppInterfaceType() override { return "std::vector<bool>"; }
             std::string toJNIType() override { return "jobject"; }
@@ -430,6 +491,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT8VECTOR;}
             std::string toCppType() override {return "std::vector<char>";}
             std::string toCppInterfaceType() override { return "std::vector<char>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -444,6 +506,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT16VECTOR;}
             std::string toCppType() override {return "std::vector<int16_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -458,6 +521,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT32VECTOR;}
             std::string toCppType() override {return "std::vector<int32_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -472,6 +536,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::INT64VECTOR;}
             std::string toCppType() override {return "std::vector<int64_t>";}
             std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -486,6 +551,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::FLOATVECTOR;}
             std::string toCppType() override {return "std::vector<float>";}
             std::string toCppInterfaceType() override { return "std::vector<float>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -500,6 +566,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::DOUBLEVECTOR;}
             std::string toCppType() override {return "std::vector<double>";}
             std::string toCppInterfaceType() override { return "std::vector<double>"; }
             std::string toJNIType() override {return "jobject";}  
@@ -514,6 +581,7 @@ namespace LibraryInterfaceGenerator
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return false; }
 
+            Name getTypeName() override {return Name::STRINGVECTOR;}
             std::string toCppType() override { return "std::vector<std::string>"; }
             std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
             std::string toJNIType() override { return "jobject"; }
@@ -531,6 +599,7 @@ namespace LibraryInterfaceGenerator
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
                 _obj(obj) {};
 
+            Name getTypeName() override {return Name::ENUMVECTOR;}
             std::string toCppType() override {
                 if (auto object = _obj.lock())
                 {
@@ -570,6 +639,7 @@ namespace LibraryInterfaceGenerator
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
                 _obj(obj) {};
 
+            Name getTypeName() override {return Name::OBJECTVECTOR;}
             std::string toCppType() override {
                 if (auto object = _obj.lock())
                 {

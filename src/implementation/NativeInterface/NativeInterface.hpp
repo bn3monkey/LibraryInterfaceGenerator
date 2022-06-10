@@ -55,12 +55,15 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
             std::string callStaticMethod(const SymbolMethod& object);
 
+            std::string createReturnValueChanger(const SymbolMethod& object);
+
             // Parameter Block ����
-            std::string createParametersDefinition(const SymbolMethod& parameters);
+            std::string createParametersDefinition(const SymbolMethod& object);
             std::string createParameterDefinition(const SymbolParameter& object);
 
             std::string createInputParameterChanger(const SymbolParameter& object);
             std::string createOutputParameterChanger(const SymbolParameter& object);
+            
 
             // Property Block ����
             std::string createPropertyName(const SymbolProperty& object);
@@ -76,6 +79,7 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
 
             std::string createScope(const SymbolClass& clazz);
+            std::string createScope(const SymbolMethod& method);
 
             std::vector<std::string> createMemoryPoolFunctions();
         };
