@@ -23,9 +23,9 @@ namespace LibraryInterfaceGenerator
                 Enum
             };
 
-            virtual Tag getTag() = 0;
-            virtual std::string getCppName() = 0;
-            virtual std::string getKotlinName() = 0;
+            virtual Tag getTag() const = 0;
+            virtual std::string getCppName() const = 0;
+            virtual std::string getKotlinName() const = 0;
         };
 
         using SymbolObjectTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;

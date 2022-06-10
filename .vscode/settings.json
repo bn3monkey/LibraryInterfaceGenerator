@@ -74,6 +74,10 @@
         "fstream": "cpp",
         "iostream": "cpp",
         "random": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "cstdarg": "cpp",
+        "mutex": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }

@@ -45,9 +45,9 @@ namespace LibraryInterfaceGenerator
                 SymbolEnumTable& enumTable,
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
 
-            Tag getTag() override { return Tag::Class; }
-            std::string getCppName() override;
-            std::string getKotlinName() override;
+            Tag getTag() const override { return Tag::Class; }
+            std::string getCppName() const override;
+            std::string getKotlinName() const override;
 
             Result change(SymbolObjectTable& objectTable);
         private:

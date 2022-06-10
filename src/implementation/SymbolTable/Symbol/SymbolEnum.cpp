@@ -55,7 +55,7 @@ LibraryInterfaceGenerator::Implementation::SymbolEnum::SymbolEnum(
 
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName()
+std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName() const
 {
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)
@@ -72,7 +72,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName()
 	return value;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName()
+std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName() const
 {
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)

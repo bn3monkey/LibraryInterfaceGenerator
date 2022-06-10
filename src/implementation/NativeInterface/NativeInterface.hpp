@@ -38,7 +38,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::string> createClassDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
 
-            // Method Block »ý¼º
+            // Method Block ï¿½ï¿½ï¿½ï¿½
             std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
             std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object);
             std::string allocate(const SymbolClass& clazz, const SymbolMethod& object);
@@ -55,22 +55,29 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
             std::string callStaticMethod(const SymbolMethod& object);
 
-            // Parameter Block »ý¼º
+            // Parameter Block ï¿½ï¿½ï¿½ï¿½
             std::string createParametersDefinition(const SymbolMethod& parameters);
             std::string createParameterDefinition(const SymbolParameter& object);
 
             std::string createInputParameterChanger(const SymbolParameter& object);
             std::string createOutputParameterChanger(const SymbolParameter& object);
 
-            // Property Block »ý¼º
+            // Property Block ï¿½ï¿½ï¿½ï¿½
             std::string createPropertyName(const SymbolProperty& object);
+            
             std::string createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
             std::string createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
-            std::string callPropertySetter(const std::string& propertyName, const SymbolProperty& object);
-            std::string callPropertyGetter(const std::string& propertyName, const SymbolProperty& object);
-
             std::vector<std::string> createPropertyDeclaration(const SymbolProperty& object);
+
+            std::string createPropertySetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            std::string createPropertyGetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            std::vector<std::string> callPropertySetter(const SymbolClass& clazz, const SymbolProperty& object);
+            std::vector<std::string> callPropertyGetter(const SymbolClass& clazz, const SymbolProperty& object);
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
+
+            std::string createScope(const SymbolClass& clazz);
+
+            std::vector<std::string> createMemoryPoolFunctions();
         };
     }
 }

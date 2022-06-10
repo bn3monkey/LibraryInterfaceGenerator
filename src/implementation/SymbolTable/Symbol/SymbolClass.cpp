@@ -190,7 +190,7 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName()
+std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName() const
 {
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)
@@ -207,7 +207,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName()
 	return value;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinName()
+std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinName() const
 {
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)

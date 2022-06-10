@@ -31,9 +31,9 @@ namespace LibraryInterfaceGenerator
                 std::vector<std::string>& object_paths
                 );
 
-            Tag getTag() override { return Tag::Enum; }
-            std::string getCppName() override;
-            std::string getKotlinName() override;
+            Tag getTag() const override { return Tag::Enum; }
+            std::string getCppName() const override;
+            std::string getKotlinName() const override;
         };
 
     }
