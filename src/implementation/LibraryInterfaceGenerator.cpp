@@ -2,6 +2,7 @@
 #include "SymbolTable/SymbolTable.hpp"
 #include "NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
 #include "NativeSourceDirectory/NativeSourceDirectory.hpp"
+#include "NativeInterface/NativeInterface.hpp"
 #include "FileSystem/FileSystem.hpp"
 
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(const std::string& root_dir_path)
@@ -42,6 +43,13 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 
 	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, root_dir_path };
 	auto result = nativeSourceDirectory.make();
+	if (!result)
+	{
+		return Error(Error::Code::FAIL, result.toString());
+	}
+
+	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, symbolTable, root_dir_path };
+	result = nativeInterface.make();
 	if (!result)
 	{
 		return Error(Error::Code::FAIL, result.toString());

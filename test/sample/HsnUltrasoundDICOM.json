@@ -7,7 +7,7 @@
     "childs" : [
         {
             "order" : "module",
-            "name" : "HsnUltrasoundDICOM",
+            "name" : "Global",
             "description" : "Global Method of HsnUltrasoundDICOM",
             "childs" : [
                 {

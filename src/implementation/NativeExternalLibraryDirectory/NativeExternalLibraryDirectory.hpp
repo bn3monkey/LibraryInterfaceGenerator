@@ -33,6 +33,7 @@ namespace LibraryInterfaceGenerator
                 return is_created[(size_t)tool];
             }
 
+            std::string getRelativeHeaderPath(ExternalTool tool) const;
             std::string getRelativeHeaderPath(ExternalTool tool, const SymbolModule& modull) const;
             std::string getRelativeHeaderPath(ExternalTool tool, const SymbolEnum& enumm) const;
             std::string getRelativeHeaderPath(ExternalTool tool, const SymbolClass& clazz) const;

@@ -84,6 +84,15 @@ LibraryInterfaceGenerator::Implementation::DefineNamespace::DefineNamespace(std:
 	}
 }
 
+LibraryInterfaceGenerator::Implementation::DefineNamespace::DefineNamespace(std::stringstream&ss, const std::string& name, std::string& indent)
+:	_ss(ss), _indent(indent)
+{	
+	_depth += 1;
+	_ss << _indent << "namespace " << name << "\n";
+	_ss << _indent << "{\n";
+	_indent += new_indent;
+}	
+
 LibraryInterfaceGenerator::Implementation::DefineNamespace::~DefineNamespace()
 {
 	while(_depth--)
@@ -92,6 +101,12 @@ LibraryInterfaceGenerator::Implementation::DefineNamespace::~DefineNamespace()
 		_ss << _indent << "}\n";
 	}
 }
+
+void LibraryInterfaceGenerator::Implementation::DefineNamespace::addLine(const std::string& line)
+{
+	_ss << _indent << line << "\n";
+}
+
 
 LibraryInterfaceGenerator::Implementation::DefineObject::DefineObject(std::stringstream& ss, const std::string& object, std::string& indent)
 	: _ss(ss), _indent(indent)

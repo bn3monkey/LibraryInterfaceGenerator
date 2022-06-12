@@ -43,6 +43,10 @@ namespace LibraryInterfaceGenerator
        {
        public:
            explicit DefineNamespace(std::stringstream& ss, const std::vector<std::string>& modules, std::string& indent);
+           explicit DefineNamespace(std::stringstream&ss, const std::string& name, std::string& indent);
+
+            void addLine(const std::string& line);
+
            virtual ~DefineNamespace();
        private:
            std::stringstream& _ss;

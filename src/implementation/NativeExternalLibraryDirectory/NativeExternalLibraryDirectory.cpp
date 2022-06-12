@@ -82,6 +82,24 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	return Result();
 }
 
+std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::getRelativeHeaderPath(ExternalTool tool) const
+{
+	std::string path;
+	path += "../";
+	path += DirectoryName;
+	path += "/";
+	switch (tool)
+	{
+	case ExternalTool::Log:
+		path += "Log/Log.hpp";
+		break;
+	case ExternalTool::MemoryPool:
+		path += "MemoryPool/MemoryPool.hpp";
+		break;
+	}
+	return path;
+}
+
 std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::getRelativeHeaderPath(ExternalTool tool, const SymbolModule& modull) const
 {
 	std::string path;

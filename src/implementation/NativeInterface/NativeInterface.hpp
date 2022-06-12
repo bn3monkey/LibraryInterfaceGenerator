@@ -1,13 +1,17 @@
-#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_NATIVESOURCEDIRECTORY__)
-#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_NATIVESOURCEDIRECTORY__
+#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_NATIVEINTERFACE__)
+#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_NATIVEINTERFACE__
 
 #include <string>
+#include <algorithm>
 
 #include "../FileSystem/FileSystem.hpp"
 #include "../Result/Result.hpp"
 #include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
+#include "../NativeSourceStream/NativeSourceStream.hpp"
+#include "../NativeSourceDirectory/NativeSourceDirectory.hpp";
+#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp";
 #include "../Environment.hpp"
 
 namespace LibraryInterfaceGenerator
@@ -17,7 +21,7 @@ namespace LibraryInterfaceGenerator
         class NativeInterface
         {
         public:
-            explicit NativeInterface(Environment environment, const SymbolTable& symbolTable, std::string root_dir_path = ".");
+            explicit NativeInterface(Environment environment, const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path = ".");
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
@@ -26,22 +30,31 @@ namespace LibraryInterfaceGenerator
             Result make();
 
         private:
+            const NativeExternalLibraryDirectory& _libDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
             std::string _interface_dir_path;
+            std::string _include_dir_path;
+
+            std::string export_macro;
+            std::string api_macro;
+            std::string root_namespace;
 
             Result createInterfaceFile(const SymbolPackage& symbolObject, std::string& parent_include_path);
             Result createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content);
             
-            void wrapPackageScope(const SymbolPackage& symbolObject, std::stringstream& ss);
-            void wrapModuleScope(const SymbolModule& symbolObject, std::stringstream& ss, std::string& indent);
+            void createPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss);
+            void createModuleDeclaration(const SymbolModule& symbolObject, std::stringstream& ss, std::string& indent);
+            void createClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string& indent);
 
-            std::vector<std::string> createClassDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            Result createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss);
+            void createModuleDefinition(const SymbolModule& mod, std::stringstream& ss);
+            void createClassDefinition(const SymbolClass& clazz, std::stringstream& ss);
 
             // Method Block ����
-            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string allocate(const SymbolClass& clazz, const SymbolMethod& object);
+            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor);
+            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& constructor);
+            std::string allocate(const SymbolClass& clazz, const SymbolMethod& constructor);
 
             std::string createDestructorDeclaration(const SymbolClass& clazz);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
@@ -49,20 +62,19 @@ namespace LibraryInterfaceGenerator
 
             std::string createClassMethodDeclaration(const SymbolMethod& object);
             std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object);
+            std::string callClassMethod(const SymbolMethod& object);
 
             std::string createStaticMethodDeclaration(const SymbolMethod& object);
             std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
             std::string callStaticMethod(const SymbolMethod& object);
 
-            std::string createReturnValueChanger(const SymbolMethod& object);
-
             // Parameter Block ����
             std::string createParametersDefinition(const SymbolMethod& object);
             std::string createParameterDefinition(const SymbolParameter& object);
 
-            std::string createInputParameterChanger(const SymbolParameter& object);
-            std::string createOutputParameterChanger(const SymbolParameter& object);
+            std::vector<std::string> createReturnValueChanger(const SymbolMethod& object);
+            std::vector<std::string> createInputParameterChanger(const SymbolParameter& object);
+            std::vector<std::string> createOutputParameterChanger(const SymbolParameter& object);
             
 
             // Property Block ����
@@ -77,6 +89,9 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> callPropertySetter(const SymbolClass& clazz, const SymbolProperty& object);
             std::vector<std::string> callPropertyGetter(const SymbolClass& clazz, const SymbolProperty& object);
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
+
+            std::vector<std::string> createInputPropertyChanger(const SymbolProperty& object);
+            std::vector<std::string> createOutputPropertyChanger(const SymbolProperty& object);
 
             std::string createScope(const SymbolClass& clazz);
             std::string createScope(const SymbolMethod& method);

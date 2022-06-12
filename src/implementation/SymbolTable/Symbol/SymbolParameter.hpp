@@ -17,7 +17,7 @@ namespace LibraryInterfaceGenerator
         class SymbolParameter : public HasResult, public HasSymbolType
         {
         public:
-            enum IO
+            enum class IO
             {
                 IN,
                 OUT,
