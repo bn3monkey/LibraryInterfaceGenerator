@@ -258,6 +258,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toCppInterfaceInnerType() override { return "void*"; }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };

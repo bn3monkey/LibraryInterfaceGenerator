@@ -513,7 +513,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 			{
 				ret.push_back(indent + line);
 			}
-			ret.push_back("    return __ret");
+			ret.push_back("    return __ret;");
 		}
 	}
 	ret.push_back("}");
@@ -609,7 +609,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 			{
 				ret.push_back(indent + line);
 			}
-			ret.push_back("    return __ret");
+			ret.push_back("    return __ret;");
 		}
 	}
 	ret.push_back("}");
@@ -750,7 +750,10 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		ret.push_back("}");
 		break;
 	default:
-		ret.push_back("auto __ret =  __temp_ret;");
+		if (object.type->isPrimitive())
+			ret.push_back("auto __ret = __temp_ret;");
+		else
+			ret.push_back("auto& __ret =  __temp_ret;");
 		break;
 	}
 	return ret;
@@ -850,7 +853,12 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		break;
 	default:
 		{
-			std::string line = "auto i_";
+			std::string line = "auto";
+			if (!object.type->isPrimitive())
+			{
+				line += "&";
+			}
+			line += " i_";
 			line += object.name;
 			line += " = ";
 			line += object.name;
@@ -969,10 +977,11 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	setter += " void set";
     setter += propertyName;
     setter += "(void* handle, ";
-    setter += object.type->toCppInterfaceType();
+	std::string type = object.type->toCppInterfaceType();
+	setter += type;
     if (!object.type->isPrimitive())
 	{
-		if(setter != "void*")
+		if(type != "void*")
         	setter += "&";
 	}
     setter += " value);";
@@ -984,10 +993,11 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	std::string getter{ "extern " };
 	getter += api_macro;
 	getter += " ";
-	getter += object.type->toCppInterfaceType();
+	std::string type = object.type->toCppInterfaceType();
+	getter += type;
     if (!object.type->isPrimitive())
 	{
-		if(getter != "void*")
+		if(type != "void*")
         	getter += "&";
 	}
     getter += " get";
@@ -1019,10 +1029,11 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	setter += "set";
     setter += propertyName;
     setter += "(void* handle, ";
-    setter += object.type->toCppInterfaceType();
+	std::string type = object.type->toCppInterfaceType();
+	setter += type;
     if (!object.type->isPrimitive())
 	{
-		if(setter != "void*")
+		if(type != "void*")
         	setter += "&";
 	}
     setter += " value)";
@@ -1031,10 +1042,11 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
 {
-	std::string getter = object.type->toCppInterfaceType();
-    if (!object.type->isPrimitive())
+	std::string type = object.type->toCppInterfaceType();
+	std::string getter = type;
+	if (!object.type->isPrimitive())
 	{
-		if(getter != "void*")
+		if(type != "void*")
         	getter += "&";
 	}
     getter += " ";
@@ -1059,7 +1071,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 	{
 		std::string line = "ptr->set";
 		line += propertyName;
-		line += "(value);";
+		line += "(c_value);";
 		ret.push_back(line);
 	}
 
@@ -1078,15 +1090,15 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		ret.push_back(line);
 	}
 	{
-		std::string line = "auto __temp_ret = ptr->get";
+		std::string line = "auto";
+		if (!object.type->isPrimitive())
+			line += "&";
+		line += " __temp_ret = ptr->get";
 		line += propertyName;
 		line += "();";
 		ret.push_back(line);
 	}
-	
-	{
-		ret.push_back("return __ret;");
-	}
+
 	return ret;
 }
 
@@ -1103,12 +1115,23 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
     ret.push_back(getter);
     ret.push_back("{");
 
+	std::string indent = "    ";
+	
+
 	auto contents = callPropertyGetter(clazz, object);
 	for (auto& content : contents)
 	{
-		std::string line = "    ";
-		line += content;
-		ret.push_back(line);
+		ret.push_back(indent + content);
+	}
+	{
+		auto lines = createOutputPropertyChanger(object);
+		for (auto& line : lines)
+		{
+			ret.push_back(indent + line);
+		}
+	}
+	{
+		ret.push_back(indent + "return __ret;");
 	}
     ret.push_back("}");
 
@@ -1117,14 +1140,20 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
         std::string setter = createPropertySetterDeclaration(scope, propertyName, object);
         ret.push_back(setter);
         ret.push_back("{");
-
+		{
+			auto lines = createInputPropertyChanger(object);
+			for (auto& line : lines)
+			{
+				ret.push_back(indent + line);
+			}
+		}
 		auto contents = callPropertySetter(clazz, object);
 		for (auto& content : contents)
 		{
-			std::string line = "    ";
-			line += content;
-			ret.push_back(line);
+			ret.push_back(indent + content);
 		}
+
+		
         ret.push_back("}");
     }
 
@@ -1135,105 +1164,83 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(const SymbolProperty& object)
 {
 	std::vector<std::string> ret;
-
-	switch (object.type->getTypeName())
+		
+	switch(object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-	{
-		std::string line;
-		line = "auto i_";
-		line += object.name;
-		line += " = ";
-		line += "static_cast<";
-		line += object.type->toCppType();
-		line += ">(";
-		line += object.name;
-		line += ");";
-		ret.push_back(line);
-	}
-	break;
+		{
+			std::string line;
+			line += "auto c_value = static_cast<";
+			line += object.type->toCppType();
+			line += ">(value);";
+			ret.push_back(line);
+		}
+		break;
 	case SymbolType::Name::OBJECT:
-	{
-		std::string line;
-		line = "auto i_";
-		line += object.name;
-		line += " = ";
-		line += "getReference<";
-		line += object.type->toCppInnerType();
-		line += ">((void *)";
-		line += object.name;
-		line += ");";
-		ret.push_back(line);
-	}
-	break;
+		{
+			std::string line;
+			line = "auto c_value = getReference<";
+			line += object.type->toCppInnerType();
+			line += ">((void *)value);";
+			ret.push_back(line);
+		}
+		break;
 	case SymbolType::Name::ENUMARRAY:
 	case SymbolType::Name::ENUMVECTOR:
-	{
-		std::string line{ "auto i_" };
-		line += object.name;
-		line += " = ";
-		line += object.type->toCppType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : ";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line;
-		line = "	i_";
-		line += object.name;
-		line += ".push_back(static_cast<";
-		line += object.type->toCppInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-	ret.push_back("}");
-	break;
+		{
+			std::string line{ "auto c_value = " };
+			line += object.type->toCppType();
+			line += "(); ";
+			ret.push_back(line);
+		}
+		{
+			std::string line;
+			line += "for (auto& __temp : ";
+			line += object.name;
+			line += ")";
+			ret.push_back(line);
+		}
+		ret.push_back("{");
+		{
+			std::string line;
+			line += "    c_value.push_back(static_cast<";
+			line += object.type->toCppInnerType();
+			line += ">(__temp));";
+			ret.push_back(line);
+		}
+		ret.push_back("}");
+		break;
 	case SymbolType::Name::OBJECTARRAY:
 	case SymbolType::Name::OBJECTVECTOR:
-	{
-		std::string line{ "auto i_" };
-		line += object.name;
-		line += " = ";
-		line += object.type->toCppType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : ";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line;
-		line = "	i_";
-		line += object.name;
-		line += ".push_back(getReference<";
-		line += object.type->toCppInnerType();
-		line += ">((void *)__temp));";
-		ret.push_back(line);
-	}
-	ret.push_back("}");
-	break;
+		{
+			std::string line{ "auto c_value = " };
+			line += object.type->toCppType();
+			line += "(); ";
+			ret.push_back(line);
+		}
+		{
+			std::string line;
+			line += "for (auto& __temp : ";
+			line += object.name;
+			line += ")";
+			ret.push_back(line);
+		}
+		ret.push_back("{");
+		{
+			std::string line;
+			line = "	c_value.push_back(getReference<";
+			line += object.type->toCppInnerType();
+			line += ">((void *)__temp));";
+			ret.push_back(line);
+		}
+		ret.push_back("}");
+		break;
 	default:
-	{
-		std::string line = "auto i_";
-		line += object.name;
-		line += " = ";
-		line += object.name;
-		line += ";";
-		ret.push_back(line);
-	}
-	break;
+		{
+			std::string line = "auto& c_value = value;";
+			ret.push_back(line);
+		}
+		break;	
 	}
 	return ret;
 }
@@ -1241,89 +1248,83 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(const SymbolProperty& object)
 {
 	std::vector<std::string> ret;
-
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
 	{
 		std::string line;
-		line += object.name;
-		line += " = ";
-		line += "static_cast<";
+		line += "auto __ret = static_cast<";
 		line += object.type->toCppInterfaceType();
-		line += ">(i_";
-		line += object.name;
-		line += ")";
+		line += ">(__temp_ret);";
 		ret.push_back(line);
 	}
-	break;
+		break;
 	case SymbolType::Name::OBJECT:
 	{
 		std::string line;
-		line += object.name;
-		line += " = ";
-		line += "(";
-		line += object.type->toCppInterfaceType();
-		line += ")cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(i_";
-		line += object.name;
+		line += "auto __ret = (";
+		line += object.type->toCppInterfaceInnerType();
 		line += ")";
+		line += "cloneReference<";
+		line += object.type->toCppInnerType();
+		line += ">(__temp_ret);";
 		ret.push_back(line);
 	}
-	break;
+		break;
 	case SymbolType::Name::ENUMARRAY:
 	case SymbolType::Name::ENUMVECTOR:
-
 	{
-		std::string line;
-		line += "for (auto& __temp : i_";
-		line += object.name;
-		line += ")";
+		std::string line{ "auto __ret = " };
+		line += object.type->toCppInterfaceType();
+		line += "(); ";
 		ret.push_back(line);
 	}
-	ret.push_back("{");
 	{
 		std::string line;
-		line += object.name;
-		line += ".push_back(static_cast<";
+		line += "for (auto& __temp : __temp_ret)";
+		ret.push_back(line);
+	}
+		ret.push_back("{");
+	{ 
+		std::string line;
+		line = "    __ret.push_back(static_cast<";
 		line += object.type->toCppInterfaceInnerType();
 		line += ">(__temp));";
 		ret.push_back(line);
 	}
-	ret.push_back("}");
-	break;
+		ret.push_back("}");
+		break;
 	case SymbolType::Name::OBJECTARRAY:
 	case SymbolType::Name::OBJECTVECTOR:
 	{
+		std::string line{ "auto __ret = " };
+		line += object.type->toCppInterfaceType();
+		line += "(); ";
+		ret.push_back(line);
+	}
+	{
 		std::string line;
-		line += "for (auto& __temp : i_";
-		line += object.name;
-		line += ")";
+		line += "for (auto& __temp : __temp_ret)";
 		ret.push_back(line);
 	}
 	ret.push_back("{");
 	{
 		std::string line;
-		line += object.name;
-		line += ".push_back((";
+		line += "    __ret.push_back((";
 		line += object.type->toCppInterfaceInnerType();
 		line += ")cloneReference<";
 		line += object.type->toCppInnerType();
 		line += ">(__temp));";
 		ret.push_back(line);
 	}
-	ret.push_back("}");
-	break;
+		ret.push_back("}");
+		break;
 	default:
-	{
-		std::string line = "auto i_";
-		line += object.name;
-		line += " = ";
-		line += object.name;
-		ret.push_back(line);
-	}
-	break;
+		if (object.type->isPrimitive())
+			ret.push_back("auto __ret = __temp_ret;");
+		else
+			ret.push_back("auto& __ret =  __temp_ret;");
+		break;
 	}
 	return ret;
 }
@@ -1371,6 +1372,15 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createSc
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createMemoryPoolFunctions()
 {
 	std::vector<std::string> ret;
+	ret.push_back("template<class T, class ...Args>");
+	ret.push_back("void* createReference(Args... args)");
+	ret.push_back("{");
+	ret.push_back("    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();");
+	ret.push_back("    ret = std::shared_ptr<T>(MemoryPool::allocate<T>(args), [](T* p) {");
+	ret.push_back("        MemoryPool::deallocate<T>(p);");
+	ret.push_back("    });");
+	ret.push_back("    return ret;");
+	ret.push_back("}");
 	ret.push_back("template<class T>");
 	ret.push_back("void* createReference()");
 	ret.push_back("{");
