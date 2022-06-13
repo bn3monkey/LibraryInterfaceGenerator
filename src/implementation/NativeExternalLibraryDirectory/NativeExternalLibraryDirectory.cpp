@@ -11,13 +11,15 @@ static char* delimeter = "\\";
 static char* delimeter = "/";
 #endif
 
-LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::NativeExternalLibraryDirectory(std::string root_dir_path)
+LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::NativeExternalLibraryDirectory(
+	const char* external_library_dir_name = DEFAULT_DIRECTORY_NAME,
+    std::string root_dir_path = ".") : _lib_dir_name(external_library_dir_name)
 {
 	for (auto& check : is_created)
 		check = false;
 	_lib_dir_path = root_dir_path;
 	_lib_dir_path += delimeter;
-	_lib_dir_path += DirectoryName;
+	_lib_dir_path += _lib_dir_name;
 }
 
 static LibraryInterfaceGenerator::Implementation::Result createExternalToolInternal
@@ -86,7 +88,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 {
 	std::string path;
 	path += "../";
-	path += DirectoryName;
+	path += _lib_dir_name;
 	path += "/";
 	switch (tool)
 	{
@@ -107,7 +109,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	{
 		path += "../";
 	}
-	path += DirectoryName;
+	path += _lib_dir_name;
 	path += "/";
 	switch (tool)
 	{
@@ -128,7 +130,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	{
 		path += "../";
 	}
-	path += DirectoryName;
+	path += _lib_dir_name;
 	path += "/";
 	switch (tool)
 	{
@@ -149,7 +151,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	{
 		path += "../";
 	}
-	path += DirectoryName;
+	path += _lib_dir_name;
 	path += "/";
 	switch (tool)
 	{

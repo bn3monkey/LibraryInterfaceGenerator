@@ -8,16 +8,19 @@ static char* delimeter = "\\";
 static char* delimeter = "/";
 #endif
 
-LibraryInterfaceGenerator::Implementation::NativeInterface::NativeInterface(Environment environment, const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path)
+LibraryInterfaceGenerator::Implementation::NativeInterface::NativeInterface(
+                Environment environment, 
+                const NativeExternalLibraryDirectory& libDirectory,
+                const NativeSourceDirectory& srcDirectory, 
+                const SymbolTable& symbolTable,
+                const char* interface_dirname, 
+                std::string root_dir_path)
 	: _symbolTable(symbolTable), _libDirectory(libDirectory)
 {
 	_interface_dir_path = root_dir_path;
 	_interface_dir_path += delimeter;
 	_interface_dir_path += "interface";
 
-	_include_dir_path = root_dir_path;
-	_include_dir_path += delimeter;
-	_include_dir_path += "include";
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::make()
@@ -199,7 +202,12 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		DefineInclude defineInclude{ ss, indent };
 		defineInclude.addInternal(symbolObject.name + "Interface.hpp");
 
-		defineInclude.addInternal("../include/" + symbolObject.name + ".hpp");
+		std::string library_header_path = "../";
+		library_header_path += _srcDirectory.getIncludeDirName();
+		library_header_path += "/";
+		library_header_path += symbolObject.name;
+		library_header_path += ".hpp";
+		defineInclude.addInternal(library_header_path);
 		
 		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
 		{

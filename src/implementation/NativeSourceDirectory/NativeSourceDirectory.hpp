@@ -20,19 +20,34 @@ namespace LibraryInterfaceGenerator
         class NativeSourceDirectory
         {
         public:
-            explicit NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path = ".");
+            static constexpr char* DEFAULT_INCLUDE_DIR_NAME = "include";
+            static constexpr char* DEFAULT_SRC_DIR_NAME = "src";
+
+            explicit NativeSourceDirectory(
+                const NativeExternalLibraryDirectory& libDirectory, 
+                const SymbolTable& symbolTable, 
+                const char* include_dir_name = DEFAULT_INCLUDE_DIR_NAME,
+                const char* src_dir_name = DEFAULT_SRC_DIR_NAME,
+                std::string root_dir_path = ".");
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
             }
 
             Result make();
+            inline std::string getIncludeDirPath() const {return _include_dir_path;}
+            inline std::string getIncludeDirName() const {return _include_dir_name;}
+            inline std::string getSourceDirPath() const {return _src_dir_path;}
+            inline std::string getSourceDirName() const {return _src_dir_name;}
 
         private:
             const NativeExternalLibraryDirectory& _libDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
+
+            std::string _include_dir_name;
             std::string _include_dir_path;
+            std::string _src_dir_name;
             std::string _src_dir_path; 
             
             // lib/ external library or source code

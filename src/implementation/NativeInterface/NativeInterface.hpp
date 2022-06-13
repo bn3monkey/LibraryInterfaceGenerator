@@ -21,7 +21,16 @@ namespace LibraryInterfaceGenerator
         class NativeInterface
         {
         public:
-            explicit NativeInterface(Environment environment, const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path = ".");
+            static constexpr char* DEFAULT_DIRECTORY_NAME = "interface";
+
+            explicit NativeInterface(
+                Environment environment, 
+                const NativeExternalLibraryDirectory& libDirectory,
+                const NativeSourceDirectory& srcDirectory, 
+                const SymbolTable& symbolTable,
+                const char* interface_dirname = DEFAULT_DIRECTORY_NAME, 
+                std::string root_dir_path = "."
+                );
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
@@ -29,13 +38,18 @@ namespace LibraryInterfaceGenerator
 
             Result make();
 
+            std::string getInterfaceDirName() const { return _interface_dir_name;}
+            std::string getInterfaceDirPath() const { return _interface_dir_path;}
+
         private:
+            const NativeSourceDirectory& _srcDirectory;
             const NativeExternalLibraryDirectory& _libDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
-            std::string _interface_dir_path;
-            std::string _include_dir_path;
 
+            std::string _interface_dir_name;
+            std::string _interface_dir_path;
+            
             std::string export_macro;
             std::string api_macro;
             std::string root_namespace;

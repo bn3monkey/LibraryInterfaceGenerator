@@ -12,14 +12,19 @@ static char* delimeter = "/";
 #endif
 
 
-NativeSourceDirectory::NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, const SymbolTable& symbolTable, std::string root_dir_path) : _symbolTable(symbolTable), _libDirectory(libDirectory)
+NativeSourceDirectory::NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, 
+                const SymbolTable& symbolTable, 
+                const char* include_dir_name = DEFAULT_INCLUDE_DIR_NAME,
+                const char* src_dir_name = DEFAULT_SRC_DIR_NAME,
+                std::string root_dir_path = ".")
+    : _symbolTable(symbolTable), _libDirectory(libDirectory), _include_dir_name(include_dir_name), _src_dir_name(src_dir_name)
 {
     _include_dir_path = root_dir_path;
     _include_dir_path += delimeter;
-    _include_dir_path += "include";
+    _include_dir_path += _include_dir_name;
     _src_dir_path = root_dir_path;
     _src_dir_path += delimeter;
-    _src_dir_path += "src";
+    _src_dir_path += _src_dir_name;
 
 }
 

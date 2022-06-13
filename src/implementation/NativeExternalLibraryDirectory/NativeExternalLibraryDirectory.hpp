@@ -13,18 +13,24 @@ namespace LibraryInterfaceGenerator
         class NativeExternalLibraryDirectory
         {
         public:
-            static constexpr char* DirectoryName = "lib";
+            static constexpr char* DEFAULT_DIRECTORY_NAME = "lib";
             enum class ExternalTool : size_t
             {
                 Log,
                 MemoryPool,
             };
 
-            explicit NativeExternalLibraryDirectory(std::string root_dir_path = ".");
+            explicit NativeExternalLibraryDirectory(
+                const char* external_library_dir_name = DEFAULT_DIRECTORY_NAME,
+                std::string root_dir_path = "."
+                );
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
             }
+
+            inline std::string getExternalLibraryDirName() const { return _lib_dir_name;}
+            inline std::string getExternalLibraryDirPath() const { return _lib_dir_path;}
 
             Result createLibraryDirectory();
             Result createExternalTool(ExternalTool tool);
@@ -40,6 +46,8 @@ namespace LibraryInterfaceGenerator
 
         private:
             Result _result;
+
+            std::string _lib_dir_name;
             std::string _lib_dir_path;
 
             bool is_created[2] {false, false};
