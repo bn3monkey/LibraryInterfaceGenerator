@@ -75,7 +75,7 @@ namespace LibraryInterfaceGenerator
             std::string createScope(const SymbolClass& clazz);
             std::string createScope(const SymbolMethod& method);
 
-            std::vector<std::string> createChangerFunction();
+            std::string createChangerFunction();
         };
     }
 }

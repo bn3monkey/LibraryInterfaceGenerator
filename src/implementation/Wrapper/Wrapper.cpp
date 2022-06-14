@@ -1,4 +1,5 @@
 #include "Wrapper.hpp"
+#include "Converter.hpp"
 
 LibraryInterfaceGenerator::Implementation::Wrapper::Wrapper(Environment& environment, const NativeInterface& interfaceDirectory, const SymbolTable& symbolTable, std::string root_dir_path)
 {
@@ -151,7 +152,41 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createScope(cons
 	return std::string();
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction()
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction()
 {
-	return std::vector<std::string>();
+
+	// bool : bool <-> jboolean
+	// int8 : int8_t <-> jbyte
+	// int16 : int16_t <-> jshort
+	// int32 : int32_t <-> jint
+	// int64 : int64_t <-> jlong
+	// float : float <-> jfloat
+	// double : double <-> jdouble
+	// string : std::string <-> jstring (�Լ� �ʿ�)
+	// enum : int <-> jint
+	// object : void* <-> jlong
+	// 
+	// array<bool>   : std::vector<bool> <-> jbooleanArray
+	// array<int8>   : std::vector<int8_t> <-> jbyteArray
+	// array<int16>  : std::vector<int16_t> <-> jshortArray
+	// array<int32>  : std::vector<int32_t> <-> jintArray
+	// array<int64>  : std::vector<int64_t> <-> jlongArray
+	// array<float>  : std::vector<float> <-> jfloatArray
+	// array<double> : std::vector<double> <-> jdoubleArray
+	// array<string> : std::vector<std::string> <-> jobjectArray
+	// array<enum>   : std::vector<int> <-> jintArray
+	// array<object> : std::vector<void*> <-> jlongArray
+	// 
+	// vector<bool>   : std::vector<bool> <-> java/util/ArrayList & java/lang/Boolean
+	// vector<int8>   : std::vector<int8_t> <-> java/util/ArrayList & java/lang/Byte
+	// vector<int16>  : std::vector<int16_t> <-> java/util/ArrayList & java/lang/Short
+	// vector<int32>  : std::vector<int32_t> <-> java/util/ArrayList & java/lang/Integer
+	// vector<int64>  : std::vector<int64_t> <-> java/util/ArrayList & java/lang/Long
+	// vector<float>  : std::vector<float> <-> java/util/ArrayList & java/lang/Float
+	// vector<double> : std::vector<double> <-> java/util/ArrayList & java/lang/Double
+	// vector<string> : std::vector<std::string> <-> java/util/ArrayList & java/lang/String
+	// vector<enum>   : std::vector<int> <-> java/util/ArrayList & java/lang/Integer
+	// vector<object> : std::vector<void*> <-> java/util/ArrayList & java/lang/Long 
+
+	return converter;
 }

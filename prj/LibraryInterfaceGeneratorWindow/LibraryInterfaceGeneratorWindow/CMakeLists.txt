@@ -40,6 +40,9 @@ add_executable (LibraryInterfaceGeneratorWindow
 	"LibraryInterfaceGeneratorWindow.cpp" 
 	"LibraryInterfaceGeneratorWindow.h")
 
+target_include_directories(LibraryInterfaceGeneratorWindow PUBLIC "C:/Program Files/Java/jdk-11.0.14/include")
+target_include_directories(LibraryInterfaceGeneratorWindow PUBLIC "C:/Program Files/Java/jdk-11.0.14/include/win32")
+
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD 17)
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD_REQUIRED ON)
 # TODO: 필요한 경우 테스트를 추가하고 대상을 설치합니다.

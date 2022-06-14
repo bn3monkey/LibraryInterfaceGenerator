@@ -164,3 +164,4 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	}
 	return path;
 }
+
