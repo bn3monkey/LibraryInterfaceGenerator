@@ -9,22 +9,22 @@ LibraryInterfaceGenerator::Implementation::Wrapper::~Wrapper()
 {
 }
 
-Result LibraryInterfaceGenerator::Implementation::Wrapper::make()
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::make()
 {
 	return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path)
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path)
 {
 	return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
 {
 	return Result();
 }
 
-Result LibraryInterfaceGenerator::Implementation::Wrapper::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
 {
 	return Result();
 }
