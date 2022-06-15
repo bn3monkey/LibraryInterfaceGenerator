@@ -3,6 +3,7 @@
 #include "NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
 #include "NativeSourceDirectory/NativeSourceDirectory.hpp"
 #include "NativeInterface/NativeInterface.hpp"
+#include "Wrapper/Wrapper.hpp"
 #include "FileSystem/FileSystem.hpp"
 
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(const std::string& root_dir_path)
@@ -36,7 +37,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory nativeExternalLibraryDirectory{ root_dir_path };
+	LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory nativeExternalLibraryDirectory{root_dir_path };
 	nativeExternalLibraryDirectory.createLibraryDirectory();
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log);
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
@@ -48,8 +49,15 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeSourceDirectory, symbolTable, root_dir_path };
 	result = nativeInterface.make();
+	if (!result)
+	{
+		return Error(Error::Code::FAIL, result.toString());
+	}
+
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeInterface, symbolTable, root_dir_path };
+	result = wrapper.make();
 	if (!result)
 	{
 		return Error(Error::Code::FAIL, result.toString());

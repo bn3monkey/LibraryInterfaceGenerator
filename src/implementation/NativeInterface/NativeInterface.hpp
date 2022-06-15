@@ -13,6 +13,7 @@
 #include "../NativeSourceDirectory/NativeSourceDirectory.hpp";
 #include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp";
 #include "../Environment.hpp"
+#include "../Converter/NativerInterfaceConverter.hpp"
 
 namespace LibraryInterfaceGenerator
 {
@@ -28,8 +29,8 @@ namespace LibraryInterfaceGenerator
                 const NativeExternalLibraryDirectory& libDirectory,
                 const NativeSourceDirectory& srcDirectory, 
                 const SymbolTable& symbolTable,
-                const char* interface_dirname = DEFAULT_DIRECTORY_NAME, 
-                std::string root_dir_path = "."
+                std::string root_dir_path = ".",
+                const char* interface_dirname = DEFAULT_DIRECTORY_NAME 
                 );
             inline operator bool() { return !_result; }
             Result toError() {
@@ -40,6 +41,7 @@ namespace LibraryInterfaceGenerator
 
             std::string getInterfaceDirName() const { return _interface_dir_name;}
             std::string getInterfaceDirPath() const { return _interface_dir_path;}
+            std::string getRootNamespace() const { return root_namespace; }
 
         private:
             const NativeSourceDirectory& _srcDirectory;
@@ -86,9 +88,9 @@ namespace LibraryInterfaceGenerator
             std::string createParametersDefinition(const SymbolMethod& object);
             std::string createParameterDefinition(const SymbolParameter& object);
 
-            std::vector<std::string> createReturnValueChanger(const SymbolMethod& object);
-            std::vector<std::string> createInputParameterChanger(const SymbolParameter& object);
-            std::vector<std::string> createOutputParameterChanger(const SymbolParameter& object);
+            std::string createReturnValueChanger(const SymbolMethod& object);
+            std::string createInputParameterChanger(const SymbolParameter& object);
+            std::string createOutputParameterChanger(const SymbolParameter& object);
             
 
             // Property Block ����
@@ -104,13 +106,13 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> callPropertyGetter(const SymbolClass& clazz, const SymbolProperty& object);
             std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
 
-            std::vector<std::string> createInputPropertyChanger(const SymbolProperty& object);
-            std::vector<std::string> createOutputPropertyChanger(const SymbolProperty& object);
+            std::string createInputPropertyChanger(const SymbolProperty& object);
+            std::string createOutputPropertyChanger(const SymbolProperty& object);
 
             std::string createScope(const SymbolClass& clazz);
             std::string createScope(const SymbolMethod& method);
 
-            std::vector<std::string> createMemoryPoolFunctions();
+            std::string createNativeInterfaceConverter();
         };
     }
 }

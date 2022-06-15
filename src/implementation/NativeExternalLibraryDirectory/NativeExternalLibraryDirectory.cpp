@@ -12,8 +12,8 @@ static char* delimeter = "/";
 #endif
 
 LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::NativeExternalLibraryDirectory(
-	const char* external_library_dir_name = DEFAULT_DIRECTORY_NAME,
-    std::string root_dir_path = ".") : _lib_dir_name(external_library_dir_name)
+    std::string root_dir_path,
+	const char* external_library_dir_name) : _lib_dir_name(external_library_dir_name)
 {
 	for (auto& check : is_created)
 		check = false;

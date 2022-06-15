@@ -14,9 +14,9 @@ static char* delimeter = "/";
 
 NativeSourceDirectory::NativeSourceDirectory(const NativeExternalLibraryDirectory& libDirectory, 
                 const SymbolTable& symbolTable, 
-                const char* include_dir_name = DEFAULT_INCLUDE_DIR_NAME,
-                const char* src_dir_name = DEFAULT_SRC_DIR_NAME,
-                std::string root_dir_path = ".")
+                std::string root_dir_path,
+                const char* include_dir_name,
+                const char* src_dir_name)
     : _symbolTable(symbolTable), _libDirectory(libDirectory), _include_dir_name(include_dir_name), _src_dir_name(src_dir_name)
 {
     _include_dir_path = root_dir_path;

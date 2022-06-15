@@ -1,4 +1,7 @@
-const char* converter =
+#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER__)
+#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER__
+
+static constexpr char* kotlinWrapperConverter =
 "inline jstring createWrapperString(JNIEnv* env, const std::string& value)\n"
 "{\n"
 "    return env->NewStringUTF(value.c_str());\n"
@@ -1251,3 +1254,5 @@ const char* converter =
 "    }\n"
 "    return true;\n"
 "}";
+
+#endif

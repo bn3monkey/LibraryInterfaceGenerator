@@ -12,15 +12,22 @@ LibraryInterfaceGenerator::Implementation::NativeInterface::NativeInterface(
                 Environment environment, 
                 const NativeExternalLibraryDirectory& libDirectory,
                 const NativeSourceDirectory& srcDirectory, 
-                const SymbolTable& symbolTable,
-                const char* interface_dirname, 
-                std::string root_dir_path)
-	: _symbolTable(symbolTable), _libDirectory(libDirectory)
+                const SymbolTable& symbolTable, 
+                std::string root_dir_path,
+				const char* interface_dirname)
+	: _symbolTable(symbolTable), _libDirectory(libDirectory), _srcDirectory(srcDirectory)
 {
 	_interface_dir_path = root_dir_path;
 	_interface_dir_path += delimeter;
-	_interface_dir_path += "interface";
+	_interface_dir_path += interface_dirname;
 
+	std::string libraryName = _symbolTable.getPackage().name;
+	std::transform(libraryName.begin(), libraryName.end(), libraryName.begin(), ::toupper);
+
+	export_macro = libraryName + "_EXPORT";
+	api_macro = libraryName + "_API";
+	root_namespace = libraryName;
+	root_namespace += "API";
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::make()
@@ -72,14 +79,6 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
 {
-	std::string libraryName = symbolObject.name;
-	std::transform(libraryName.begin(), libraryName.end(), libraryName.begin(), ::toupper);
-
-	export_macro = libraryName + "_EXPORT";
-	api_macro = libraryName + "_API";
-	root_namespace = libraryName;
-	root_namespace += "API";
-
 	std::stringstream ss {""};
 	createPackageDeclaration(symbolObject, ss);
 	header_content = ss.str();
@@ -219,14 +218,8 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	ss << "using namespace " << root_namespace << ";\n";
 	ss << "\n";
 
-	auto lines = createMemoryPoolFunctions();
-	for (auto& line : lines)
-	{
-		ss << line << "\n";
-	}
-	ss << "\n";
-
-
+	ss <<  createNativeInterfaceConverter();
+	
 	for (auto& mod : symbolObject.modules)
 	{
 		createModuleDefinition(*mod, ss);
@@ -345,22 +338,16 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		std::string indent{ "   " };
 		for (auto& parameter : constructor.parameters)
 		{
-			auto lines = createInputParameterChanger(*parameter);
-			for (auto& line : lines)
-				ret.push_back(indent + line);
+			ret.push_back(indent + createInputParameterChanger(*parameter));
 		}
 		{
-			std::string line = "    ";
-			line += allocate(clazz, constructor);
-			ret.push_back(line);
+			ret.push_back(indent + allocate(clazz, constructor));
 		}
 		for (auto& parameter : constructor.parameters)
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
 			{
-				auto lines = createOutputParameterChanger(*parameter);
-				for (auto& line : lines)
-					ret.push_back(indent + line);
+				ret.push_back(indent + createOutputParameterChanger(*parameter));
 			}
 		}
 		ret.push_back("}");
@@ -494,11 +481,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		}
 		for (auto& parameter : object.parameters)
 		{
-			auto lines = createInputParameterChanger(*parameter);
-			for (auto& line : lines)
-			{
-				ret.push_back(indent + line);
-			}
+			ret.push_back(indent + createInputParameterChanger(*parameter));
 		}
 		{
 			ret.push_back(indent + callClassMethod(object));
@@ -507,21 +490,13 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
 			{
-				auto lines = createOutputParameterChanger(*parameter);
-				for (auto& line : lines)
-				{
-					ret.push_back(indent + line);
-				}
+				ret.push_back(indent + createOutputParameterChanger(*parameter));
 			}
 		}
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
-			auto lines = createReturnValueChanger(object);
-			for (auto& line : lines)
-			{
-				ret.push_back(indent + line);
-			}
-			ret.push_back("    return __ret;");
+			ret.push_back(indent + createReturnValueChanger(object));
+			ret.push_back(indent + "return __ret;");
 		}
 	}
 	ret.push_back("}");
@@ -590,11 +565,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		for (auto& parameter : object.parameters)
 		{
 			
-			auto lines = createInputParameterChanger(*parameter);
-			for (auto& line : lines)
-			{
-				ret.push_back(indent + line);
-			}
+			ret.push_back(indent + createInputParameterChanger(*parameter));
 		}
 		{
 			ret.push_back(indent + callStaticMethod(object));
@@ -603,21 +574,13 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
 			{
-				auto lines = createOutputParameterChanger(*parameter);
-				for (auto& line : lines)
-				{
-					ret.push_back(indent + line);
-				}
+				ret.push_back(indent + createOutputParameterChanger(*parameter));
 			}
 		}
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
-			auto lines = createReturnValueChanger(object);
-			for (auto& line : lines)
-			{
-				ret.push_back(indent + line);
-			}
-			ret.push_back("    return __ret;");
+			ret.push_back(indent + createReturnValueChanger(object));
+			ret.push_back(indent + "return __ret;");
 		}
 	}
 	ret.push_back("}");
@@ -683,287 +646,167 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPa
     return content;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(const SymbolMethod& object)
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(const SymbolMethod& object)
 {
-	std::vector<std::string> ret;
+	std::string ret;
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-	{
-		std::string line;
-		line += "auto __ret = static_cast<";
-		line += object.type->toCppInterfaceType();
-		line += ">(__temp_ret);";
-		ret.push_back(line);
-	}
+		ret = "auto __ret = createInterfaceEnum(__temp_ret);";
 		break;
 	case SymbolType::Name::OBJECT:
-	{
-		std::string line;
-		line += "auto __ret = (";
-		line += object.type->toCppInterfaceInnerType();
-		line += ")";
-		line += "cloneReference<";
-		line += object.type->toCppType();
-		line += ">(__temp_ret);";
-		ret.push_back(line);
-	}
+		ret = "auto __ret = createInterfaceObject(__temp_ret);";
 		break;
 	case SymbolType::Name::ENUMARRAY:
+		ret = "auto __ret = createInterfaceEnumArray(__temp_ret);";
+		break;
 	case SymbolType::Name::ENUMVECTOR:
-	{
-		std::string line{ "auto __ret = " };
-		line += object.type->toCppInterfaceType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : __temp_ret)";
-		ret.push_back(line);
-	}
-		ret.push_back("{");
-	{ 
-		std::string line;
-		line = "    __ret.push_back(static_cast<";
-		line += object.type->toCppInterfaceInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-		ret.push_back("}");
+		ret = "auto __ret = createInterfaceEnumVector(__temp_ret);";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
+		ret = "auto __ret = createInterfaceObjectArray(__temp_ret);";
+		break;
 	case SymbolType::Name::OBJECTVECTOR:
-	{
-		std::string line{ "auto __ret = " };
-		line += object.type->toCppInterfaceType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : __temp_ret)";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line;
-		line += "    __ret.push_back((";
-		line += object.type->toCppInterfaceInnerType();
-		line += ")cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-		ret.push_back("}");
+		ret = "auto _ret = createInterfaceObjectVector(__temp_ret);";
 		break;
 	default:
 		if (object.type->isPrimitive())
-			ret.push_back("auto __ret = __temp_ret;");
+			ret = "auto __ret = __temp_ret;";
 		else
-			ret.push_back("auto& __ret =  __temp_ret;");
+			ret = "auto& __ret =  __temp_ret;";
 		break;
 	}
 	return ret;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(const SymbolParameter& object)
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(const SymbolParameter& object)
 {
-	std::vector<std::string> ret;
-		
-	switch(object.type->getTypeName())
-	{
-	case SymbolType::Name::ENUM:
-		{
-			std::string line;
-			line = "auto i_";
-			line += object.name;
-			line += " = ";
-			line += "static_cast<";
-			line += object.type->toCppType();
-			line += ">(";
-			line += object.name;
-			line += ");";
-			ret.push_back(line);
-		}
-		break;
-	case SymbolType::Name::OBJECT:
-		{
-			std::string line;
-			line = "auto i_";
-			line += object.name;
-			line += " = ";
-			line += "getReference<";
-			line += object.type->toCppInnerType();
-			line += ">((void *)";
-			line += object.name;
-			line += ");";
-			ret.push_back(line);
-		}
-		break;
-	case SymbolType::Name::ENUMARRAY:
-	case SymbolType::Name::ENUMVECTOR:
-		{
-			std::string line{ "auto i_" };
-			line += object.name;
-			line += " = ";
-			line += object.type->toCppType();
-			line += "(); ";
-			ret.push_back(line);
-		}
-		{
-			std::string line;
-			line += "for (auto& __temp : ";
-			line += object.name;
-			line += ")";
-			ret.push_back(line);
-		}
-		ret.push_back("{");
-		{
-			std::string line;
-			line = "	i_";
-			line += object.name;
-			line += ".push_back(static_cast<";
-			line += object.type->toCppInnerType();
-			line += ">(__temp));";
-			ret.push_back(line);
-		}
-		ret.push_back("}");
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-	case SymbolType::Name::OBJECTVECTOR:
-		{
-			std::string line{ "auto i_" };
-			line += object.name;
-			line += " = ";
-			line += object.type->toCppType();
-			line += "(); ";
-			ret.push_back(line);
-		}
-		{
-			std::string line;
-			line += "for (auto& __temp : ";
-			line += object.name;
-			line += ")";
-			ret.push_back(line);
-		}
-		ret.push_back("{");
-		{
-			std::string line;
-			line = "	i_";
-			line += object.name;
-			line += ".push_back(getReference<";
-			line += object.type->toCppInnerType();
-			line += ">((void *)__temp));";
-			ret.push_back(line);
-		}
-		ret.push_back("}");
-		break;
-	default:
-		{
-			std::string line = "auto";
-			if (!object.type->isPrimitive())
-			{
-				line += "&";
-			}
-			line += " i_";
-			line += object.name;
-			line += " = ";
-			line += object.name;
-			line += ";";
-			ret.push_back(line);
-		}
-		break;	
-	}
-	return ret;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(const SymbolParameter& object)
-{
-	std::vector<std::string> ret;
-
+	std::string ret;
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-	{
-		std::string line;
-		line += object.name;
-		line += " = ";
-		line += "static_cast<";
-		line += object.type->toCppInterfaceType();
-		line += ">(i_";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	break;
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeEnum<";
+		ret += object.type->toCppType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	case SymbolType::Name::OBJECT:
-	{
-		std::string line;
-		line += object.name;
-		line += " = ";
-		line += "(";
-		line += object.type->toCppInterfaceType();
-		line += ")cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(i_";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	break;
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeObject<";
+		ret += object.type->toCppInnerType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	case SymbolType::Name::ENUMARRAY:
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeEnumArray<";
+		ret += object.type->toCppType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	case SymbolType::Name::ENUMVECTOR:
-	{
-		std::string line;
-		line += "for (auto& __temp : i_";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line;
-		line += object.name;
-		line += ".push_back(static_cast<";
-		line += object.type->toCppInterfaceInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-	ret.push_back("}");
-	break;
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeEnumVector<";
+		ret += object.type->toCppType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	case SymbolType::Name::OBJECTARRAY:
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeObjectArray<";
+		ret += object.type->toCppInnerType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	case SymbolType::Name::OBJECTVECTOR:
-	{
-		std::string line;
-		line += "for (auto& __temp : i_";
-		line += object.name;
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line{ "    " };
-		line += object.name;
-		line += ".push_back((";
-		line += object.type->toCppInterfaceInnerType();
-		line += ")cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-	ret.push_back("}");
-	break;
+		ret = "auto i_";
+		ret += object.name;
+		ret += " = createNativeObjectVector<";
+		ret += object.type->toCppInnerType();
+		ret += ">(";
+		ret += object.name;
+		ret += "); ";
+		break;
 	default:
-	{
-		std::string line;
-		line += object.name;
-		line += " = i_";
-		line += object.name;
-		line += ";";
-		ret.push_back(line);
+		if (object.type->isPrimitive())
+		{
+			ret = "auto i_";
+			ret += object.name;
+			ret += " = ";
+			ret += object.name;
+			ret += ";";
+		}
+		else
+		{
+			ret = "auto& i_";
+			ret += object.name;
+			ret += " = ";
+			ret += object.name;
+			ret += ";";
+		}
+		break;
 	}
-	break;
+	return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(const SymbolParameter& object)
+{
+	std::string ret;
+	switch (object.type->getTypeName())
+	{
+	case SymbolType::Name::ENUM:
+		ret += object.name;
+		ret += " = createInterfaceEnum(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	case SymbolType::Name::OBJECT:
+		ret += object.name;
+		ret += " = createInterfaceObject(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	case SymbolType::Name::ENUMARRAY:
+		ret += object.name;
+		ret += " = createInterfaceEnumArray(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	case SymbolType::Name::ENUMVECTOR:
+		ret += object.name;
+		ret += " = createInterfaceEnumVector(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	case SymbolType::Name::OBJECTARRAY:
+		ret += object.name;
+		ret += " = createInterfaceObjectArray(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	case SymbolType::Name::OBJECTVECTOR:
+		ret += object.name;
+		ret += " = createInterfaceObjectVector(i_";
+		ret += object.name;
+		ret += "); ";
+		break;
+	default:
+		ret = object.name;
+		ret += " = i_";
+		ret += object.name;
+		ret += ";";
+		break;
 	}
 	return ret;
 }
@@ -1005,8 +848,8 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	getter += type;
     if (!object.type->isPrimitive())
 	{
-		if(type != "void*")
-        	getter += "&";
+		if (type == "std::string")
+			getter += "&";
 	}
     getter += " get";
     getter += propertyName;
@@ -1054,7 +897,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	std::string getter = type;
 	if (!object.type->isPrimitive())
 	{
-		if(type != "void*")
+		if(type == "std::string")
         	getter += "&";
 	}
     getter += " ";
@@ -1079,7 +922,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 	{
 		std::string line = "ptr->set";
 		line += propertyName;
-		line += "(c_value);";
+		line += "(i_value);";
 		ret.push_back(line);
 	}
 
@@ -1132,11 +975,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 		ret.push_back(indent + content);
 	}
 	{
-		auto lines = createOutputPropertyChanger(object);
-		for (auto& line : lines)
-		{
-			ret.push_back(indent + line);
-		}
+		ret.push_back(indent + createOutputPropertyChanger(object));
 	}
 	{
 		ret.push_back(indent + "return __ret;");
@@ -1148,13 +987,8 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
         std::string setter = createPropertySetterDeclaration(scope, propertyName, object);
         ret.push_back(setter);
         ret.push_back("{");
-		{
-			auto lines = createInputPropertyChanger(object);
-			for (auto& line : lines)
-			{
-				ret.push_back(indent + line);
-			}
-		}
+		ret.push_back(indent + createInputPropertyChanger(object));
+
 		auto contents = callPropertySetter(clazz, object);
 		for (auto& content : contents)
 		{
@@ -1169,169 +1003,83 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterf
 }
 
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(const SymbolProperty& object)
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(const SymbolProperty& object)
 {
-	std::vector<std::string> ret;
-		
-	switch(object.type->getTypeName())
+	std::string ret;
+	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		{
-			std::string line;
-			line += "auto c_value = static_cast<";
-			line += object.type->toCppType();
-			line += ">(value);";
-			ret.push_back(line);
-		}
+		ret = "auto i_value = createNativeEnum<";
+		ret += object.type->toCppType();
+		ret += ">(value);";
 		break;
 	case SymbolType::Name::OBJECT:
-		{
-			std::string line;
-			line = "auto c_value = getReference<";
-			line += object.type->toCppInnerType();
-			line += ">((void *)value);";
-			ret.push_back(line);
-		}
+		ret += "auto i_value = getReference<";
+		ret += object.type->toCppInnerType();
+		ret += ">(value);";
 		break;
 	case SymbolType::Name::ENUMARRAY:
+		ret += "auto i_value = createNativeEnumArray<";
+		ret += object.type->toCppType();
+		ret += ">(value);";
+		break;
 	case SymbolType::Name::ENUMVECTOR:
-		{
-			std::string line{ "auto c_value = " };
-			line += object.type->toCppType();
-			line += "(); ";
-			ret.push_back(line);
-		}
-		{
-			std::string line;
-			line += "for (auto& __temp : ";
-			line += object.name;
-			line += ")";
-			ret.push_back(line);
-		}
-		ret.push_back("{");
-		{
-			std::string line;
-			line += "    c_value.push_back(static_cast<";
-			line += object.type->toCppInnerType();
-			line += ">(__temp));";
-			ret.push_back(line);
-		}
-		ret.push_back("}");
+		ret += "auto i_value = createNativeEnumVector<";
+		ret += object.type->toCppType();
+		ret += ">(value);";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
+		ret += "auto i_value = createNativeObjectArray<";
+		ret += object.type->toCppInnerType();
+		ret += ">(value);";
+		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		{
-			std::string line{ "auto c_value = " };
-			line += object.type->toCppType();
-			line += "(); ";
-			ret.push_back(line);
-		}
-		{
-			std::string line;
-			line += "for (auto& __temp : ";
-			line += object.name;
-			line += ")";
-			ret.push_back(line);
-		}
-		ret.push_back("{");
-		{
-			std::string line;
-			line = "	c_value.push_back(getReference<";
-			line += object.type->toCppInnerType();
-			line += ">((void *)__temp));";
-			ret.push_back(line);
-		}
-		ret.push_back("}");
+		ret += "auto i_value = createNativeObjectArray<";
+		ret += object.type->toCppInnerType();
+		ret += ">(value);";
 		break;
 	default:
+		if (object.type->isPrimitive())
 		{
-			std::string line = "auto& c_value = value;";
-			ret.push_back(line);
+			ret = "auto i_value = value;";
 		}
-		break;	
+		else
+		{
+			ret = "auto& i_value = value;";
+		}
+		break;
 	}
 	return ret;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(const SymbolProperty& object)
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(const SymbolProperty& object)
 {
-	std::vector<std::string> ret;
+	std::string ret;
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-	{
-		std::string line;
-		line += "auto __ret = static_cast<";
-		line += object.type->toCppInterfaceType();
-		line += ">(__temp_ret);";
-		ret.push_back(line);
-	}
+		ret = "auto __ret = createInterfaceEnum(__temp_ret);";
 		break;
 	case SymbolType::Name::OBJECT:
-	{
-		std::string line;
-		line += "auto __ret = (";
-		line += object.type->toCppInterfaceInnerType();
-		line += ")";
-		line += "cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(__temp_ret);";
-		ret.push_back(line);
-	}
+		ret = "auto __ret = createInterfaceObject(__temp_ret);";
 		break;
 	case SymbolType::Name::ENUMARRAY:
+		ret = "auto __ret = createInterfaceEnumArray(__temp_ret);";
+		break;
 	case SymbolType::Name::ENUMVECTOR:
-	{
-		std::string line{ "auto __ret = " };
-		line += object.type->toCppInterfaceType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : __temp_ret)";
-		ret.push_back(line);
-	}
-		ret.push_back("{");
-	{ 
-		std::string line;
-		line = "    __ret.push_back(static_cast<";
-		line += object.type->toCppInterfaceInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-		ret.push_back("}");
+		ret = "auto __ret = createInterfaceEnumVector(__temp_ret);";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
+		ret = "auto __ret = createInterfaceObjectArray(__temp_ret);";
+		break;
 	case SymbolType::Name::OBJECTVECTOR:
-	{
-		std::string line{ "auto __ret = " };
-		line += object.type->toCppInterfaceType();
-		line += "(); ";
-		ret.push_back(line);
-	}
-	{
-		std::string line;
-		line += "for (auto& __temp : __temp_ret)";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string line;
-		line += "    __ret.push_back((";
-		line += object.type->toCppInterfaceInnerType();
-		line += ")cloneReference<";
-		line += object.type->toCppInnerType();
-		line += ">(__temp));";
-		ret.push_back(line);
-	}
-		ret.push_back("}");
+		ret = "auto __ret = createInterfaceObjectVector(__temp_ret);";
 		break;
 	default:
 		if (object.type->isPrimitive())
-			ret.push_back("auto __ret = __temp_ret;");
+			ret = "auto __ret = __temp_ret;";
 		else
-			ret.push_back("auto& __ret =  __temp_ret;");
+			ret = "auto& __ret =  __temp_ret;";
 		break;
 	}
 	return ret;
@@ -1377,51 +1125,43 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createSc
     return scope;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createMemoryPoolFunctions()
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
 {
-	std::vector<std::string> ret;
-	ret.push_back("template<class T, class ...Args>");
-	ret.push_back("void* createReference(Args... args)");
-	ret.push_back("{");
-	ret.push_back("    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();");
-	ret.push_back("    ret = std::shared_ptr<T>(MemoryPool::allocate<T>(args), [](T* p) {");
-	ret.push_back("        MemoryPool::deallocate<T>(p);");
-	ret.push_back("    });");
-	ret.push_back("    return ret;");
-	ret.push_back("}");
-	ret.push_back("template<class T>");
-	ret.push_back("void* createReference()");
-	ret.push_back("{");
-	ret.push_back("    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();");
-	ret.push_back("    ret = std::shared_ptr<T>(MemoryPool::allocate<T>(), [](T* p) {");
-	ret.push_back("        MemoryPool::deallocate<T>(p);");
-	ret.push_back("    });");
-	ret.push_back("    return ret;");
-	ret.push_back("}");
-	ret.push_back("template<class T>");
-	ret.push_back("void releaseReference(void* cptr)");
-	ret.push_back("{");
-	ret.push_back("    MemoryPool::deallocate(reinterpret_cast<std::shared_ptr<T>*>(cptr));");
-	ret.push_back("}");
-	ret.push_back("template<class T>");
-	ret.push_back("std::shared_ptr<T>& getReference(void* cptr)");
-	ret.push_back("{");
-	ret.push_back("    auto* ret = reinterpret_cast<std::shared_ptr<T>*>(cptr);");
-	ret.push_back("    return *ret;");
-	ret.push_back("}");
-	ret.push_back("template<class T>");
-	ret.push_back("std::shared_ptr<T>* cloneReference(std::shared_ptr<T>& cptr)");
-	ret.push_back("{");
-	ret.push_back("    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();");
-	ret.push_back("    *ret = value;");
-	ret.push_back("    return ret;");
-	ret.push_back("}");
-	ret.push_back("template<class T>");
-	ret.push_back("std::shared_ptr<T> copyReference(std::shared_ptr<T>& cptr)");
-	ret.push_back("{");
-	ret.push_back("    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();");
-	ret.push_back("    *ret = value;");
-	ret.push_back("    return *ret;");
-	ret.push_back("}");
-	return ret;
+	return nativeInterfaceConverter;
 }
+
+// Return Value (Create)
+
+// enum : enum class -> int32_t
+// object : std::shared_ptr<T> -> (void *)(std::shared_ptr<T>*)
+
+// enum array : std::vector<enum class> -> std::vector<int>
+// enum vector : std::vector<enum class> -> std::vector<int>
+
+// object array : std::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
+// object vector : ::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
+
+
+// Input (Create)
+
+// enum : int -> enum class
+// object : (void *)(std::shared_ptr<T>*) -> std::shared_ptr<T> 
+
+// enum array : std::vector<int> -> std::vector<enum class> 
+// enum vector : std::vector<int> -> std::vector<enum class>
+
+// object array : std::vector<void*> -> std::vector<std::shared_ptr<T>> -> 
+// object vector :  std::vector<void*> -> std::vector<std::shared_ptr<T>>
+
+
+// Output (Copy)
+
+// enum : enum class -> int
+// object : std::shared_ptr<T> -> (void *)(std::shared_ptr<T>*)
+
+// enum array : std::vector<enum class> -> std::vector<int>
+// enum vector : std::vector<enum class> -> std::vector<int>
+
+// object array : std::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
+// object vector : ::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
+

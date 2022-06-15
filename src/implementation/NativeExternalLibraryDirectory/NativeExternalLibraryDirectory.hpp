@@ -21,8 +21,8 @@ namespace LibraryInterfaceGenerator
             };
 
             explicit NativeExternalLibraryDirectory(
-                const char* external_library_dir_name = DEFAULT_DIRECTORY_NAME,
-                std::string root_dir_path = "."
+                std::string root_dir_path = ".",
+                const char* external_library_dir_name = DEFAULT_DIRECTORY_NAME
                 );
             inline operator bool() { return !_result; }
             Result toError() {
