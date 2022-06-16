@@ -37,10 +37,10 @@ namespace LibraryInterfaceGenerator
 
             Result make();
 
-            inline std::string getKotlinPackageName() {
+            inline std::string getKotlinPackageName() const {
                 return _kotlin_package_name;
             }
-            inline std::string getKotlinWrapperClassName() {
+            inline std::string getKotlinWrapperClassName() const {
                 return _kotlin_wrapper_class_name;
             }
 

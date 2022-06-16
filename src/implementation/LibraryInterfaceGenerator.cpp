@@ -4,6 +4,7 @@
 #include "NativeSourceDirectory/NativeSourceDirectory.hpp"
 #include "NativeInterface/NativeInterface.hpp"
 #include "Wrapper/Wrapper.hpp"
+#include "SourceDirectory/SourceDirectory.hpp"
 #include "FileSystem/FileSystem.hpp"
 
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(const std::string& root_dir_path)
@@ -63,6 +64,12 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
+	LibraryInterfaceGenerator::Implementation::SourceDirectory sourceDirectory{ Environment::Kotlin_Android, wrapper, symbolTable, root_dir_path };
+	result = sourceDirectory.make();
+	if (!result)
+	{
+		return Error(Error::Code::FAIL, result.toString());
+	}
 	return Error(Error::Code::SUCCESS);
 }
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createAPIDocumentation(const std::string& json_content, const std::string& root_dir_path)

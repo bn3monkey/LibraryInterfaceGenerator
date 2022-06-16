@@ -10,8 +10,8 @@
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
 #include "../NativeSourceStream/NativeSourceStream.hpp"
-#include "../NativeSourceDirectory/NativeSourceDirectory.hpp";
-#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp";
+#include "../NativeSourceDirectory/NativeSourceDirectory.hpp"
+#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
 #include "../Environment.hpp"
 #include "../Converter/NativerInterfaceConverter.hpp"
 
@@ -27,11 +27,12 @@ namespace LibraryInterfaceGenerator
             explicit NativeInterface(
                 Environment environment, 
                 const NativeExternalLibraryDirectory& libDirectory,
-                const NativeSourceDirectory& srcDirectory, 
+                const NativeSourceDirectory& srcDirectory,
                 const SymbolTable& symbolTable,
                 std::string root_dir_path = ".",
                 const char* interface_dirname = DEFAULT_DIRECTORY_NAME 
-                );
+            );
+
             inline operator bool() { return !_result; }
             Result toError() {
                 return _result;
@@ -67,7 +68,6 @@ namespace LibraryInterfaceGenerator
             void createModuleDefinition(const SymbolModule& mod, std::stringstream& ss);
             void createClassDefinition(const SymbolClass& clazz, std::stringstream& ss);
 
-            // Method Block ����
             std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor);
             std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& constructor);
             std::string allocate(const SymbolClass& clazz, const SymbolMethod& constructor);

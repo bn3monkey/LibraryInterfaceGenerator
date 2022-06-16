@@ -8,7 +8,7 @@
 #include "../SymbolTable/SymbolTable.hpp"
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
-#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp";
+#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
 #include "../NativeSourceStream/NativeSourceStream.hpp"
 #include <algorithm>
 #include <set>

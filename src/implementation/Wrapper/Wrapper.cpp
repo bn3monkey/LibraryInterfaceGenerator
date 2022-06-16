@@ -124,10 +124,13 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 				defineObject.addLine("System.loadLibrary(" + _kotlin_wrapper_class_name + ")");
 
+				defineObject.addLine("@Volatile private var instance: " + _kotlin_wrapper_class_name + "? = null");
+				defineObject.addLine("@JvmStatic fun getInstance() : " + _kotlin_wrapper_class_name + "=");
+				defineObject.addLine("	instance ?: synchronized(this) { instance ?: " + _kotlin_wrapper_class_name + "().alose { instance = it} }");
 			}
 
-			createWrapperPackageDeclaration(symbolObject, ss, indent);
 		}
+		createWrapperPackageDeclaration(symbolObject, ss, indent);
 	}
 	
 	

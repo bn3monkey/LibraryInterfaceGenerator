@@ -66,6 +66,7 @@ namespace LibraryInterfaceGenerator
 
             virtual std::string toCppInnerType() { return ""; }
             virtual std::string toCppInterfaceInnerType() { return ""; }
+            virtual std::string toKotlinInnerType() { return ""; }
         };
 
         class SymbolTypeVoid : public SymbolType
@@ -81,7 +82,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "void";}
             std::string toKotlinWrapperType() override { return "Unit"; }
             std::string toKotlinType() override {return "Unit"; }
-
+            std::string toKotlinInnerType() override { return "Unit"; }
         };
 
         class SymbolTypeBool : public SymbolType
@@ -97,6 +98,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override { return "jboolean"; }
             std::string toKotlinWrapperType() override { return "Boolean"; }
             std::string toKotlinType() override { return "Boolean"; }
+            std::string toKotlinInnerType() override { return "Boolean"; }
         };
 
         class SymbolTypeInt8 : public SymbolType
@@ -111,7 +113,8 @@ namespace LibraryInterfaceGenerator
             std::string toCppInterfaceType() override { return "int8_t"; }
             std::string toJNIType() override {return "jbyte";}
             std::string toKotlinWrapperType() override { return "Byte"; }
-            std::string toKotlinType() override {return "Byte"; }       
+            std::string toKotlinType() override {return "Byte"; }
+            std::string toKotlinInnerType() override { return "Byte"; }
         };
         class SymbolTypeInt16 : public SymbolType
         {
@@ -126,6 +129,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jshort";}
             std::string toKotlinWrapperType() override { return "Short"; }
             std::string toKotlinType() override {return "Short"; }
+            std::string toKotlinInnerType() override { return "Short"; }
         };
         class SymbolTypeInt32 : public SymbolType
         {
@@ -140,6 +144,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jint";}
             std::string toKotlinWrapperType() override { return "Int"; }
             std::string toKotlinType() override {return "Int"; }
+            std::string toKotlinInnerType() override { return "Int"; }
         };
         class SymbolTypeInt64 : public SymbolType
         {
@@ -154,6 +159,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jlong";}
             std::string toKotlinWrapperType() override { return "Long"; }
             std::string toKotlinType() override {return "Long"; }
+            std::string toKotlinInnerType() override { return "Long"; }
         };
         class SymbolTypeDouble : public SymbolType
         {
@@ -168,6 +174,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jdouble";}
             std::string toKotlinWrapperType() override { return "Double"; }
             std::string toKotlinType() override {return "Double"; }
+            std::string toKotlinInnerType() override { return "Double"; }
         };
         class SymbolTypeFloat : public SymbolType
         {
@@ -182,6 +189,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jfloat";}
             std::string toKotlinWrapperType() override { return "Float"; }
             std::string toKotlinType() override {return "Float"; }
+            std::string toKotlinInnerType() override { return "Float"; }
         };
         class SymbolTypeString : public SymbolType
         {
@@ -196,6 +204,7 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {return "jstring";}
             std::string toKotlinWrapperType() override { return "String"; }
             std::string toKotlinType() override {return "String"; }
+            std::string toKotlinInnerType() override { return "String"; }
         };
        
         class SymbolTypeEnum : public SymbolType
@@ -221,6 +230,14 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override { return "Int"; }
             std::string toKotlinType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto ret = object->getKotlinName();
+                    return ret;
+                }
+                return "";
+            }
+            std::string toKotlinInnerType() override { 
                 if (auto object = _obj.lock())
                 {
                     auto ret = object->getKotlinName();
@@ -272,6 +289,13 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
             std::string toCppInterfaceInnerType() override { return "void*"; }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getCppName();
+                }
+                return "";
+            }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
@@ -300,6 +324,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeBool;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -320,6 +347,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt8;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -340,6 +370,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt16;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -360,6 +393,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt32;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -380,6 +416,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt64;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -400,6 +439,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeFloat;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -420,6 +462,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeDouble;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -440,6 +485,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeString;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -492,6 +540,13 @@ namespace LibraryInterfaceGenerator
             }
             std::string toCppInterfaceInnerType() override {
                 return "int";
+            }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
@@ -548,6 +603,13 @@ namespace LibraryInterfaceGenerator
             std::string toCppInterfaceInnerType() override {
                 return "void*";
             }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
+            }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
@@ -576,6 +638,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeBool;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -596,6 +661,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt8;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -616,6 +684,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt16;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -636,6 +707,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt32;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -656,6 +730,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeInt64;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -676,6 +753,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeFloat;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -696,6 +776,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeDouble;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -716,6 +799,9 @@ namespace LibraryInterfaceGenerator
             using InnerType = SymbolTypeString;
             std::string toCppInnerType() override { return InnerType().toCppType(); }
             std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
+            std::string toKotlinInnerType() override {
+                return InnerType().toKotlinType();
+            }
         };
 
         template<>
@@ -765,6 +851,13 @@ namespace LibraryInterfaceGenerator
             }
             std::string toCppInterfaceInnerType() override {
                 return "int";
+            }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
@@ -818,6 +911,13 @@ namespace LibraryInterfaceGenerator
             }
             std::string toCppInterfaceInnerType() override {
                 return "void*";
+            }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
