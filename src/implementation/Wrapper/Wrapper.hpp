@@ -37,11 +37,22 @@ namespace LibraryInterfaceGenerator
 
             Result make();
 
+            inline std::string getKotlinPackageName() {
+                return _kotlin_package_name;
+            }
+            inline std::string getKotlinWrapperClassName() {
+                return _kotlin_wrapper_class_name;
+            }
+
         private:
             const NativeInterface& _infDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
+            
             std::string _wrapper_dir_path;
+
+            std::string _kotlin_package_name;
+            std::string _kotlin_wrapper_class_name;
 
             Result createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path);
             Result createWrapperContent(const SymbolPackage& symbolObject, std::string& native_content, std::string& target_content);

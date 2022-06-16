@@ -14,6 +14,14 @@ LibraryInterfaceGenerator::Implementation::Wrapper::Wrapper(Environment environm
 	_wrapper_dir_path = root_dir_path;
 	_wrapper_dir_path += delimeter;
 	_wrapper_dir_path += directory_name;
+
+	auto& package = _symbolTable.getPackage();
+
+	std::string packageName = package.name;
+	std::transform(packageName.begin(), packageName.end(), packageName.begin(), ::tolower);
+
+	_kotlin_package_name = "com." + package.author + "." + packageName;
+	_kotlin_wrapper_class_name = package.name + "Wrapper";
 }
 
 LibraryInterfaceGenerator::Implementation::Wrapper::~Wrapper()
@@ -100,15 +108,11 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	ss.str("");
 
 	{
-		std::string packageName = symbolObject.name;
-		std::transform(packageName.begin(), packageName.end(), packageName.begin(), ::tolower);
-
-		ss << "package com." << symbolObject.author << "." << packageName << ";\n\n";
+		ss << "package " << _kotlin_package_name << ";\n\n";
 	}
 
-	std::string className = symbolObject.name + "Wrapper";
 	{
-		std::string classStart = "class " + className;
+		std::string classStart = "class " + _kotlin_wrapper_class_name;
 		DefineObject defineObject(ss, classStart, indent);
 		{
 			std::string companionObject{ "companion object" };
@@ -118,7 +122,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				std::string init{ "init" };
 				DefineObject defineObject(ss, init, indent);
 
-				defineObject.addLine("System.loadLibrary(" + className + ")");
+				defineObject.addLine("System.loadLibrary(" + _kotlin_wrapper_class_name + ")");
 
 			}
 
@@ -142,8 +146,8 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	prefix += "_";
 	prefix += packageName;
 	prefix += "_";
-	prefix += symbolObject.name;
-	prefix += "Wrapper_";
+	prefix += _kotlin_wrapper_class_name;
+	prefix += "_";
 
 	for (auto& mod : symbolObject.modules)
 	{
