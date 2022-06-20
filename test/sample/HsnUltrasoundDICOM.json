@@ -666,9 +666,46 @@
         },
         {
             "order" : "module",
-            "name" : "Model",
-            "description" : "Data communicated with the DICOM server (images, patient/study information)",
+            "name" : "IE",
+            "description" : "Information entity communicated with the DICOM server (images, patient/study information)",
             "childs" : [
+                {
+                    "order" : "method",
+                    "name" : "genereateUID",
+                    "type" : "string",
+                    "description" : "generate UID for Information entity",
+                    "return" : "UID value",
+                    "parameters" : [
+                        {
+                            "order" : "parameter",
+                            "name" : "root",
+                            "io" : "in",
+                            "description" : "root UID assigned to the company",
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "parameter",
+                            "name" : "departmentID",
+                            "io" : "in",
+                            "description" : "department ID (assigned by the company)",
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "parameter",
+                            "name" : "modelID",
+                            "io" : "in",
+                            "description" : "model ID (assigned by the department)",
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "parameter",
+                            "name" : "serialNumber",
+                            "io" : "in",
+                            "description" : "the model serial number (assigned by the department)",
+                            "type" : "string"
+                        }
+                    ]
+                },
                 {
                     "order" : "class",
                     "name" : "Patient",
@@ -680,35 +717,42 @@
                             "type" : "string",
                             "readonly" : false,
                             "name" : "firstName",
-                            "description" : "first(family) name of a patient"
+                            "description" : "first(family) name of a patient.\nFrom worklist entry or user input"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
                             "readonly" : false,
                             "name" : "middleName",
-                            "description" : "middle name of a patient"
+                            "description" : "middle name of a patient.\nFrom worklist entry or user input"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
                             "readonly" : false,
                             "name" : "lastName",
-                            "description" : "last name of a patient"
+                            "description" : "last name of a patient.\nFrom worklist entry or user input"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "ID",
+                            "description" : "ID of a patient.\nFrom worklist entry or user input"
                         },
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/HsnDate",
                             "readonly" : false,
                             "name" : "birthDate",
-                            "description" : "birth date of a patient"
+                            "description" : "birth date of a patient.\nFrom worklist entry or user input"
                         },
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/Sex",
                             "readonly" : false,
                             "name" : "sex",
-                            "description" : "sex of a patient"
+                            "description" : "sex of a patient.\nFrom worklist entry or user input, “M”, “F” or “O”"
                         },
                         {
                             "order" : "property",
@@ -717,13 +761,7 @@
                             "name" : "weight",
                             "description" : "weight of a patient"
                         },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "patientID",
-                            "description" : "ID of a patient"
-                        },
+                        
                         {
                             "order" : "property",
                             "type" : "string",
@@ -765,25 +803,56 @@
                     "childs" : [
                         {
                             "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
+                            "name" : "date",
+                            "description" : "a study date.\nIt is sent deviced by study date and study time\nFrom worklist entry or generated automatically using the date of the patient's examination"
+                        },
+                        {
+                            "order" : "property",
                             "type" : "string",
                             "readonly" : false,
-                            "name" : "ID",
-                            "description" : "ID of a study"
+                            "name" : "accession",
+                            "description" : "accession number of a physician"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "referringPhysician",
+                            "description" : "referring physician of a physician"
+                        },
+                        
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "description",
+                            "description" : "study description.\nEither from worklist entry “Requested Procedure Description” or user input"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
                             "readonly" : false,
                             "name" : "instanceUID",
-                            "description" : "instance uid of a study"
+                            "description" : "instance uid of a study.\nEither from worklist entry or generated automatically"
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "type" : "string",
                             "readonly" : false,
-                            "name" : "date",
-                            "description" : "a study date"
+                            "name" : "ID",
+                            "description" : "ID of a study.\nGenerated automatically from current date and time"
                         },
+
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "physicianOfRecord",
+                            "description" : "physician of record of a physician"
+                        },
+
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/StudyStatus",
@@ -846,34 +915,7 @@
                             "name" : "performedProcedureStepEndDate",
                             "description" : "performed procedure step end date of a study"
                         },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "referringPhysician",
-                            "description" : "referring physician of a physician"
-                        },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "physicianOfRecord",
-                            "description" : "physician of record of a physician"
-                        },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "description",
-                            "description" : "study description"
-                        },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "accession",
-                            "description" : "accession number of a physician"
-                        },
+                                                
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Model/Patient",
@@ -918,7 +960,14 @@
                             "type" : "string",
                             "readonly" : false,
                             "name" : "modality",
-                            "description" : "modality of a physician"
+                            "description" : "modality of a physician\nDefault value is \"US\""
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "readonly" : false,
+                            "name" : "date",
+                            "description" : "data of a series..\nIt is sent devided by series date and sereis time.\nGenerated automatically using the date of the patient's examination "
                         },
                         {
                             "order" : "property",
@@ -929,18 +978,18 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "int32",
-                            "readonly" : false,
-                            "name" : "number",
-                            "description" : "series number"
-                        },
-                        {
-                            "order" : "property",
                             "type" : "string",
                             "readonly" : false,
                             "name" : "instanceUID",
                             "description" : "instance uid of a series"
                         },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "readonly" : false,
+                            "name" : "number",
+                            "description" : "series number"
+                        },                        
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Model/Study",
@@ -976,6 +1025,28 @@
                 },
                 {
                     "order" : "class",
+                    "name" : "Equipment",
+                    "base" : [],
+                    "description" : "equipment information of the DICOM",
+                    "childs" : [
+                        {
+                            "order" : "parameter",
+                            "type" : "string",
+                            "io" : "in",
+                            "name" : "manufacturer",
+                            "description" : "Manufacturer of the equipment.\nDefault value is \"FCU\""
+                        },
+                        {
+                            "order" : "parameter",
+                            "type" : "string",
+                            "io" : "in",
+                            "name" : "modelName",
+                            "description" : "Manufacturer's model name of the equipment.\nDefault value is \"SC1\""
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
                     "name" : "UltrasoundImage",
                     "base" : [],
                     "description" : "ultrasound image data that can be sent to dicom",
@@ -1006,18 +1077,25 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Model/Series",
+                            "type" : "string",
                             "readonly" : false,
-                            "name" : "series",
-                            "description" : "series holding this ultrasound image"
+                            "name" : "instanceUID",
+                            "description" : "instance uid of ultrasound image"
                         },
                         {
                             "order" : "property",
                             "type" : "string",
                             "readonly" : false,
-                            "name" : "instanceUID",
-                            "description" : "instance uid of ultrasound image"
-                         },
+                            "name" : "burnedInAnnotation",
+                            "description" : "burned in annotation.\nDefault value is \"YES\""
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Model/Series",
+                            "readonly" : false,
+                            "name" : "series",
+                            "description" : "series holding this ultrasound image"
+                        },
                          {
                              "order" : "method",
                              "type" : "bool",
