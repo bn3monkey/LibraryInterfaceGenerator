@@ -51,11 +51,25 @@ performed series sequence
 	protocol name : equipment.protocolName
 	series instauce uid : series.instanceUID
 	series descrption : null
-	referenced image seuqnece : null
-	referenced sop class uid : 1.2.840.10008.5.1.4.1.1.6.1
-	referenced sop instance uid : auto-generated
+	referenced image seuqnece : image.ultrasoundsounds
+		referenced sop class uid : 1.2.840.10008.5.1.4.1.1.6.1
+		referenced sop instance uid : auto-generated
 	Referenced Non-Image Composite SOP Instance Sequence : nullptr
+		
 
+Scheduled Step Attribute Sequence 
+	study Instance UId : study.instanceUID
+	referencedStudySequence : null,
+	accession : study.accession
+	requested procedure ID : study.requestedProcedure.id
+	requestedProceduer Description : study.requestedProcedure.description
+	scheduled Procedure STep ID : scheduledProcedure.id
+	Scheduled Procedure Step Description : scheduledProcedure.description
+	Scheduled Protocol Code Sequence : scheduledProcedure.protocolCode
+		code value
+		coding schme designator
+		code meaning
+t
 endExam
 
 performed procedure step status : study.status

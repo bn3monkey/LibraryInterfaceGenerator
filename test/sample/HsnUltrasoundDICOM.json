@@ -247,7 +247,7 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/UltrasoundImage",
+                                    "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage",
                                     "name" : "image",
                                     "io" : "in",
                                     "description" : "ultrasound image to put in the queue"
@@ -294,21 +294,21 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                                     "name" : "image",
                                     "io" : "in",
                                     "description" : "ultrasound images to check the images"
                                 },
                                 {
                                     "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                                     "name" : "success_images",
                                     "io" : "out",
                                     "description" : "ultrasound images that store successfully in the server"
                                 },
                                 {
                                     "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                                     "name" : "failed_images",
                                     "io" : "out",
                                     "description" : "ultrasound images that fail to store in the server"
@@ -346,7 +346,7 @@
                                 },
                                 {
                                    "order" : "parameter",
-                                   "type" : "vector<HsnUltrasoundDICOM/Model/Patient>",
+                                   "type" : "vector<HsnUltrasoundDICOM/IE/Patient>",
                                    "name" : "patients",
                                    "io" : "out",
                                    "description" : "query results"
@@ -383,7 +383,7 @@
                                 },
                                 {
                                    "order" : "parameter",
-                                   "type" : "vector<HsnUltrasoundDICOM/Model/Study>",
+                                   "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
                                    "name" : "studies",
                                    "io" : "out",
                                    "description" : "query results"
@@ -414,7 +414,7 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/Study",
+                                    "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "name" : "study",
                                     "io" : "in",
                                     "description" : "query"
@@ -437,7 +437,7 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/Study",
+                                    "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "name" : "study",
                                     "io" : "in",
                                     "description" : "query"
@@ -562,6 +562,35 @@
                     ]
                 },
                 {
+                    "order" : "class",
+                    "name" : "SequenceItem",
+                    "base" : [],
+                    "description" : "Sequence Item of DICOM IE Attribute",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "codeValue",
+                            "readonly" : false,
+                            "description" : "Code Value"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "codingSchemeDesignator",
+                            "readonly" : false,
+                            "description" : "Coding Scheme Designator"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "codeMeaning",
+                            "readonly" : false,
+                            "description" : "Code Meaning"
+                        }
+                    ]
+                },
+                {
                     "order" : "enum",
                     "name" : "CodePage",
                     "description" : "data type of code page",
@@ -677,6 +706,18 @@
                         "ACSETimeout/101",
                         "DIMSETimeout/102",
                         "AssociationAbort/103"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "ScheduledProcedureStepStatus",
+                    "description" : "A Real World condition that may affect the selection of the Scheduled Procedure Step.",
+                    "values" : [
+                        "SCHEDULED/1",
+                        "ARRIVED/2",
+                        "READY/3",
+                        "STARTED/4",
+                        "DEPARTED/5"
                     ]
                 }
             ]
@@ -827,7 +868,7 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "vector<HsnUltrasoundDICOM/Model/Study>",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
                             "readonly" : true,
                             "name" : "exams",
                             "description" : "exams of a patient"
@@ -842,7 +883,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/Study",
+                                    "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "io" : "in",
                                     "name" : "exam",
                                     "description" : "exam that added to the patient"                                    
@@ -981,16 +1022,16 @@
                                                 
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Model/Patient",
+                            "type" : "HsnUltrasoundDICOM/IE/Patient",
                             "readonly" : false,
                             "name" : "patient",
                             "description" : "Patient holding this study"
                         },
                         {
                             "order" : "property",
-                            "type" : "vector<HsnUltrasoundDICOM/Model/Series>",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/Series>",
                             "readonly" : true,
-                            "name" : "series",
+                            "name" : "serieses",
                             "description" : "all serieses that are hold by this patient"
                         },
                         {
@@ -1003,12 +1044,163 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/Series",
+                                    "type" : "HsnUltrasoundDICOM/IE/Series",
                                     "io" : "in",
                                     "name" : "series",
                                     "description" : "series that are hold by this patient"                                    
                                 }
                             ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/ScheduledProcedureStep>",
+                            "readonly" : true,
+                            "name" : "scheduledProcedureSteps",
+                            "description" : "Scheduled procedure step sequence"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "add scheduled procecure step to a study",
+                            "name" : "addScheduledProcedureStep",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/IE/ScheduledProcedureStep",
+                                    "io" : "in",
+                                    "name" : "value",
+                                    "description" : "scheduled procedure step to be added"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "description" : "clear scheduled procecure step to a study",
+                            "name" : "clearScheduledProcedureSteps",
+                            "return" : "N/A",
+                            "parameters" : [
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUtlrasoundDICOM/IE/RequstedProcedure",
+                            "readonly" : false,
+                            "name" : "requestedProcedure",
+                            "description" : "Requested Procedure"
+                        }
+
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ScheduledProcedureStep",
+                    "base" : [],
+                    "description" : "Scheduled Procedure for Modality Worklist",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "modality",
+                            "readonly" : false,
+                            "description" : "modality"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "stationAETitle",
+                            "readonly" : false,
+                            "description" : "Station AE Title"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "name" : "startDate",
+                            "readonly" : false,
+                            "description" : "Scheduled Procedure Step Start Date and Time."
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "performingPhysiciansName",
+                            "readonly" : false,
+                            "description" : "scheduled Performing Physician's name"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "description",
+                            "readonly" : false,
+                            "description" : "Scheduled Procedure Step Description"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "vector<HsnUltrasoundDICOM/Type/SequenceItem>",
+                            "name" : "protocolCodes",
+                            "readonly" : true,
+                            "description" : "Scheduled Protocol Code Sequence"
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "bool",
+                            "name" : "addProtocolCode",
+                            "description" : "add Protocol Code Sequence Item to Protocol Code Sequence",
+                            "return" : "whether success or not",
+                            "childs" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Type/SequenceItem",
+                                    "name" : "value",
+                                    "io" : "in",
+                                    "description" : "Protocol Code Sequence Item to be added" 
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "name" : "clearProtocolCodes",
+                            "description" : "clear Protocol Code Sequence",
+                            "return" : "N/A",
+                            "childs" : [
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "name" : "ID",
+                            "readonly" : false,
+                            "description" : "Scheduled Procedure Step ID"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/ScheduledProcedureStepStatus",
+                            "name" : "status",
+                            "readonly" : false,
+                            "description" : "Scheduled Procedure Step Status"
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "RequestedProcedure",
+                    "base" : [],
+                    "description" : "Requested Procedure for Modality Worklist",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "name" : "ID",
+                            "readonly" : false,
+                            "description" : "Requested Procedure ID",
+                            "type" : "string"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "description",
+                            "readonly" : false,
+                            "description" : "Requested Procedure Description",
+                            "type" : "string"
                         }
                     ]
                 },
@@ -1055,14 +1247,14 @@
                         },                        
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Model/Study",
+                            "type" : "HsnUltrasoundDICOM/IE/Study",
                             "readonly" : false,
                             "name" : "exam",
                             "description" : "Exam holding this series"
                         },
                         {
                             "order" : "property",
-                            "type" : "vector<HsnUltrasoundDICOM/Model/UltrasoundImage>",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                             "readonly" : true,
                             "name" : "ultrasoundImage",
                             "description" : "all ultrasound iamges that are hold by this patient"
@@ -1077,7 +1269,7 @@
                             [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Model/UltrasoundImage",
+                                    "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage",
                                     "io" : "in",
                                     "name" : "ultrasoundImage",
                                     "description" : "ultrasound Image that are hold by this series"                                    
@@ -1161,7 +1353,7 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Model/Series",
+                            "type" : "HsnUltrasoundDICOM/IE/Series",
                             "readonly" : false,
                             "name" : "series",
                             "description" : "series holding this ultrasound image"
