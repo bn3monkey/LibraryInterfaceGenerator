@@ -106,6 +106,20 @@
                             "description" : "How long to wait for a write request",
                             "readonly" : false,
                             "type" : "string"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "imageTransferMode",
+                            "description" : "Image Transfer Mode of DICOM Server.",
+                            "readonly" : false,
+                            "type" : "HsnUltrasoundDICOM/Type/ImageTransferMode"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "codePage",
+                            "description" : "",
+                            "readonly" : false,
+                            "type" : "HsnUltrasoundDICOM/Type/CodePage"
                         }
                     ]
                 },
@@ -124,6 +138,13 @@
                     "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Basic settings for communicating with the server, such as IP, PORT, etc.",
                     "childs" : [
+                        {
+                            "order" : "property",
+                            "name" : "alias",
+                            "description" : "Alias of DICOM server",
+                            "readonly" : false,
+                            "type" : "string"
+                        },
                         {
                             "order" : "property",
                             "name" : "ipAddress",
@@ -147,20 +168,34 @@
                         },
                         {
                             "order" : "property",
+                            "name" : "maxRetries",
+                            "description" : "max trial of the request for the server",
+                            "readonly" : false,
+                            "type" : "int32" 
+                        },
+                        {
+                            "order" : "property",
                             "name" : "codePage",
                             "description" : "",
                             "readonly" : false,
                             "type" : "HsnUltrasoundDICOM/Type/CodePage"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "DIMSETimeout",
+                            "description" : "Time-out for DIMSE messages.\nDefault value is unlimited",
+                            "readonly" : false,
+                            "type" : "int32"
                         }
                     ]
                 },
                 {
                     "order" : "class",
                     "name" : "StorageConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Storage Server",
                     "childs" : [
-
+                        
                     ]
                 },
                 {
@@ -622,6 +657,27 @@
                         "Compressed_JPEG/1",
                         "BMP/2"
                     ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "ImageTransferMode",
+                    "description" : "",
+                    "values" : [
+                        "DURING_EXAM/0",
+                        "END_EXAM/1"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "Result",
+                    "description" : "Execution result that occurs during DICOM communication",
+                    "values" : [
+                        "SUCCESS/0",
+                        "TCPIPTimeout/100",
+                        "ACSETimeout/101",
+                        "DIMSETimeout/102",
+                        "AssociationAbort/103"
+                    ]
                 }
             ]
         },
@@ -897,23 +953,30 @@
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : false,
+                            "readonly" : true,
                             "name" : "performedProcedureStepID",
-                            "description" : "performed procedure step io of a study"
+                            "description" : "performed procedure step id of a study.\nAuto generated from Patient ID + Time Stamp"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "performedProcedureStepDescription",
+                            "description" : "performed procedure description of a study"
                         },
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/HsnDate",
-                            "readonly" : false,
+                            "readonly" : true,
                             "name" : "performedProcedureStepStartDate",
-                            "description" : "performed procedure step start date of a study"
+                            "description" : "performed procedure step start date of a study.\nauto-genereated by executing startExam in the MPPSServer class"
                         },
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/HsnDate",
-                            "readonly" : false,
+                            "readonly" : true,
                             "name" : "performedProcedureStepEndDate",
-                            "description" : "performed procedure step end date of a study"
+                            "description" : "performed procedure step end date of a study.\nauto-generated by executing updateExam in the MPPSServer class"
                         },
                                                 
                         {
@@ -1030,18 +1093,25 @@
                     "description" : "equipment information of the DICOM",
                     "childs" : [
                         {
-                            "order" : "parameter",
+                            "order" : "property",
                             "type" : "string",
-                            "io" : "in",
+                            "readonly" : false,
                             "name" : "manufacturer",
                             "description" : "Manufacturer of the equipment.\nDefault value is \"FCU\""
                         },
                         {
-                            "order" : "parameter",
+                            "order" : "property",
                             "type" : "string",
-                            "io" : "in",
+                            "readonly" : false,
                             "name" : "modelName",
                             "description" : "Manufacturer's model name of the equipment.\nDefault value is \"SC1\""
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "protocolName",
+                            "description" : "Protocol name of the equipment.\nDefault value is \"FCU\""
                         }
                     ]
                 },
