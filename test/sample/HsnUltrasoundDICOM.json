@@ -195,13 +195,19 @@
                     "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Storage Server",
                     "childs" : [
-                        
+                        {
+                            "order" : "property",
+                            "name" : "imageMode",
+                            "description" : "Image mode for dicom",
+                            "readonly" : false,
+                            "type" : "HsnUltrasoundDICOM/Type/ImageMode"
+                        }
                     ]
                 },
                 {
                     "order" : "class",
                     "name" : "StorageCommitmentConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Storage Commitment Server",
                     "childs" : [
 
@@ -210,7 +216,7 @@
                 {
                     "order" : "class",
                     "name" : "ModalityWorklistConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Modality Worklist Server",
                     "childs" : [
 
@@ -219,7 +225,7 @@
                 {
                     "order" : "class",
                     "name" : "MPPSConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM MPPS Server",
                     "childs" : [
 
@@ -233,6 +239,29 @@
             "description" : "A set of classes for communicating with the DICOM server",
             "childs" : [
                 {
+                    "order" : "interface",
+                    "name" : "Server",
+                    "description" : "Provides an interface to the ability to validate connections.",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "name" : "verify",
+                            "description" : "verify communication with server",
+                            "return" : "HsnUltrasoundDICOM/Type/Result",
+                            "type" : "Communication result",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "configuration",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ServerConfiguration",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to be verifed the connection"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "order" : "class",
                     "name" : "StorageServer",
                     "base" : [],
@@ -242,22 +271,22 @@
                             "order" : "method",
                             "name" : "queueImage",
                             "description" : "Stack the images to be sent in the queue",
-                            "return" : "code for use result",
-                            "type" : "int32",
+                            "return" : "result for use result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
+                                    "name" : "configuration",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to send images"
+                                },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage",
                                     "name" : "image",
                                     "io" : "in",
                                     "description" : "ultrasound image to put in the queue"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         },
@@ -266,14 +295,14 @@
                             "name" : "sendImage",
                             "description" : "Send images stacked in the queue",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
+                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
+                                    "name" : "configuration",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to send images"
                                 }
                             ]
                         }
@@ -287,11 +316,18 @@
                     "childs" : [
                         {
                             "order" : "method",
-                            "name" : "commitImage",
-                            "description" : "commit the images in the server",
+                            "name" : "checkImageCommitment",
+                            "description" : "Check that the sent image is saved on the server.",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageCommitmentServer",
+                                    "name" : "configuration",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to check if the image is committed"
+                                },
                                 {
                                     "order" : "parameter",
                                     "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
@@ -312,13 +348,6 @@
                                     "name" : "failed_images",
                                     "io" : "out",
                                     "description" : "ultrasound images that fail to store in the server"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         }
@@ -333,9 +362,9 @@
                         {
                             "order" : "method",
                             "name" : "listPatients",
-                            "description" : "Get patient information that meets your criteria.",
+                            "description" : "Get patient information  that meets the filter query",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/IE/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -350,22 +379,15 @@
                                    "name" : "patients",
                                    "io" : "out",
                                    "description" : "query results"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         },
                         {
                             "order" : "method",
                             "name" : "listStudies",
-                            "description" : "Get studies information that meets your criteria.",
+                            "description" : "Get studies information that meets the filter query.",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -375,25 +397,27 @@
                                     "description" : "query"
                                 },
                                 {
+                                  "order" : "parameter",
+                                  "type" : "vector<HsnUltrasoundDICOM/Type/ScheduledProcedureStepFilter>",
+                                  "name" : "scheduledProcedureStepFilters",
+                                  "io" : "in",
+                                  "description" : "query"  
+                                },
+                                /*
+                                {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Filter/StudyFilter",
                                     "name" : "studyFilter",
                                     "io" : "in",
                                     "description" : "query"
                                 },
+                                */
                                 {
                                    "order" : "parameter",
                                    "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
                                    "name" : "studies",
                                    "io" : "out",
                                    "description" : "query results"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         }
@@ -410,7 +434,7 @@
                             "name" : "openStudy",
                             "description" : "open the study.",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -418,13 +442,6 @@
                                     "name" : "study",
                                     "io" : "in",
                                     "description" : "query"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         },
@@ -433,7 +450,7 @@
                             "name" : "updateStudy",
                             "description" : "open the study.",
                             "return" : "code for use result",
-                            "type" : "int32",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -441,13 +458,6 @@
                                     "name" : "study",
                                     "io" : "in",
                                     "description" : "query"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "name" : "outputMsg",
-                                    "io" : "out",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         }
@@ -698,14 +708,65 @@
                 },
                 {
                     "order" : "enum",
-                    "name" : "Result",
-                    "description" : "Execution result that occurs during DICOM communication",
+                    "name" : "ResultType",
+                    "description" : "Result Type",
                     "values" : [
                         "SUCCESS/0",
-                        "TCPIPTimeout/100",
-                        "ACSETimeout/101",
-                        "DIMSETimeout/102",
-                        "AssociationAbort/103"
+                        "REFUSED/1",
+                        "ERROR/2",
+                        "WARNING/3",
+                        "INFORMATION/4",
+                        "PENDING/5",
+                        "CANCEL/6"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "ResultCode",
+                    "description" : "Result Code",
+                    "values" : [
+                        "SUCCESS/0x0000", // SUCCESS
+                        "TCPIP_CONNECTION_TIMEOUT/0X0001", // ERROR
+                        "ACSE_TIMEOUT/0X0002", // ERROR
+                        "DIMSE_TIMEOUT/0x0003", // ERROR
+                        "ASSOCIATION_ABORT/0x0110", // ERROR
+                        "ATTRIBUTE_VALUE_OUT_OF_RANGE/0x0116H", // ERROR
+                        "FAILURE/0xA700", // ERROR
+                        
+                        "IDENTIFIER_DOES_NOT_MATCH_SOP_CLASS/0xA900", // ERROR
+                        "UNABLE_TO_PROCESS/0XC000", // ERROR
+                        "MATCHES_ARE_CONTINUING/0XFF00", // PENDING
+                        "MATCHES_ARE_CONTINUING_BUT_OPTINAL_KEYS_NOT_SUPPORTED/0XFF01", // PENDING
+                        "OUT_OF_RESOURCES/0XA700", // REFUSED
+                        
+                        "DATA_SET_DOES_NOT_MATCH_SOP_CLASS/0XA901", // ERROR
+                        "CANNOT_UNDERSTAND/0XC000",  // ERROR
+                        
+                        // VERIFICATION CODE
+                        "COMMUNICATION_REFUSED/0xA001", // REFUSED
+                        "COMMUNICATION_FAILED/0xC001" // ERROR
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "Result",
+                    "base" : [],
+                    "description" : "Execution result that occurs during DICOM communication",
+                    "childs" : [
+                        {
+                            "order" : "property",
+                            "name" : "type",
+                            "description" : "Result Type",
+                            "readonly" : false,
+                            "type" : "HsnUltrasoundDICOM/Type/ResultType"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "code",
+                            "description" : "Result Code",
+                            "readonly" : false,
+                            "type" : "HsnUltrasoundDICOM/Type/ResultCode"
+                        }
                     ]
                 },
                 {
@@ -732,9 +793,46 @@
                     "name" : "PatientFilter",
                     "description" : "filter about patient",
                     "childs" : [
-
+                        {
+                            "name" : "addNameQuery",
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching"
+                        },
+                        {
+                            "name" : "addIDQuery",
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching"
+                        
+                        },
+                        {
+                            "name" : "addBirthDateQuery",
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Range Based Matching."
+                        
+                        }
                     ]
                 },
+                {
+                    "order" : "class",
+                    "name" : "ScheduledProcedureStepFilter",
+                    "description" : "filter about scheduled procedure step.\n!!!Modality is Always set to \"US\"!!!",
+                    "childs" : [
+                        {
+                            "name" : "addScheduledStationAETitle",
+                            "description" : "Queried using Single Value Matching."
+                        },
+                        {
+                            "name" : "addScheduledProcedrueStepStartDateQuery",
+                            "description" : "From-To range values can be set by user in the worklist query.\nQueried using Range Based Matching."
+                        },
+                        {
+                            "name" : "addScheduledPerformingPhysicianNameQuery",
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching."
+                        },
+                        {
+                            "name" : "addScheduledProcedureStepDescriptionQuery",
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching."
+                        }
+                    ]
+                }
+                /*
                 {
                     "order" : "class",
                     "name" : "StudyFilter",
@@ -759,6 +857,7 @@
                         
                     ]
                 }
+                */
             ]
         },
         {

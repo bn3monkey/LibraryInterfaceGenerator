@@ -73,7 +73,7 @@ t
 endExam
 
 performed procedure step status : study.status
-performed procedure step end date : study.performedProcedureStepEndDate
+performed procedure step end date : study.perfzormedProcedureStepEndDate
 performed procedure step end time : study.performedProcedureStepEndTime
 performed procduer step discontinuation reason code sequence :
 	code value : 110500
