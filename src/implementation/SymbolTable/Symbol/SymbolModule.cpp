@@ -141,7 +141,9 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 				auto tempMethod = std::make_shared<SymbolMethod>(
 					child,
 					moduleNames,
-					hasTypes
+					hasTypes,
+					_object_references,
+					_enum_references
 				);
 
 				_result = tempMethod->toResult();
@@ -175,6 +177,26 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 			}
 		}
 	}
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolModule::collectAllClassReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _object_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolModule::collectAllEnumReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _enum_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
 }
 
 void LibraryInterfaceGenerator::Implementation::SymbolModule::addEnumTable(SymbolEnumTable& enumTable, std::shared_ptr<SymbolEnum>& value)

@@ -93,10 +93,14 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 		constructorObject["return"] = "";
 		constructorObject["parameters"] = nlohmann::json::array();
 
+		//auto sans = SymbolMethod(constructorObject, parentModules, hasTypes, _object_references, _enum_references);
+
 		auto defaultConstructor = std::make_shared<SymbolMethod>(
 			constructorObject,
 			parentModules,
-			hasTypes
+			hasTypes,
+			_object_references,
+			_enum_references
 			);
 		constructors.push_back(defaultConstructor);
 		hasTypes.push_back(defaultConstructor);
@@ -144,7 +148,9 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 				auto tempMethod = std::make_shared<SymbolMethod>(
 					child,
 					parentModules,
-					hasTypes
+					hasTypes,
+					_object_references,
+					_enum_references
 					);
 
 				_result = tempMethod->toResult();
@@ -171,7 +177,9 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 				};
 				*/
 				auto tempProperty = std::make_shared<SymbolProperty>(
-					child					
+					child,
+					_object_references,
+					_enum_references
 					);
 
 				_result = tempProperty->toResult();
@@ -245,6 +253,60 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		return Result(Result::Code::CANNOT_FIND_CLASSNAME, "There is no class (%s)", _base.c_str());
 	}
 	return Result(Result::Code::SUCCESS);
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolClass::collectAllClassReference() const
+{
+	ReferenceSet references;
+	for (auto& base : bases)
+	{
+		if (auto pBase = base.lock())
+		{
+			auto base_references = pBase->collectAllClassReference();
+			for (auto& reference : base_references)
+			{
+				references.insert(reference);
+			}
+		}
+	}
+	for (auto& reference : _object_references)
+	{
+		references.insert(reference);
+	}
+
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolClass::collectAllEnumReference() const
+{
+	ReferenceSet references;
+	for (auto& base : bases)
+	{
+		if (auto pBase = base.lock())
+		{
+			auto base_references = pBase->collectAllEnumReference();
+			for (auto& reference : base_references)
+			{
+				references.insert(reference);
+			}
+		}
+	}
+	for (auto& reference : _enum_references)
+	{
+		references.insert(reference);
+	}
+
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
 }
 
 void LibraryInterfaceGenerator::Implementation::SymbolClass::addEnumTable(SymbolEnumTable& enumTable, std::shared_ptr<SymbolEnum>& value)

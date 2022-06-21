@@ -17,7 +17,7 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolClass : public HasResult, public SymbolObject
+        class SymbolClass : public HasResult, public SymbolObject, public HasReference
         {
         public:
             const std::vector<std::string>& parentModules;
@@ -51,8 +51,9 @@ namespace LibraryInterfaceGenerator
 
             Result collectBaseClass(SymbolObjectTable& objectTable);
 
-            std::vector<std::weak_ptr<SymbolClass>> collectAllClassReference();
-            std::vector<std::weak_ptr<SymbolEnum>> collectAllEnumReference();
+            std::vector<std::weak_ptr<SymbolObject>> collectAllClassReference() const override;
+            std::vector<std::weak_ptr<SymbolObject>> collectAllEnumReference() const override;
+
         private:
             std::vector<std::string> _bases;
 

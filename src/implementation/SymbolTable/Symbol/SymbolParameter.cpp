@@ -5,9 +5,13 @@ using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
 
 LibraryInterfaceGenerator::Implementation::SymbolParameter::SymbolParameter
-	(const nlohmann::json& object)
+	(const nlohmann::json& object,
+		ObjectReferenceSet& parentObjectReferenceSet,
+		EnumReferenceSet& parentEnumReferenceSet)
 {
 	_result = Result(Result::Code::SUCCESS);
+
+	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet);
 
 	{
 		auto iter = object.find(Field::Name);

@@ -254,8 +254,40 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
             defineInclude.addExternal("string");
             defineInclude.addExternal("memory");
 
+
+
             ss << "\n";
         }
+
+        addForwardDeclaration(ss, indent, object);
+
+        {
+            auto classObjects = object.collectAllClassReference();
+            for (auto& wClassObject : classObjects)
+            {
+                if (auto classObject = wClassObject.lock())
+                {
+                    auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
+                    DefineNamespace defineNamespace(ss, clazz->parentModules, indent);
+                    defineNamespace.addLine("class " + clazz->name + ";");
+                }
+            }
+        }
+
+        {
+            auto enumObjects = object.collectAllEnumReference();
+            for (auto& wEnumObject : enumObjects)
+            {
+                if (auto enumObject = wEnumObject.lock())
+                {
+                    auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
+                    DefineNamespace defineNamespace(ss, enumm->parentModules, indent);
+                    defineNamespace.addLine("enum class " + enumm->name + ";");
+                }
+            }
+        }
+
+        ss << "\n";
         
         {
             DefineNamespace defineNamespace {ss, object.parentModules, indent};
@@ -382,6 +414,8 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
             ss << "\n";
             // 전방 선언하거나 헤더 포함!           
         }
+
+        addForwardDeclaration(ss, indent, object);
 
         {
             DefineNamespace defineNamespace{ ss, object.parentModules, indent };
@@ -651,6 +685,8 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
             // 전방 선언하거나 헤더 포함!           
         }
         
+        addForwardDeclaration(ss, indent, object);
+
         {
             DefineNamespace defineNamespace {ss, object.moduleNames, indent};
             for (auto& method : object.globla_methods)
@@ -743,6 +779,75 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
     }
     header_content = ss.str();
     return Result();
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object)
+{
+    {
+        auto baseObjects = object.bases;
+        for (auto& wbaseObject : baseObjects)
+        {
+            if (auto baseObject = wbaseObject.lock())
+            {
+                DefineNamespace defineNamespace(ss, baseObject->parentModules, indent);
+                defineNamespace.addLine("class " + baseObject->name + ";");
+            }
+        }
+    }
+    {
+        auto classObjects = object.collectAllClassReference();
+        for (auto& wClassObject : classObjects)
+        {
+            if (auto classObject = wClassObject.lock())
+            {
+                auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
+                DefineNamespace defineNamespace(ss, clazz->parentModules, indent);
+                defineNamespace.addLine("class " + clazz->name + ";");
+            }
+        }
+    }
+
+    {
+        auto enumObjects = object.collectAllEnumReference();
+        for (auto& wEnumObject : enumObjects)
+        {
+            if (auto enumObject = wEnumObject.lock())
+            {
+                auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
+                DefineNamespace defineNamespace(ss, enumm->parentModules, indent);
+                defineNamespace.addLine("enum class " + enumm->name + ";");
+            }
+        }
+    }
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object)
+{
+    {
+        auto classObjects = object.collectAllClassReference();
+        for (auto& wClassObject : classObjects)
+        {
+            if (auto classObject = wClassObject.lock())
+            {
+                auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
+                DefineNamespace defineNamespace(ss, clazz->parentModules, indent);
+                defineNamespace.addLine("class " + clazz->name + ";");
+            }
+        }
+    }
+
+    {
+        auto enumObjects = object.collectAllEnumReference();
+        for (auto& wEnumObject : enumObjects)
+        {
+            if (auto enumObject = wEnumObject.lock())
+            {
+                auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
+                DefineNamespace defineNamespace(ss, enumm->parentModules, indent);
+                defineNamespace.addLine("enum class " + enumm->name + ";");
+            }
+        }
+    }
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumDefinition(const SymbolEnum& object)

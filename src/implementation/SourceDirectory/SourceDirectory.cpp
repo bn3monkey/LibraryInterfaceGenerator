@@ -194,6 +194,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
 		ss << "import java.lang.AutoCloseable\n";
+		addForwardDeclaration(ss, indent, object);
 
 		ss << "open class " << object.name << " : AutoCloseable\n";
 		ss << "{\n";
@@ -273,6 +274,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
 		ss << "import java.lang.AutoCloseable\n";
+		addForwardDeclaration(ss, indent, object);
 
 		ss << "class " << object.name << " : AutoCloseable";
 
@@ -422,7 +424,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		ss << "\n";
 
 		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-
+		addForwardDeclaration(ss, indent, object);
 
 		{
 			for (auto& method : object.globla_methods)
@@ -442,6 +444,152 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	content = ss.str();
 
 	return Result();
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object)
+{
+	{
+		auto baseObjects = object.bases;
+		for (auto& wbaseObject : baseObjects)
+		{
+			if (auto baseObject = wbaseObject.lock())
+			{
+				std::string objectPath;
+				auto& parentModules = baseObject->parentModules;
+				for (size_t i = 1; i < parentModules.size(); i++)
+				{
+					objectPath += ".";
+					objectPath += parentModules[i];
+				}
+				auto& parentObjects = baseObject->parentObjects;
+				for (auto& objectName : parentObjects)
+				{
+					objectPath += ".";
+					objectPath += objectName;
+				}
+				objectPath += ".";
+				objectPath += baseObject->name;
+
+				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+			}
+		}
+	}
+	{
+		auto classObjects = object.collectAllClassReference();
+		for (auto& wClassObject : classObjects)
+		{
+			if (auto classObject = wClassObject.lock())
+			{
+				auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
+				std::string objectPath;
+				auto& parentModules = clazz->parentModules;
+				for (size_t i = 1; i < parentModules.size(); i++)
+				{
+					objectPath += ".";
+					objectPath += parentModules[i];
+				}
+				auto& parentObjects = clazz->parentObjects;
+				for (auto& objectName : parentObjects)
+				{
+					objectPath += ".";
+					objectPath += objectName;
+				}
+				objectPath += ".";
+				objectPath += clazz->name;
+
+				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+			}
+		}
+	}
+
+	{
+		auto enumObjects = object.collectAllEnumReference();
+		for (auto& wEnumObject : enumObjects)
+		{
+			if (auto enumObject = wEnumObject.lock())
+			{
+				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
+				std::string objectPath;
+				auto& parentModules = enumm->parentModules;
+				for (size_t i = 1; i < parentModules.size(); i++)
+				{
+					objectPath += ".";
+					objectPath += parentModules[i];
+				}
+				auto& parentObjects = enumm->parentObjects;
+				for (auto& objectName : parentObjects)
+				{
+					objectPath += ".";
+					objectPath += objectName;
+				}
+				objectPath += ".";
+				objectPath += enumm->name;
+
+				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+			}
+		}
+	}
+	ss << "\n";
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object)
+{
+	{
+		auto classObjects = object.collectAllClassReference();
+		for (auto& wClassObject : classObjects)
+		{
+			if (auto classObject = wClassObject.lock())
+			{
+				auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
+				std::string objectPath;
+				auto& parentModules = clazz->parentModules;
+				for (size_t i = 1; i < parentModules.size(); i++)
+				{
+					objectPath += ".";
+					objectPath += parentModules[i];
+				}
+				auto& parentObjects = clazz->parentObjects;
+				for (auto& objectName : parentObjects)
+				{
+					objectPath += ".";
+					objectPath += objectName;
+				}
+				objectPath += ".";
+				objectPath += clazz->name;
+
+				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+			}
+		}
+	}
+
+	{
+		auto enumObjects = object.collectAllEnumReference();
+		for (auto& wEnumObject : enumObjects)
+		{
+			if (auto enumObject = wEnumObject.lock())
+			{
+				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
+				std::string objectPath;
+				auto& parentModules = enumm->parentModules;
+				for (size_t i = 1; i < parentModules.size(); i++)
+				{
+					objectPath += ".";
+					objectPath += parentModules[i];
+				}
+				auto& parentObjects = enumm->parentObjects;
+				for (auto& objectName : parentObjects)
+				{
+					objectPath += ".";
+					objectPath += objectName;
+				}
+				objectPath += ".";
+				objectPath += enumm->name;
+
+				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+			}
+		}
+	}
+	ss << "\n";
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefinition(const SymbolEnum& object)

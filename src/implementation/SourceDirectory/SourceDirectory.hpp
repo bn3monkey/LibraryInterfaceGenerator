@@ -65,6 +65,8 @@ namespace LibraryInterfaceGenerator
             Result createMethodFileContent(const SymbolModule& object, std::string& content);
 
             // 7. Code Block 제작
+            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
+            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
 
             // Enum Block 생성
             std::vector<std::string> createEnumDefinition(const SymbolEnum& object);

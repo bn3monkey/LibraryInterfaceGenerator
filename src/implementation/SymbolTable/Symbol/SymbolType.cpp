@@ -3,7 +3,9 @@
 std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::makeType(
 	const std::string& type,
 	const SymbolObjectTable& objectTable,
-	const SymbolEnumTable& enumTable)
+	const SymbolEnumTable& enumTable,
+	ObjectReferenceSet* objectReferenceSet,
+	EnumReferenceSet* enumReferenceSet)
 {
 	using namespace LibraryInterfaceGenerator::Implementation;
 	if (type == "void") {
@@ -84,12 +86,22 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				if (object_iter != objectTable.end())
 				{
 					auto object = object_iter->second;
+					if (objectReferenceSet != nullptr)
+					{
+						objectReferenceSet->insert(object);
+					}
+
 					return std::make_unique<SymbolTypeArray<SymbolTypeObject>>(object);
 				}
 				auto enum_iter = enumTable.find(inner_type);
 				if (enum_iter != enumTable.end())
 				{
 					auto object = enum_iter->second;
+					if (enumReferenceSet != nullptr)
+					{
+						enumReferenceSet->insert(object);
+					}
+
 					return std::make_unique< SymbolTypeArray<SymbolTypeEnum>>(object);
 				}
 			}
@@ -135,12 +147,20 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				if (object_iter != objectTable.end())
 				{
 					auto object = object_iter->second;
+					if (objectReferenceSet != nullptr)
+					{
+						objectReferenceSet->insert(object);
+					}
 					return std::make_unique< SymbolTypeVector<SymbolTypeObject>>(object);
 				}
 				auto enum_iter = enumTable.find(inner_type);
 				if (enum_iter != enumTable.end())
 				{
 					auto object = enum_iter->second;
+					if (enumReferenceSet != nullptr)
+					{
+						enumReferenceSet->insert(object);
+					}
 					return std::make_unique< SymbolTypeVector<SymbolTypeEnum>>(object);
 				}
 			}
@@ -151,12 +171,20 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 			if (object_iter != objectTable.end())
 			{
 				auto object = object_iter->second;
+				if (objectReferenceSet != nullptr)
+				{
+					objectReferenceSet->insert(object);
+				}
 				return std::make_unique<SymbolTypeObject>(object);
 			}
 			auto enum_iter = enumTable.find(type);
 			if (enum_iter != enumTable.end())
 			{
 				auto object = enum_iter->second;
+				if (enumReferenceSet != nullptr)
+				{
+					enumReferenceSet->insert(object);
+				}
 				return std::make_unique<SymbolTypeEnum>(object);
 			}
 		}
@@ -166,7 +194,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::HasSymbolType::change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable)
 {
-	type = LibraryInterfaceGenerator::Implementation::makeType(_type, objectTable, enumTable);
+	type = LibraryInterfaceGenerator::Implementation::makeType(_type, objectTable, enumTable, _objectReferenceSet, _enumReferenceSet);
 	if (type->valid())
 	{
 		_type.clear();
@@ -176,4 +204,10 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	{
 		return Result(Result::Code::SYMBOL_TYPE_CAST_FAIL, "Symbol not exists (%s)", _type.c_str());
 	}
+}
+
+void LibraryInterfaceGenerator::Implementation::HasSymbolType::registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet)
+{
+	_objectReferenceSet = objectReferenceSet;
+	_enumReferenceSet = enumReferenceSet;
 }

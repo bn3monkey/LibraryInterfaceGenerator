@@ -16,7 +16,7 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolModule : public HasResult
+        class SymbolModule : public HasResult, public HasReference
         {
         public:
             std::vector<std::string> moduleNames; // include itself
@@ -34,6 +34,9 @@ namespace LibraryInterfaceGenerator
                 SymbolObjectTable& objectTable,
                 SymbolEnumTable& enumTable,
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
+
+            std::vector<std::weak_ptr<SymbolObject>> collectAllClassReference() const override;
+            std::vector<std::weak_ptr<SymbolObject>> collectAllEnumReference() const override;
 
         private:
             void addEnumTable(SymbolEnumTable& enumTable, std::shared_ptr<SymbolEnum>& value);

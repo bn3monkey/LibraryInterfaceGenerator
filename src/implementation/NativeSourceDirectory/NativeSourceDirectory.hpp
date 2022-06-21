@@ -104,6 +104,10 @@ namespace LibraryInterfaceGenerator
             // 6. 전체 파일의 include file
             Result createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content);
 
+            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
+            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
+
+
             // 7. Code Block 제작
             
             // Enum Block 생성

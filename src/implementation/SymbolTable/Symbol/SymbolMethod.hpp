@@ -29,8 +29,10 @@ namespace LibraryInterfaceGenerator
 
             explicit SymbolMethod(const nlohmann::json& object,
                 const std::vector<std::string>& module_paths,
-                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
-
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes,
+                ObjectReferenceSet& parentObjectReferenceSet,
+                EnumReferenceSet& parentEnumReferenceSet
+                );
         };
     }
 }

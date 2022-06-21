@@ -5,6 +5,7 @@
 #include "../../Result/Result.hpp"
 #include "SymbolObject.hpp"
 #include "SymbolType.hpp"
+#include "SymbolObject.hpp"
 #include "../../Auxiliary/Definition.hpp"
 #include <memory>
 #include <string>
@@ -22,7 +23,10 @@ namespace LibraryInterfaceGenerator
             bool readonly;
             std::string description;
 
-            explicit SymbolProperty(const nlohmann::json& object);
+            explicit SymbolProperty(const nlohmann::json& object, 
+                ObjectReferenceSet& parentobjectReferenceSet,
+                EnumReferenceSet& parentEnumReferenceSet
+                );
 
         };
     }

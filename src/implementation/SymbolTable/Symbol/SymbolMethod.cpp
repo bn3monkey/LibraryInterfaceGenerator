@@ -5,9 +5,14 @@ using namespace LibraryInterfaceGenerator::Implementation::Definition;
 LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 	const nlohmann::json& object, 
 	const std::vector<std::string>& module_paths, 
-	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes) : parentModules(module_paths)
+	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes,
+	ObjectReferenceSet& parentObjectReferenceSet,
+	EnumReferenceSet& parentEnumReferenceSet) : parentModules(module_paths)
 {
 	_result = Result(Result::Code::SUCCESS);
+
+	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet);
+	
 
 	{
 		auto iter = object.find(Field::Name);
@@ -73,7 +78,9 @@ LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 			{
 				//std::vector<std::string> paths = { name };
 				auto tempParameter = std::make_shared<SymbolParameter>(
-					child
+					child,
+					parentObjectReferenceSet,
+					parentEnumReferenceSet
 					);
 				_result = tempParameter->toResult();
 				if (!_result)
@@ -90,3 +97,5 @@ LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 		}
 	}
 }
+
+

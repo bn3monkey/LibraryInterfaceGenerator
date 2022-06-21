@@ -27,7 +27,9 @@ namespace LibraryInterfaceGenerator
             std::string description;
             IO io;
 
-            explicit SymbolParameter(const nlohmann::json& object);
+            explicit SymbolParameter(const nlohmann::json& object,
+                ObjectReferenceSet& parentobjectReferenceSet,
+                EnumReferenceSet& parentEnumReferenceSet);
         };
     }
 }

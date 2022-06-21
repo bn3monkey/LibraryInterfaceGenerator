@@ -1,7 +1,7 @@
 {
     "order" : "package",
     "name" : "HsnUltrasoundDICOM",
-    "author" : "bn3monkey",
+    "author" : "hansono",
     "description" : 
         "A library to send ultrasound images to a DICOM supported server or query patients/studies.\nImebra DICOM Library was used internally.",
     "childs" : [
@@ -133,9 +133,8 @@
                     ]
                 },
                 {
-                    "order" : "class",
+                    "order" : "interface",
                     "name" : "ServerConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Basic settings for communicating with the server, such as IP, PORT, etc.",
                     "childs" : [
                         {
@@ -192,7 +191,7 @@
                 {
                     "order" : "class",
                     "name" : "StorageServerConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration", "HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Storage Server",
                     "childs" : [
                         {
@@ -207,7 +206,7 @@
                 {
                     "order" : "class",
                     "name" : "StorageCommitmentServerConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration", "HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Storage Commitment Server",
                     "childs" : [
 
@@ -216,7 +215,7 @@
                 {
                     "order" : "class",
                     "name" : "ModalityWorklistServerConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration", "HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM Modality Worklist Server",
                     "childs" : [
 
@@ -225,7 +224,7 @@
                 {
                     "order" : "class",
                     "name" : "MPPSServerConfiguration",
-                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
+                    "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration", "HsnUltrasoundDICOM/Configuration/Parsable"],
                     "description" : "Settings for DICOM MPPS Server",
                     "childs" : [
 

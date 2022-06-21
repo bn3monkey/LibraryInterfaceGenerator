@@ -926,7 +926,9 @@ namespace LibraryInterfaceGenerator
         std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> makeType(
             const std::string& type,
             const SymbolObjectTable& objectTable,
-            const SymbolEnumTable& enumTable
+            const SymbolEnumTable& enumTable,
+            ObjectReferenceSet* objectReferenceSet,
+            EnumReferenceSet* enumReferenceSet
             );
 
         class HasSymbolType
@@ -934,9 +936,14 @@ namespace LibraryInterfaceGenerator
         public:
             std::unique_ptr<SymbolType> type;
             Result change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable);
+            void registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet);
+        
         protected:
             std::string _type;
+            ObjectReferenceSet* _objectReferenceSet{ nullptr };
+            EnumReferenceSet* _enumReferenceSet{ nullptr };
         };
+
     }
 }
 
