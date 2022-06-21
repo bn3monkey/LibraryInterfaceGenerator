@@ -96,7 +96,7 @@ const char* memorypool_header =
 "#endif ";
 
 const char* memorypool_src =
-"#include \"MemoryPool.h\"\n"
+"#include \"MemoryPool.hpp\"\n"
 "\n"
 "static int8_t* pool {nullptr};\n"
 "static int32_t* dirty{nullptr};\n"

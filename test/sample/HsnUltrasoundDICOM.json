@@ -191,7 +191,7 @@
                 },
                 {
                     "order" : "class",
-                    "name" : "StorageConfiguration",
+                    "name" : "StorageServerConfiguration",
                     "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Storage Server",
                     "childs" : [
@@ -206,7 +206,7 @@
                 },
                 {
                     "order" : "class",
-                    "name" : "StorageCommitmentConfiguration",
+                    "name" : "StorageCommitmentServerConfiguration",
                     "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Storage Commitment Server",
                     "childs" : [
@@ -215,7 +215,7 @@
                 },
                 {
                     "order" : "class",
-                    "name" : "ModalityWorklistConfiguration",
+                    "name" : "ModalityWorklistServerConfiguration",
                     "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM Modality Worklist Server",
                     "childs" : [
@@ -224,7 +224,7 @@
                 },
                 {
                     "order" : "class",
-                    "name" : "MPPSConfiguration",
+                    "name" : "MPPSServerConfiguration",
                     "base" : ["HsnUltrasoundDICOM/Configuration/ServerConfiguration"],
                     "description" : "Settings for DICOM MPPS Server",
                     "childs" : [
@@ -247,8 +247,8 @@
                             "order" : "method",
                             "name" : "verify",
                             "description" : "verify communication with server",
-                            "return" : "HsnUltrasoundDICOM/Type/Result",
-                            "type" : "Communication result",
+                            "return" : "Communication result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -323,7 +323,7 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageCommitmentServer",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageCommitmentServerConfiguration",
                                     "name" : "configuration",
                                     "io" : "in",
                                     "description" : "The configuration of the server to which user want to check if the image is committed"
@@ -364,7 +364,7 @@
                             "name" : "listPatients",
                             "description" : "Get patient information  that meets the filter query",
                             "return" : "code for use result",
-                            "type" : "HsnUltrasoundDICOM/IE/Result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -398,20 +398,11 @@
                                 },
                                 {
                                   "order" : "parameter",
-                                  "type" : "vector<HsnUltrasoundDICOM/Type/ScheduledProcedureStepFilter>",
+                                  "type" : "vector<HsnUltrasoundDICOM/Filter/ScheduledProcedureStepFilter>",
                                   "name" : "scheduledProcedureStepFilters",
                                   "io" : "in",
                                   "description" : "query"  
                                 },
-                                /*
-                                {
-                                    "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/Filter/StudyFilter",
-                                    "name" : "studyFilter",
-                                    "io" : "in",
-                                    "description" : "query"
-                                },
-                                */
                                 {
                                    "order" : "parameter",
                                    "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
@@ -794,18 +785,52 @@
                     "description" : "filter about patient",
                     "childs" : [
                         {
+                            "order" : "method",
                             "name" : "addNameQuery",
-                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching"
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         },
                         {
+                            "order" : "method",
                             "name" : "addIDQuery",
-                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching"
-                        
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         },
                         {
+                            "order" : "method",
                             "name" : "addBirthDateQuery",
-                            "description" : "Value can be set by user in the worklist query.\nQueried using Range Based Matching."
-                        
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Range Based Matching.",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -815,20 +840,68 @@
                     "description" : "filter about scheduled procedure step.\n!!!Modality is Always set to \"US\"!!!",
                     "childs" : [
                         {
+                            "order" : "method",
                             "name" : "addScheduledStationAETitle",
-                            "description" : "Queried using Single Value Matching."
+                            "description" : "Queried using Single Value Matching.",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         },
                         {
+                            "order" : "method",
                             "name" : "addScheduledProcedrueStepStartDateQuery",
-                            "description" : "From-To range values can be set by user in the worklist query.\nQueried using Range Based Matching."
+                            "description" : "From-To range values can be set by user in the worklist query.\nQueried using Range Based Matching.",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         },
                         {
+                            "order" : "method",
                             "name" : "addScheduledPerformingPhysicianNameQuery",
-                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching."
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching.",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         },
                         {
+                            "order" : "method",
                             "name" : "addScheduledProcedureStepDescriptionQuery",
-                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching."
+                            "description" : "Value can be set by user in the worklist query.\nQueried using Wildcard Matching.",
+                            "type" : "void",
+                            "return" : "N/A",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "query",
+                                    "description" : "query content",
+                                    "type" : "string",
+                                    "io" : "in"
+                                }
+                            ]
                         }
                     ]
                 }
@@ -1184,7 +1257,7 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUtlrasoundDICOM/IE/RequstedProcedure",
+                            "type" : "HsnUltrasoundDICOM/IE/RequestedProcedure",
                             "readonly" : false,
                             "name" : "requestedProcedure",
                             "description" : "Requested Procedure"
@@ -1246,7 +1319,7 @@
                             "name" : "addProtocolCode",
                             "description" : "add Protocol Code Sequence Item to Protocol Code Sequence",
                             "return" : "whether success or not",
-                            "childs" : [
+                            "parameters" : [
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Type/SequenceItem",
@@ -1262,7 +1335,7 @@
                             "name" : "clearProtocolCodes",
                             "description" : "clear Protocol Code Sequence",
                             "return" : "N/A",
-                            "childs" : [
+                            "parameters" : [
                             ]
                         },
                         {

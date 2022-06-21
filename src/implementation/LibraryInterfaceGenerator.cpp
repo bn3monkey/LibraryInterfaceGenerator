@@ -24,10 +24,11 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	nlohmann::json object;
 	try
 	{
-		object = nlohmann::json::parse(json_content);
+		object = nlohmann::json::parse(json_content, nullptr, true, true);
 	}
 	catch (std::exception& e)
 	{
+		printf("%s", e.what());
 		return Error(Error::Code::FAIL, e.what());
 	}
 
@@ -35,6 +36,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	if (!symbolTable)
 	{
 		auto result = symbolTable.toResult();
+		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
@@ -47,6 +49,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	auto result = nativeSourceDirectory.make();
 	if (!result)
 	{
+		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
@@ -54,6 +57,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	result = nativeInterface.make();
 	if (!result)
 	{
+		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
@@ -61,6 +65,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	result = wrapper.make();
 	if (!result)
 	{
+		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
@@ -68,6 +73,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	result = sourceDirectory.make();
 	if (!result)
 	{
+		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
 	return Error(Error::Code::SUCCESS);

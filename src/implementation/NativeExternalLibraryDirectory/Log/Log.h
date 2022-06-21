@@ -74,7 +74,7 @@ const char* log_header =
 "#endif";
 
 const char* log_source = 
-"#include \"Log.h\"\n"
+"#include \"Log.hpp\"\n"
 "\n"
 "class LogStream\n"
 "{\n"
