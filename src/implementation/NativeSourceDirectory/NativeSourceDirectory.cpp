@@ -412,7 +412,53 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
             defineInclude.addExternal("memory");
 
             ss << "\n";
-            // 전방 선언하거나 헤더 포함!           
+            // 전방 선언하거나 헤더 포함!
+
+            {
+                auto baseObjects = object.bases;
+                for (auto& wbaseObject : baseObjects)
+                {
+                    if (auto baseObject = wbaseObject.lock())
+                    {
+                        std::string path;
+
+                        auto& currentModules = object.parentModules;
+                        auto& baseModules = object.parentModules;
+
+                        size_t baseDepth = baseModules.size();
+                        size_t currentDepth = currentModules.size();
+
+                        size_t depthIndicator = 0;
+                        for (depthIndicator = currentDepth-1; depthIndicator > baseDepth; depthIndicator--)
+                        {
+                            path += "../";
+                        }
+                        for (; depthIndicator >= 0; depthIndicator--)
+                        {
+                            if (baseModules[depthIndicator] == currentModules[depthIndicator])
+                                break;
+                            path += "../";
+                        }
+                        for (; depthIndicator < baseDepth; depthIndicator++)
+                        {
+                            path += baseModules[depthIndicator];
+                            path += "/";
+                        }
+                        
+                        if (baseObject->parentObjects.empty())
+                        {
+                            path += baseObject->name;
+                            
+                        }
+                        else
+                        {
+                            path += baseObject->parentObjects[0];
+                        }
+                        path += ".hpp";
+                        defineInclude.addInternal(path);
+                    }
+                }
+            }
         }
 
         addForwardDeclaration(ss, indent, object);
@@ -522,6 +568,12 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
                 defineObject.addLine("private:");
 
                 for (auto& propertyObject : object.properties)
+                {
+                    auto line = createPropertyField(*propertyObject);
+                    defineObject.addLine(line);
+                }
+
+                for (auto& propertyObject : baseProperties)
                 {
                     auto line = createPropertyField(*propertyObject);
                     defineObject.addLine(line);
@@ -784,17 +836,6 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object)
 {
     {
-        auto baseObjects = object.bases;
-        for (auto& wbaseObject : baseObjects)
-        {
-            if (auto baseObject = wbaseObject.lock())
-            {
-                DefineNamespace defineNamespace(ss, baseObject->parentModules, indent);
-                defineNamespace.addLine("class " + baseObject->name + ";");
-            }
-        }
-    }
-    {
         auto classObjects = object.collectAllClassReference();
         for (auto& wClassObject : classObjects)
         {
@@ -998,7 +1039,14 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
     method += ")";
     ret.push_back(method);
     ret.push_back("{");
-    ret.push_back("");
+    if (object.type->getTypeName() == SymbolType::Name::VOID)
+    {
+        ret.push_back("");
+    }
+    else
+    {
+        ret.push_back("\treturn " + object.type->toCppType() + "();");
+    }
     ret.push_back("}");
     return ret;
 }
@@ -1021,7 +1069,14 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
     method += ")";
     ret.push_back(method);
     ret.push_back("{");
-    ret.push_back("");
+    if (object.type->getTypeName() == SymbolType::Name::VOID)
+    {
+        ret.push_back("");
+    }
+    else
+    {
+        ret.push_back("\treturn " + object.type->toCppType() + "();");
+    }
     ret.push_back("}");
     return ret;
 }
