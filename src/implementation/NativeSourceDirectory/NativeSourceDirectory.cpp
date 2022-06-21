@@ -439,7 +439,7 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
                                 break;
                             path += "../";
                         }
-                        for (; depthIndicator < baseDepth; depthIndicator++)
+                        for (depthIndicator += 1; depthIndicator < baseDepth; depthIndicator++)
                         {
                             path += baseModules[depthIndicator];
                             path += "/";
