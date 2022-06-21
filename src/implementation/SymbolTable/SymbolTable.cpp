@@ -56,7 +56,7 @@ LibraryInterfaceGenerator::Implementation::SymbolTable::SymbolTable(const nlohma
 			auto clazz = std::dynamic_pointer_cast<SymbolClass>(object);
 			if (clazz)
 			{
-				_result = clazz->change(objectTable);
+				_result = clazz->collectBaseClass(objectTable);
 				if (!_result)
 				{
 					return;

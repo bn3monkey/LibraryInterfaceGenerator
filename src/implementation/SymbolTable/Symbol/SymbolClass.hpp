@@ -49,7 +49,10 @@ namespace LibraryInterfaceGenerator
             std::string getCppName() const override;
             std::string getKotlinName() const override;
 
-            Result change(SymbolObjectTable& objectTable);
+            Result collectBaseClass(SymbolObjectTable& objectTable);
+
+            std::vector<std::weak_ptr<SymbolClass>> collectAllClassReference();
+            std::vector<std::weak_ptr<SymbolEnum>> collectAllEnumReference();
         private:
             std::vector<std::string> _bases;
 

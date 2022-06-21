@@ -26,6 +26,7 @@ namespace LibraryInterfaceGenerator
             std::string return_description;
             std::vector<std::shared_ptr<SymbolParameter>> parameters;
 
+
             explicit SymbolMethod(const nlohmann::json& object,
                 const std::vector<std::string>& module_paths,
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);

@@ -224,7 +224,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinNam
 	return value;
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SymbolClass::change(SymbolObjectTable& objectTable)
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SymbolClass::collectBaseClass(SymbolObjectTable& objectTable)
 {
 	for (auto& _base : _bases)
 	{

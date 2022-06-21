@@ -6,6 +6,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <set>
 #include "../../Auxiliary/Definition.hpp"
 
 
@@ -28,8 +29,20 @@ namespace LibraryInterfaceGenerator
             virtual std::string getKotlinName() const = 0;
         };
 
+        class HasReference // Global Method & Interface & Class
+        {
+        public:
+            std::vector<std::weak_ptr<SymbolObject>> enum_references;
+            std::vector<std::weak_ptr<SymbolObject>> object_references;
+            void collectReference();
+        private:
+            std::set<std::string> _reference_names;
+        };
+
         using SymbolObjectTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;
         using SymbolEnumTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;
+        
+        using HasReference
     }
 }
 

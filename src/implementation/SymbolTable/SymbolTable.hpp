@@ -15,6 +15,7 @@
 
 #include "../Auxiliary/Definition.hpp"
 
+#include <unordered_map>
 namespace LibraryInterfaceGenerator
 {
     namespace Implementation
@@ -27,6 +28,7 @@ namespace LibraryInterfaceGenerator
         private:
             std::shared_ptr<SymbolPackage> _package;
             
+
             // SymbolObjectTable _objectTable;
             // SymbolEnumTable _enumTable;
             // std::vector<HasSymbolType&> _hasTypes;
