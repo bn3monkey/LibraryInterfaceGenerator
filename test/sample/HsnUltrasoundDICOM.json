@@ -908,9 +908,16 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "name" : "query",
-                                    "description" : "query content",
-                                    "type" : "string",
+                                    "name" : "from",
+                                    "description" : "from date",
+                                    "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                                    "io" : "in"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "name" : "to",
+                                    "description" : "to date",
+                                    "type" : "HsnUltrasoundDICOM/Type/HsnDate",
                                     "io" : "in"
                                 }
                             ]
@@ -947,9 +954,16 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "name" : "query",
-                                    "description" : "query content",
-                                    "type" : "string",
+                                    "name" : "from",
+                                    "description" : "from date",
+                                    "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                                    "io" : "in"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "name" : "to",
+                                    "description" : "to date",
+                                    "type" : "HsnUltrasoundDICOM/Type/HsnDate",
                                     "io" : "in"
                                 }
                             ]
