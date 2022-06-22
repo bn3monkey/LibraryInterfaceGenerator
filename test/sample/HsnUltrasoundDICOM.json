@@ -296,16 +296,46 @@
                                 },
                                 {
                                     "order" : "parameter",
-                                    "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage",
-                                    "name" : "image",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                                    "name" : "images",
                                     "io" : "in",
-                                    "description" : "ultrasound image to put in the queue"
+                                    "description" : "ultrasound images to put in the queue"
                                 }
                             ]
                         },
                         {
                             "order" : "method",
                             "name" : "sendImage",
+                            "description" : "send Images to the Storage Server",
+                            "return" : "result for use result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
+                                    "name" : "server",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to send images"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                                    "name" : "images",
+                                    "io" : "in",
+                                    "description" : "ultrasound image to send"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "method",
+                            "name" : "exportQueue",
                             "description" : "Send images stacked in the queue",
                             "return" : "code for use result",
                             "type" : "HsnUltrasoundDICOM/Type/Result",
@@ -809,6 +839,7 @@
                         
                         "IDENTIFIER_DOES_NOT_MATCH_SOP_CLASS/0xA900", // ERROR
                         "UNABLE_TO_PROCESS/0XC000", // ERROR
+                        "MATCHING_TERMINATED_DUE_TO_CANCEL_REQUEST/0xFE00", //CANCEL
                         "MATCHES_ARE_CONTINUING/0XFF00", // PENDING
                         "MATCHES_ARE_CONTINUING_BUT_OPTINAL_KEYS_NOT_SUPPORTED/0XFF01", // PENDING
                         "OUT_OF_RESOURCES/0XA700", // REFUSED
