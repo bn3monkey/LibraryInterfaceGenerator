@@ -251,7 +251,14 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
-                                    "name" : "configuration",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "name" : "server",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ServerConfiguration",
                                     "io" : "in",
                                     "description" : "The configuration of the server to be verifed the connection"
@@ -275,8 +282,15 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
-                                    "name" : "configuration",
+                                    "name" : "server",
                                     "io" : "in",
                                     "description" : "The configuration of the server to which user want to send images"
                                 },
@@ -298,8 +312,15 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
-                                    "name" : "configuration",
+                                    "name" : "server",
                                     "io" : "in",
                                     "description" : "The configuration of the server to which user want to send images"
                                 }
@@ -322,8 +343,15 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/StorageCommitmentServerConfiguration",
-                                    "name" : "configuration",
+                                    "name" : "server",
                                     "io" : "in",
                                     "description" : "The configuration of the server to which user want to check if the image is committed"
                                 },
@@ -367,6 +395,20 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ModalityWorklistServerConfiguration",
+                                    "name" : "server",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to query"
+                                },
+                                {
+                                    "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Filter/PatientFilter",
                                     "name" : "filter",
                                     "io" : "in",
@@ -388,6 +430,20 @@
                             "return" : "code for use result",
                             "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ModalityWorklistServerConfiguration",
+                                    "name" : "server",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to query"
+                                },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Filter/PatientFilter",
@@ -428,6 +484,20 @@
                             "parameters" : [
                                 {
                                     "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/MPPSServerConfiguration",
+                                    "name" : "server",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to query"
+                                },
+                                {
+                                    "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "name" : "study",
                                     "io" : "in",
@@ -442,6 +512,20 @@
                             "return" : "code for use result",
                             "type" : "HsnUltrasoundDICOM/Type/Result",
                             "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "client",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
+                                    "io" : "in",
+                                    "description" : "The client configuration for communication"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Configuration/MPPSServerConfiguration",
+                                    "name" : "server",
+                                    "io" : "in",
+                                    "description" : "The configuration of the server to which user want to query"
+                                },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
@@ -939,7 +1023,7 @@
             "childs" : [
                 {
                     "order" : "method",
-                    "name" : "genereateUID",
+                    "name" : "generateUID",
                     "type" : "string",
                     "description" : "generate UID for Information entity",
                     "return" : "UID value",
@@ -956,21 +1040,21 @@
                             "name" : "departmentID",
                             "io" : "in",
                             "description" : "department ID (assigned by the company)",
-                            "type" : "string"
+                            "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "modelID",
                             "io" : "in",
                             "description" : "model ID (assigned by the department)",
-                            "type" : "string"
+                            "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "serialNumber",
                             "io" : "in",
                             "description" : "the model serial number (assigned by the department)",
-                            "type" : "string"
+                            "type" : "int32"
                         }
                     ]
                 },
