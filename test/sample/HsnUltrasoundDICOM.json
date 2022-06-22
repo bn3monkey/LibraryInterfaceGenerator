@@ -720,7 +720,7 @@
                         "ACSE_TIMEOUT/0X0002", // ERROR
                         "DIMSE_TIMEOUT/0x0003", // ERROR
                         "ASSOCIATION_ABORT/0x0110", // ERROR
-                        "ATTRIBUTE_VALUE_OUT_OF_RANGE/0x0116H", // ERROR
+                        "ATTRIBUTE_VALUE_OUT_OF_RANGE/0x0116", // ERROR
                         "FAILURE/0xA700", // ERROR
                         
                         "IDENTIFIER_DOES_NOT_MATCH_SOP_CLASS/0xA900", // ERROR

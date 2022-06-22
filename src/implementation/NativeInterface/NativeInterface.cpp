@@ -132,10 +132,12 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 		auto line = createStaticMethodDeclaration(*method);
 		defineNamespace.addLine(line);
 	}
+	/*
 	for (auto& interface : symbolObject.interfaces)
 	{
 		createClassDeclaration(*interface, ss, indent);
 	}
+	*/
 	for (auto& clazz : symbolObject.classes)
 	{
 		createClassDeclaration(*clazz, ss, indent);
@@ -236,10 +238,12 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDef
 			ss << line << "\n";
 		}
 	}
+	/*
 	for (auto& interface : mod.interfaces)
 	{
 		createClassDefinition(*interface, ss);
 	}
+	*/
 	for (auto& clazz : mod.classes)
 	{
 		createClassDefinition(*clazz, ss);

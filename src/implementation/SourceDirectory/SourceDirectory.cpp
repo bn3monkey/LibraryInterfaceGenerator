@@ -193,13 +193,14 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		ss << "\n";
 
 		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-		ss << "import java.lang.AutoCloseable\n";
+		//ss << "import java.lang.AutoCloseable\n";
 		addForwardDeclaration(ss, indent, object);
 
-		ss << "open class " << object.name << " : AutoCloseable\n";
+		ss << "interface " << object.name << "\n";
 		ss << "{\n";
 		{
 			indent += "\t";
+			/*
 			for (auto& constructor : object.constructors)
 			{
 				{
@@ -225,6 +226,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 					ss << indent << line << "\n";
 				}
 			}
+			*/
 
 			for (auto& method : object.methods)
 			{
@@ -678,8 +680,17 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterfaceMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object)
 {
-	auto lines = createClassMethodDefinition(clazz, object);
-	lines[0] = "open " + lines[0];
+	std::vector<std::string> lines{};
+
+	{
+		std::string line = "fun ";
+		line += object.name;
+		line += "(";
+		line += createParametersDefinition(object);
+		line += ") : ";
+		line += object.type->toKotlinType();
+		lines.push_back(line);
+	}
 	return lines;
 }
 
@@ -1147,8 +1158,28 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterfacePropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object)
 {
-	std::vector<std::string> lines = createClassPropertyDefinition(clazz, object);
-	lines[0] = "open " + lines[0];
+	std::vector<std::string> lines{};
+	std::string propertyName = createPropertyName(object);
+	if (object.readonly)
+	{
+		{
+			std::string line = "val ";
+			line += object.name;
+			line += " : ";
+			line += object.type->toKotlinType();
+			lines.push_back(line);
+		}
+	}
+	else
+	{
+		{
+			std::string line = "var ";
+			line += object.name;
+			line += " : ";
+			line += object.type->toKotlinType();
+			lines.push_back(line);
+		}
+	}
 	return lines;
 }
 

@@ -170,10 +170,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createModuleDefinition(
 			ss << line << "\n";
 		}
 	}
+	/*
 	for (auto& inf : mod.interfaces)
 	{
 		createClassDefinition(prefix, *inf, ss);
 	}
+	*/
 	for (auto& clazz : mod.classes)
 	{
 		createClassDefinition(prefix, *clazz, ss);

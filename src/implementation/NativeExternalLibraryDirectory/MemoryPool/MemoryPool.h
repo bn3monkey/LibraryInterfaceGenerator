@@ -23,7 +23,7 @@ const char* memorypool_header =
 "		if (!isInitialized())\n"
 "			return nullptr;\n"
 "       T* ret = reinterpret_cast<T*>(MemoryPool::alloc(sizeof(T), n));\n"
-"       new(ret) T(args);\n"
+"       new(ret) T(args...);\n"
 "       return ret;\n"
 "    }\n"
 "    template<class T>\n"
