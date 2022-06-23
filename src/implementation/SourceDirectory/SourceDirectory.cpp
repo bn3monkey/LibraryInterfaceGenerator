@@ -780,7 +780,7 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callClas
 	}
 	ret += _wrapperDirectory.getKotlinWrapperClassName();
 	ret += ".getInstance().";
-	ret += createWrapperScope(object);
+	ret += createWrapperScope(clazz);
 	ret += object.name;
 	ret += "(_handle";
 	if (!object.parameters.empty())

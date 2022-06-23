@@ -320,7 +320,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 		line += object.type->toJNIType();
 		line += " ";
 		line += prefix;
-		line += createScope(object);
+		line += createScope(clazz);
 		line += object.name;
 		line += "(JNIEnv* env, jobject thiz, jlong handle";
 		if (!object.parameters.empty())
@@ -1387,7 +1387,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDes
 std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
 {
 	std::string ret = { "external fun " };
-	ret += createWrapperScope(object);
+	ret += createWrapperScope(clazz);
 	ret += object.name;
 	ret += "(";
 	if (!object.parameters.empty())
