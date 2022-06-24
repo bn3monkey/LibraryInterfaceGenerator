@@ -831,25 +831,29 @@
                     "values" : [
                         "SUCCESS/0x0000", // SUCCESS
                         "TCPIP_CONNECTION_TIMEOUT/0X0001", // ERROR
-                        "ACSE_TIMEOUT/0X0002", // ERROR
-                        "DIMSE_TIMEOUT/0x0003", // ERROR
+                        "ACSE_RESPONSE_TIMEOUT/0X0002", // ERROR
+                        "DIMSE_RESPONSE_TIMEOUT/0x0003", // ERROR
                         "ASSOCIATION_ABORT/0x0110", // ERROR
-                        "ATTRIBUTE_VALUE_OUT_OF_RANGE/0x0116", // ERROR
-                        "FAILURE/0xA700", // ERROR
                         
-                        "IDENTIFIER_DOES_NOT_MATCH_SOP_CLASS/0xA900", // ERROR
-                        "UNABLE_TO_PROCESS/0XC000", // ERROR
-                        "MATCHING_TERMINATED_DUE_TO_CANCEL_REQUEST/0xFE00", //CANCEL
-                        "MATCHES_ARE_CONTINUING/0XFF00", // PENDING
-                        "MATCHES_ARE_CONTINUING_BUT_OPTINAL_KEYS_NOT_SUPPORTED/0XFF01", // PENDING
-                        "OUT_OF_RESOURCES/0XA700", // REFUSED
+                        "MPPS_REQUEST_ATTRIBUTE_VALUE_OUT_OF_RANGE/0x0116", // ERROR
                         
-                        "DATA_SET_DOES_NOT_MATCH_SOP_CLASS/0XA901", // ERROR
-                        "CANNOT_UNDERSTAND/0XC000",  // ERROR
+                        "WORKLIST_REQUEST_REFUESED/0xA700", // ERROR
+                        "WORKLIST_REQUEST_IDENTIFIER_DOES_NOT_MATCH_SOP_CLASS/0xA900", // ERROR
+                        "WORKLIST_REQUEST_UNABLE_TO_PROCESS/0XC000", // ERROR
+                        
+                        "WORKLIST_MATCHING_TERMINATED_DUE_TO_CANCEL_REQUEST/0xFE00", //CANCEL
+                        "WORKLIST_MATCHES_ARE_CONTINUING/0XFF00", // PENDING
+                        "WORKLIST_MATCHES_ARE_CONTINUING_BUT_OPTINAL_KEYS_NOT_SUPPORTED/0XFF01", // PENDING
+                        
+                        "STORAGE_COMMITMENT_REQUEST_UNABLE_TO_PROCESS/0xC001",
+
+                        "STORAGE_REQUEST_REFUSED/0XA701", // REFUSED
+                        "STORAGE_REQUEST_DATSET_DOES_NOT_MATCH_SOP_CLASS/0XA901", // ERROR
+                        "STORAGE_REQUEST_UNABLE_TO_PROCESS/0XC002",  // ERROR
                         
                         // VERIFICATION CODE
-                        "COMMUNICATION_REFUSED/0xA001", // REFUSED
-                        "COMMUNICATION_FAILED/0xC001" // ERROR
+                        "COMMUNICATION_VERIFICATION_REFUSED/0xA001", // REFUSED
+                        "COMMUNICATION_VERIFICATION_FAIL/0xC003" // ERROR
                     ]
                 },
                 {
