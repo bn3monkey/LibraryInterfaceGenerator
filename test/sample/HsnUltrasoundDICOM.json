@@ -489,6 +489,13 @@
                                   "description" : "query"  
                                 },
                                 {
+                                    "order" : "parameter",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/Patient>",
+                                    "name" : "studies",
+                                    "io" : "out",
+                                    "description" : "query results"
+                                },
+                                {
                                    "order" : "parameter",
                                    "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
                                    "name" : "studies",
