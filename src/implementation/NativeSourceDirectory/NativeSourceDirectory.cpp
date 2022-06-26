@@ -1119,7 +1119,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::cr
 {
     std::string setter{ "void set" };
     setter += propertyName;
-    setter += "(";
+    setter += "(const ";
     setter += object.type->toCppType();
     if (!object.type->isPrimitive())
         setter += "&";
@@ -1238,7 +1238,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeSource
         setter += scope;
         setter += "set";
         setter += propertyName;
-        setter += "(";
+        setter += "(const ";
         setter += object.type->toCppType();
         if (!object.type->isPrimitive())
             setter += "&";

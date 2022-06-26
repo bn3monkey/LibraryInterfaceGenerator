@@ -1181,14 +1181,14 @@
                             "order" : "property",
                             "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
                             "readonly" : true,
-                            "name" : "exams",
-                            "description" : "exams of a patient"
+                            "name" : "studies",
+                            "description" : "studies of a patient"
                         },
                         {
                             "order" : "method",
                             "type" : "void",
                             "description" : "add exam to the patient",
-                            "name" : "addExam",
+                            "name" : "addStudy",
                             "return" : "N/A",
                             "parameters" : 
                             [
@@ -1196,8 +1196,8 @@
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "io" : "in",
-                                    "name" : "exam",
-                                    "description" : "exam that added to the patient"                                    
+                                    "name" : "study",
+                                    "description" : "study that added to the patient"                                    
                                 }
                             ]
                         }
@@ -1560,8 +1560,8 @@
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/Study",
                             "readonly" : false,
-                            "name" : "exam",
-                            "description" : "Exam holding this series"
+                            "name" : "study",
+                            "description" : "Study holding this series"
                         },
                         {
                             "order" : "property",

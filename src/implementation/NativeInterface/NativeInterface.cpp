@@ -831,7 +831,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	setter += api_macro;
 	setter += " void set";
     setter += propertyName;
-    setter += "(void* handle, ";
+    setter += "(void* handle, const ";
 	std::string type = object.type->toCppInterfaceType();
 	setter += type;
     if (!object.type->isPrimitive())
@@ -883,7 +883,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPr
 	setter += scope;
 	setter += "set";
     setter += propertyName;
-    setter += "(void* handle, ";
+    setter += "(void* handle, const ";
 	std::string type = object.type->toCppInterfaceType();
 	setter += type;
     if (!object.type->isPrimitive())
