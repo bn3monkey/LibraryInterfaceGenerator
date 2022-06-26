@@ -1259,7 +1259,7 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "HsnUltrasoundDICOM/Type/DiscontinuedReason",
+                            "type" : "vector<HsnUltrasoundDICOM/Type/DiscontinuedReason>",
                             "readonly" : true,
                             "name" : "discontinuedReasons",
                             "description" : "Discontinued reasons of a study"
