@@ -1627,13 +1627,6 @@
                                     "io" : "in",
                                     "name" : "imagePaths",
                                     "description" : "ultrasound Image path that is saved in the local machine"                                    
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "string",
-                                    "io" : "out",
-                                    "name" : "outputMsg",
-                                    "description" : "Reasons when an error occurs in a function"
                                 }
                             ]
                         },
