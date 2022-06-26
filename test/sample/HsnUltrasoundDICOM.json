@@ -238,9 +238,9 @@
             "description" : "A set of classes for communicating with the DICOM server",
             "childs" : [
                 {
-                    "order" : "interface",
-                    "name" : "Server",
-                    "description" : "Provides an interface to the ability to validate connections.",
+                    "order" : "class",
+                    "name" : "Verficiation",
+                    "description" : "Provides an class to the ability to validate connections.",
                     "childs" : [
                         {
                             "order" : "method",
