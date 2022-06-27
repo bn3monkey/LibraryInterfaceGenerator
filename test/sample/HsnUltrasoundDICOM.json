@@ -239,7 +239,7 @@
             "childs" : [
                 {
                     "order" : "class",
-                    "name" : "VerficiationServer",
+                    "name" : "VerificationServer",
                     "description" : "Provides an class to the ability to validate connections.",
                     "childs" : [
                         {
