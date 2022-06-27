@@ -722,6 +722,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 		}
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
+			lines.push_back(indent + createReturnValueChanger(object));
 			lines.push_back(indent + "return __ret;");
 		}
 	}
@@ -764,6 +765,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 		}
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
+			lines.push_back(indent + createReturnValueChanger(object));
 			lines.push_back(indent + "return __ret;");
 		}
 	}
@@ -839,12 +841,12 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createRe
 		break;
 	case SymbolType::Name::ENUMARRAY:
 		ret = "val __ret = Array(__temp_ret.size) { idx -> enumValues<";
-		ret += object.type->toKotlinType();
+		ret += object.type->toKotlinInnerType();
 		ret += ">().find { it.value == __temp_ret[idx]}!! }";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
 		ret = "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<";
-		ret += object.type->toKotlinType();
+		ret += object.type->toKotlinInnerType();
 		ret += ">().find { it.value == __temp_ret[idx]}!! }";
 		break;
 	case SymbolType::Name::OBJECT:
@@ -853,12 +855,12 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createRe
 		ret += "(__temp_ret)";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "val _value = Array(value.size) {";
+		ret = "val _value = Array(__temp_ret.size) {";
 		ret += object.type->toKotlinInnerType();
 		ret += "(__temp_ret[it]) }";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "val _value = MutableList(value.size) {";
+		ret = "val _value = MutableList(__temp_ret.size) {";
 		ret += object.type->toKotlinInnerType();
 		ret += "(__temp_ret[it]) }";
 		break;
@@ -887,7 +889,9 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createIn
 		ret = "val i_";
 		ret += object.name;
 		ret += " = ";
-		ret += "IntArray(value.size) { ";
+		ret += "IntArray(";
+		ret += object.name;
+		".size) { ";
 		ret += object.name;
 		ret += "[it].value }";
 		break;
@@ -895,7 +899,9 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createIn
 		ret = "val i_";
 		ret += object.name;
 		ret += " = ";
-		ret += "MutableList(value.size) { ";
+		ret += "MutableList(";
+		ret += object.name;
+		ret += ".size) { ";
 		ret += object.name;
 		ret += "[it].value }";
 		break;
@@ -910,7 +916,9 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createIn
 		ret = "val i_";
 		ret += object.name;
 		ret += " = ";
-		ret += "IntArray(value.size) { ";
+		ret += "IntArray(";
+		ret += object.name;
+		".size) { ";
 		ret += object.name;
 		ret += "[it].getNativeHandle() }";
 		break;
@@ -918,7 +926,9 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createIn
 		ret = "val i_";
 		ret += object.name;
 		ret += " = ";
-		ret += "MutableList(value.size) { ";
+		ret += "MutableList(";
+		ret += object.name;
+		ret += ".size) { ";
 		ret += object.name;
 		ret += "[it].getNativeHandle() }";
 		break;
@@ -949,23 +959,31 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createOu
 		break;
 	case SymbolType::Name::ENUMARRAY:
 		ret = object.name;
-		ret += " = Array(i_";
+		ret += ".clear(); ";
+
+		ret += "for (value in i_" + object.name;
+		ret += ") {";
 		ret += object.name;
-		ret += ".size) { idx->enumValues<";
+		ret += ".add(enumValues<";
 		ret += object.type->toKotlinType();
-		ret += ">().find { it.value == i_";
-		ret += object.name;
-		ret += "[idx] }!! }";
+		ret += ">().find { it.value == value }";
+		ret += ")";
+		ret += " }";
+
 		break;
 	case SymbolType::Name::ENUMVECTOR:
 		ret = object.name;
-		ret += " = MutableList(i_";
+		ret += ".clear(); ";
+
+		ret += "for (value in i_" + object.name;
+		ret += ") {";
 		ret += object.name;
-		ret += ".size) { idx->enumValues<";
+		ret += ".add(enumValues<";
 		ret += object.type->toKotlinType();
-		ret += ">().find { it.value == i_";
-		ret += object.name;
-		ret += "[idx] }!! }";
+		ret += ">().find { it.value == value }";
+		ret += ")";
+		ret += " }";
+
 		break;
 	case SymbolType::Name::OBJECT:
 		ret = object.name;
@@ -977,19 +995,29 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createOu
 		break;
 	case SymbolType::Name::OBJECTARRAY:
 		ret = object.name;
-		ret += " = Array(value.size) {";
-		ret += object.type->toKotlinInnerType();
-		ret += "(i_";
+		ret += ".clear(); ";
+
+		ret += "for (value in i_" + object.name;
+		ret += ") {";
 		ret += object.name;
-		ret += "[it]) }";
+		ret += ".add(";
+		ret += object.type->toKotlinInnerType();
+		ret += "(value)";
+		ret += ")";
+		ret += " }";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
 		ret = object.name;
-		ret += " = MutableList(value.size) {";
-		ret += object.type->toKotlinInnerType();
-		ret += "(i_";
+		ret += ".clear(); ";
+
+		ret += "for (value in i_" + object.name;
+		ret += ") {";
 		ret += object.name;
-		ret += "[it]) }";
+		ret += ".add(";
+		ret += object.type->toKotlinInnerType();
+		ret += "(value)";
+		ret += ")";
+		ret += " }";
 		break;
 	default:
 		ret = object.name;
@@ -1070,12 +1098,12 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createOu
 		break;
 	case SymbolType::Name::ENUMARRAY:
 		ret = "val __ret = Array(__temp_ret.size) { idx -> enumValues<";
-		ret += object.type->toKotlinType();
+		ret += object.type->toKotlinInnerType();
 		ret += ">().find { it.value == __temp_ret[idx]}!! }";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
 		ret = "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<";
-		ret += object.type->toKotlinType();
+		ret += object.type->toKotlinInnerType();
 		ret += ">().find { it.value == __temp_ret[idx]}!! }";
 		break;
 	case SymbolType::Name::OBJECT:
@@ -1084,12 +1112,12 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createOu
 		ret += "(__temp_ret)";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "val __ret = Array(value.size) {";
+		ret = "val __ret = Array(__temp_ret.size) {";
 		ret += object.type->toKotlinInnerType();
 		ret += "(__temp_ret[it]) }";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "val __ret = MutableList(value.size) {";
+		ret = "val __ret = MutableList(__temp_ret.size) {";
 		ret += object.type->toKotlinInnerType();
 		ret += "(__temp_ret[it]) }";
 		break;

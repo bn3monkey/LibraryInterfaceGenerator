@@ -582,7 +582,7 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
-                    auto name = object->getCppName();
+                    auto name = object->getKotlinName();
                     std::string ret{ "Array<" };
                     ret += name;
                     ret += ">";
@@ -832,7 +832,7 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
-                    auto name = object->getCppName();
+                    auto name = object->getKotlinName();
                     std::string ret{ "MutableList<" };
                     ret += name;
                     ret += ">";
@@ -891,7 +891,7 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
-                    auto name = object->getCppName();
+                    auto name = object->getKotlinName();
                     std::string ret{ "MutableList<" };
                     ret += name;
                     ret += ">";

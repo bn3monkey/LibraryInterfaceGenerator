@@ -217,6 +217,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName()
 
 std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinName() const
 {
+	/*
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)
 	{
@@ -229,7 +230,8 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinNam
 		value += ".";
 	}
 	value += name;
-	return value;
+	*/
+	return name;
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SymbolClass::collectBaseClass(SymbolObjectTable& objectTable)

@@ -74,6 +74,7 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName() 
 
 std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName() const
 {
+	/*
 	std::string value{ "" };
 	for (auto& moduleName : parentModules)
 	{
@@ -86,5 +87,6 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName
 		value += ".";
 	}
 	value += name;
-	return value;
+	*/
+	return name;
 }

@@ -122,13 +122,13 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				std::string init{ "init" };
 				DefineObject defineObject(ss, init, indent);
 
-				defineObject.addLine("System.loadLibrary(" + _kotlin_wrapper_class_name + ")");
+				defineObject.addLine("System.loadLibrary(\"" + _kotlin_wrapper_class_name + "\")");
 
-				defineObject.addLine("@Volatile private var instance: " + _kotlin_wrapper_class_name + "? = null");
-				defineObject.addLine("@JvmStatic fun getInstance() : " + _kotlin_wrapper_class_name + "=");
-				defineObject.addLine("	instance ?: synchronized(this) { instance ?: " + _kotlin_wrapper_class_name + "().alose { instance = it} }");
 			}
-
+			
+			defineObject.addLine("@Volatile private var instance: " + _kotlin_wrapper_class_name + "? = null");
+			defineObject.addLine("@JvmStatic fun getInstance() : " + _kotlin_wrapper_class_name + "=");
+			defineObject.addLine("	instance ?: synchronized(this) { instance ?: " + _kotlin_wrapper_class_name + "().also { instance = it} }");
 		}
 		createWrapperPackageDeclaration(symbolObject, ss, indent);
 	}
@@ -144,7 +144,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	std::string packageName = symbolObject.name;
 	std::transform(packageName.begin(), packageName.end(), packageName.begin(), ::tolower);
 
-	std::string prefix = "com_";
+	std::string prefix = "Java_com_";
 	prefix += symbolObject.author;
 	prefix += "_";
 	prefix += packageName;
@@ -291,7 +291,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 		std::string line = "extern \"C\" JNIEXPORT void ";
 		line += prefix;
 		line += createScope(clazz);
-		line += "release(JNIEnv* env, jobject thiz, jlong handle);";
+		line += "release(JNIEnv* env, jobject thiz, jlong handle)";
 		lines.push_back(line);
 	}
 	lines.push_back("{");
@@ -328,7 +328,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 			line += ", ";
 			line += createParametersDefinition(object);
 		}
-		line += ");";
+		line += ")";
 		lines.push_back(line);
 	}
 	lines.push_back("{");
@@ -491,10 +491,14 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createReturnValu
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-	case SymbolType::Name::OBJECT:
 		ret = "auto __ret = static_cast<";
 		ret += object.type->toJNIType();
 		ret += ">(__temp_ret);";
+		break;
+	case SymbolType::Name::OBJECT:
+		ret = "auto __ret = (";
+		ret += object.type->toJNIType();
+		ret += ")__temp_ret;";
 		break;
 	case SymbolType::Name::STRING:
 		ret = "auto __ret = createWrapperString(env, __temp_ret);";
@@ -581,7 +585,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputParam
 		ret = "auto i_";
 		ret += object.name;
 		ret += " = static_cast<";
-		ret += object.type->toCppType();
+		ret += object.type->toCppInterfaceType();
 		ret += ">(";
 		ret += object.name;
 		ret += ");";
@@ -589,11 +593,11 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputParam
 	case SymbolType::Name::OBJECT:
 		ret = "auto i_";
 		ret += object.name;
-		ret += " = static_cast<";
-		ret += object.type->toCppInnerType();
-		ret += ">(";
+		ret += " = (const ";
+		ret += object.type->toCppInterfaceInnerType();
+		ret += ")";
 		ret += object.name;
-		ret += ");";
+		ret += ";";
 		break;
 	case SymbolType::Name::STRING:
 		ret = "auto i_";
@@ -768,11 +772,11 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputPara
 		break;
 	case SymbolType::Name::OBJECT:
 		ret = object.name;
-		ret += " = static_cast<";
+		ret += " = (";
 		ret += object.type->toJNIType();
-		ret += ">(i_";
+		ret += ")i_";
 		ret += object.name;
-		ret += "); // NOT AVAILABLE";
+		ret += "; // NOT AVAILABLE";
 		break;
 	case SymbolType::Name::STRING:
 		ret = "auto ";
@@ -994,7 +998,6 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 	
 	ret.push_back(createPropertyGetterDeclaration(prefix, scope, propertyName, object));
 	ret.push_back("{");
-	ret.push_back(indent + createInputPropertyChanger(object));
 	{
 		ret.push_back(indent + callPropertyGetter(propertyName, clazz, object));
 	}
@@ -1034,9 +1037,9 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputPrope
 		ret += ">(value);";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto i_value = static_cast<";
+		ret = "auto i_value = (const ";
 		ret += object.type->toCppInterfaceInnerType();
-		ret += ">(value);";
+		ret += ")value;";
 		break;
 	case SymbolType::Name::STRING:
 		ret = "auto i_value = createNativeString(env, value);";
@@ -1121,10 +1124,14 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputProp
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-	case SymbolType::Name::OBJECT:
 		ret = "auto __ret = static_cast<";
 		ret += object.type->toJNIType();
 		ret += ">(__temp_ret);";
+		break;
+	case SymbolType::Name::OBJECT:
+		ret = "auto __ret = (";
+		ret += object.type->toJNIType();
+		ret += ")__temp_ret;";
 		break;
 	case SymbolType::Name::STRING :
 		ret = "auto __ret = createWrapperString(env, __temp_ret);";
@@ -1316,10 +1323,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDecl
 	{
 		ss << indent << createWrapperStaticMethodDeclaration(*method) << "\n";
 	}
+	/*
 	for (auto& inf : mod.interfaces)
 	{
 		createWrapperClassDeclaration(*inf, ss, indent);
 	}
+	*/
 	for (auto& clazz : mod.classes)
 	{
 		createWrapperClassDeclaration(*clazz, ss, indent);
@@ -1372,7 +1381,12 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperCon
 {
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(clazz);
-	ret += "construct() : Long";
+	ret += "construct(";
+	if (!constructor.parameters.empty())
+	{
+		ret += createWrapperParametersDeclaration(constructor);
+	}
+	ret += ") : Long";
 	return ret;
 }
 
@@ -1389,13 +1403,14 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperCla
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(clazz);
 	ret += object.name;
-	ret += "(";
+	ret += "(handle : Long";
 	if (!object.parameters.empty())
 	{
+		ret += ", ";
 		ret += createWrapperParametersDeclaration(object);
 	}
 	ret += ") : ";
-	ret += object.type->toKotlinType();
+	ret += object.type->toKotlinWrapperType();
 	return ret;
 }
 
@@ -1404,14 +1419,13 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperSta
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(object);
 	ret += object.name;
-	ret += "(handle : Long";
+	ret += "(";
 	if (!object.parameters.empty())
 	{
-		ret += ", ";
 		ret += createWrapperParametersDeclaration(object);
 	}
 	ret += ") : ";
-	ret += object.type->toKotlinType();
+	ret += object.type->toKotlinWrapperType();
 	return ret;
 }
 
