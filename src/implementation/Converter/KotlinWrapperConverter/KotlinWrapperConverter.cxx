@@ -8,22 +8,22 @@
 std::mutex vm_mtx;
 JavaVM* g_vm {nullptr};
 
-inline std::function<void()> createReleaser(JNIEnv* env, jobject* reference)
+inline std::function<void()> createReleaser(JNIEnv* env, jobject reference)
 {
     {
         std::lock_guard<std::mutex> lock(vm_mtx);
         if (g_vm == nullptr)
         {
-            g_vm = env->GetJavaVM(&g_vam)
+            env->GetJavaVM(&g_vm);
         }
     }
 
     jobject globalRef = env->NewGlobalRef(reference);
-    auto ret = [globalRef]() {
+    std::function<void()> ret = [globalRef]() {
         JNIEnv* env {nullptr};
         int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
         if (getEnvStat == JNI_EDETACHED) {
-            if (g_vm->AttachCurrentThread((void **) &g_env, NULL) != 0) {
+            if (g_vm->AttachCurrentThread(&env, NULL) != 0) {
                 return;
             }
         }
@@ -33,14 +33,14 @@ inline std::function<void()> createReleaser(JNIEnv* env, jobject* reference)
         else if (getEnvStat == JNI_OK) {
         } 
 
-        jclass clazz = env->GetObjectClass(jobect);
-        jemthodID release = env->GetMethodID(clazz, "close", "()V");
-        env->CallVoidMethod();
+        jclass clazz = env->GetObjectClass(globalRef);
+        jmethodID close = env->GetMethodID(clazz, "close", "()V");
+        env->CallVoidMethod(globalRef, close);
         env->DeleteGlobalRef(globalRef);
 
         if (getEnvStat == JNI_EDETACHED)
             g_vm->DetachCurrentThread();
-    }
+    };
     return ret;
 }
 

@@ -356,7 +356,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::callAddReleaser(const SymbolClass& clazz)
 {
 	std::vector<std::string> lines;
-	lines.push_back("auto ret = createReleaser(reference);");
+	lines.push_back("auto ret = createReleaser(env, reference);");
 	{
 		std::string line = createNativeScope(clazz);
 		line += "addReleaser((void *)(&ret));";
