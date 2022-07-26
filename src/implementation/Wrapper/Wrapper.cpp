@@ -204,6 +204,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createClassDefinition(c
 				ss << line << "\n";
 		}
 
+		{
+			auto lines = createAddReleaserDefinition(prefix, clazz);
+			for (auto& line : lines)
+				ss << line << "\n";
+		}
+
 		auto& base_methods = clazz.getBaseMethods();
 		for (auto& methodObject : base_methods)
 		{
@@ -324,6 +330,39 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::callDestructor(c
 	line += createNativeScope(clazz);
 	line += "release((void *)handle);";
 	return line;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createAddReleaserDefinition(const std::string& prefix, const SymbolClass& clazz)
+{
+	std::vector<std::string> lines;
+	{
+		std::string line = "extern \"C\" JNIEXPORT void ";
+		line += prefix;
+		line += createScope(clazz);
+		line += "addReleaser(JNIEnv* env, jobject thiz, jobject reference)";
+		lines.push_back(line);
+	}
+	lines.push_back("{");
+	{
+		std::string indent = "    ";
+		std::vector<std::string> codes = callAddReleaser(clazz);
+		for(auto& code : codes)
+			lines.push_back(indent + code);
+	}
+	lines.push_back("}");
+	return lines;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::callAddReleaser(const SymbolClass& clazz)
+{
+	std::vector<std::string> lines;
+	lines.push_back("auto ret = createReleaser(reference);");
+	{
+		std::string line = createNativeScope(clazz);
+		line += "addReleaser((void *)(&ret));";
+		lines.push_back(line);
+	}
+	return lines;
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number)
@@ -1327,7 +1366,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFun
 	// vector<enum>   : std::vector<int> <-> java/util/ArrayList & java/lang/Integer
 	// vector<object> : std::vector<void*> <-> java/util/ArrayList & java/lang/Long 
 
-	return kotlinWrapperConverter;
+	return KotlinWrapperConverter;
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss, std::string indent)
@@ -1372,6 +1411,9 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDecla
 
 		{
 			ss << indent << createWrapperDestructorDeclaration(clazz) << "\n";
+		}
+		{
+			ss << indent << createWrapperAddReleaserDeclaration(clazz) << "\n";
 		}
 
 		auto& base_methods = clazz.getBaseMethods();
@@ -1431,6 +1473,14 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDes
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(clazz);
 	ret += "release(handle : Long)";
+	return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperAddReleaserDeclaration(const SymbolClass& clazz)
+{
+	std::string ret = { "external fun " };
+	ret += createWrapperScope(clazz);
+	ret += "addReleaser(reference : Any)";
 	return ret;
 }
 

@@ -1,7 +1,53 @@
-#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER__)
-#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER__
-
-static constexpr char* kotlinWrapperConverter =
+#ifndef __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
+#define __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
+static constexpr char* KotlinWrapperConverter = 
+"#include <jni.h>\n"
+"#include <vector>\n"
+"#include <string>\n"
+"#include <functional>\n"
+"#include <mutex>\n"
+"// Make Wrapper Return Value\n"
+"\n"
+"std::mutex vm_mtx;\n"
+"JavaVM* g_vm {nullptr};\n"
+"\n"
+"inline std::function<void()> createReleaser(JNIEnv* env, jobject* reference)\n"
+"{\n"
+"    {\n"
+"        std::lock_guard<std::mutex> lock(vm_mtx);\n"
+"        if (g_vm == nullptr)\n"
+"        {\n"
+"            g_vm = env->GetJavaVM(&g_vam)\n"
+"        }\n"
+"    }\n"
+"\n"
+"    jobject globalRef = env->NewGlobalRef(reference);\n"
+"    auto ret = [globalRef]() {\n"
+"        JNIEnv* env {nullptr};\n"
+"        int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);\n"
+"        if (getEnvStat == JNI_EDETACHED) {\n"
+"            if (g_vm->AttachCurrentThread((void **) &g_env, NULL) != 0) {\n"
+"                return;\n"
+"            }\n"
+"        }\n"
+"        else if (getEnvStat == JNI_EVERSION) {\n"
+"            return;\n"
+"        }\n"
+"        else if (getEnvStat == JNI_OK) {\n"
+"        } \n"
+"\n"
+"        jclass clazz = env->GetObjectClass(jobect);\n"
+"        jemthodID release = env->GetMethodID(clazz, \"close\", \"()V\");\n"
+"        env->CallVoidMethod();\n"
+"        env->DeleteGlobalRef(globalRef);\n"
+"\n"
+"        if (getEnvStat == JNI_EDETACHED)\n"
+"            g_vm->DetachCurrentThread();\n"
+"    }\n"
+"    return ret;\n"
+"}\n"
+"\n"
+"\n"
 "inline jstring createWrapperString(JNIEnv* env, const std::string& value)\n"
 "{\n"
 "    return env->NewStringUTF(value.c_str());\n"
@@ -1253,6 +1299,6 @@ static constexpr char* kotlinWrapperConverter =
 "        env->DeleteLocalRef(jelement);\n"
 "    }\n"
 "    return true;\n"
-"}";
-
-#endif
+"}"
+"";
+#endif // __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__

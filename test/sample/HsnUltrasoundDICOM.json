@@ -98,14 +98,14 @@
                             "name" : "readTimeout",
                             "description" : "How long to wait for a read request",
                             "readonly" : false,
-                            "type" : "string"
+                            "type" : "int32"
                         },
                         {
                             "order" : "property",
                             "name" : "writeTimeout",
                             "description" : "How long to wait for a write request",
                             "readonly" : false,
-                            "type" : "string"
+                            "type" : "int32"
                         },
                         {
                             "order" : "property",
@@ -748,7 +748,8 @@
                         "ISO_2022_IR_87/29",
                         "ISO_2022_IR_159/30",
                         "ISO_IR_192/31",
-                        "GB18030/32"
+                        "GB18030/32",
+                        "None/1000"
                     ]
                 },
                 {
@@ -824,7 +825,7 @@
                     "values" : [
                         "SUCCESS/0",
                         "REFUSED/1",
-                        "ERROR/2",
+                        "Error/2",
                         "WARNING/3",
                         "INFORMATION/4",
                         "PENDING/5",

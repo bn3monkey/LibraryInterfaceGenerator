@@ -1,8 +1,50 @@
 #include <jni.h>
 #include <vector>
 #include <string>
-
+#include <functional>
+#include <mutex>
 // Make Wrapper Return Value
+
+std::mutex vm_mtx;
+JavaVM* g_vm {nullptr};
+
+inline std::function<void()> createReleaser(JNIEnv* env, jobject* reference)
+{
+    {
+        std::lock_guard<std::mutex> lock(vm_mtx);
+        if (g_vm == nullptr)
+        {
+            g_vm = env->GetJavaVM(&g_vam)
+        }
+    }
+
+    jobject globalRef = env->NewGlobalRef(reference);
+    auto ret = [globalRef]() {
+        JNIEnv* env {nullptr};
+        int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
+        if (getEnvStat == JNI_EDETACHED) {
+            if (g_vm->AttachCurrentThread((void **) &g_env, NULL) != 0) {
+                return;
+            }
+        }
+        else if (getEnvStat == JNI_EVERSION) {
+            return;
+        }
+        else if (getEnvStat == JNI_OK) {
+        } 
+
+        jclass clazz = env->GetObjectClass(jobect);
+        jemthodID release = env->GetMethodID(clazz, "close", "()V");
+        env->CallVoidMethod();
+        env->DeleteGlobalRef(globalRef);
+
+        if (getEnvStat == JNI_EDETACHED)
+            g_vm->DetachCurrentThread();
+    }
+    return ret;
+}
+
+
 inline jstring createWrapperString(JNIEnv* env, const std::string& value)
 {
     return env->NewStringUTF(value.c_str());

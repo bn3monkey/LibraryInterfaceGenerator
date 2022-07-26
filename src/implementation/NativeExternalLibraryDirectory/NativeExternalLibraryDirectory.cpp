@@ -67,14 +67,14 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	{
 	case ExternalTool::Log :
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "Log", log_header, log_source);
+			auto ret = createExternalToolInternal(_lib_dir_path, "Log", Log_header, Log_src);
 			if (!ret)
 				return ret;
 			}
 		break;
 	case ExternalTool::MemoryPool:
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", memorypool_header, memorypool_src);
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", MemoryPool_header, MemoryPool_src);
 			if (!ret)
 				return ret;
 		}

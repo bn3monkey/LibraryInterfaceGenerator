@@ -165,6 +165,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 			auto line = createDestructorDeclaration(clazz);
 			defineNamespace.addLine(line);
 		}
+		{
+			auto line = createAddReleaserDeclaration(clazz);
+			defineNamespace.addLine(line);
+		}
 
 		auto base_props = clazz.getBaseProperties();
 		for (auto& base_prop : base_props)
@@ -273,6 +277,13 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefi
 	{
 		auto lines = createDestructorDefinition(clazz);
 		for(auto& line : lines)
+		{
+			ss << line << "\n";
+		}
+	}
+	{
+		auto lines = createAddReleaserDefinition(clazz);
+		for (auto& line : lines)
 		{
 			ss << line << "\n";
 		}
@@ -443,6 +454,38 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::dealloca
 	ret += clazz.name;
 	ret += ">(handle);";
 	return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(const SymbolClass& clazz)
+{
+	std::string line{ "extern " };
+	line += api_macro;
+	line += " void addReleaser(void* reference); ";
+	return line;
+}
+
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDefinition(const SymbolClass& clazz)
+{
+	std::vector<std::string> ret;
+	{
+		std::string line{ "void " };
+		line += createScope(clazz);
+		line += "addReleaser(void* reference)";
+		ret.push_back(line);
+	}
+	{
+		ret.push_back("{");
+		std::string line = "    ";
+		line += addReleaser(clazz);
+		ret.push_back(line);
+		ret.push_back("}");
+	}
+	return ret;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::addReleaser(const SymbolClass& clazz)
+{
+	return "addReferenceReleaser(reference);";
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDeclaration(const SymbolMethod& object)
@@ -1140,7 +1183,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createSc
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
 {
-	return nativeInterfaceConverter;
+	return NativeInterfaceConverter;
 }
 
 // Return Value (Create)

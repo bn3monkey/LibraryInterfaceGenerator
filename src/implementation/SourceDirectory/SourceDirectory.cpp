@@ -9,15 +9,6 @@ static char* delimeter = "/";
 #endif
 
 
-static const std::vector<std::string> handleCode = {
-	"internal constructor(handle : Long) {",
-	"\t_handle = handle",
-	"\trequire(_handle != 0L)",
-	"}",
-	"private var _handle : Long",
-	"internal fun getNativeHandle() : Long = _handle",
-};
-
 LibraryInterfaceGenerator::Implementation::SourceDirectory::SourceDirectory(Environment environment, const Wrapper& wrapperDirectory, const SymbolTable& symbolTable, std::string root_dir_path, const char* dir_name)
 	: _wrapperDirectory(wrapperDirectory), _symbolTable(symbolTable)
 {
@@ -200,6 +191,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		ss << "{\n";
 		{
 			indent += "\t";
+			ss << indent << "fun getNativeHandle() : Long\n";
 			/*
 			for (auto& constructor : object.constructors)
 			{
@@ -307,11 +299,6 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				{
 					ss << indent << line << "\n";
 				}
-			}
-
-			{
-				for (const auto& line : handleCode)
-					ss << indent << line << "\n";
 			}
 
 			{
@@ -664,9 +651,42 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 			line += ")";
 			lines.push_back(line);
 		}
+		
 		lines.push_back(indent + "require(_handle != 0L)");
+
+		{
+			std::string line = indent;
+			line += _wrapperDirectory.getKotlinWrapperClassName();
+			line += ".getInstance().";
+			line += createWrapperScope(clazz);
+			line += "addReleaser(this)";
+			lines.push_back(line);
+		}
 	}
 	lines.push_back("}");
+
+	lines.push_back("internal constructor(handle : Long) { ");
+	lines.push_back("\t_handle = handle");
+	lines.push_back("\trequire(_handle != 0L)");
+	{
+		std::string line = "\t";
+		line += _wrapperDirectory.getKotlinWrapperClassName();
+		line += ".getInstance().";
+		line += createWrapperScope(clazz);
+		line += "addReleaser(this)";
+		lines.push_back(line);
+	}
+	lines.push_back("}");
+	lines.push_back("private var _handle : Long");
+	{
+		std::string line;
+		if (clazz.bases.empty())
+			line = "internal ";
+		else
+			line = "override ";
+		line += "fun getNativeHandle() : Long = _handle";
+		lines.push_back(line);
+	}
 	return lines;
 }
 
@@ -678,16 +698,36 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 		lines.push_back("override fun close()");
 	}
 	lines.push_back("{");
+	std::string indent = "\t";
 	{
-		std::string indent = "\t";
-		std::string line;
-		line += indent;
+		std::string line{ indent };
+		line += "if (_handle != 0L)";
+		lines.push_back(line);
+	}
+	{
+		std::string line{ indent };
+		line += "{";
+		lines.push_back(line);
+	}
+	{
+		std::string line{indent + indent};
 		line += _wrapperDirectory.getKotlinWrapperClassName();
 		line += ".getInstance().";
 		line += createWrapperScope(clazz);
 		line += "release(_handle)";
 		lines.push_back(line);
 	}
+	{
+		std::string line{ indent + indent };
+		line += "_handle = 0L";
+		lines.push_back(line);
+	}
+	{
+		std::string line{ indent };
+		line += "}";
+		lines.push_back(line);
+	}
+
 	lines.push_back("}");
 	lines.push_back("protected fun finalize() = close()");
 	return lines;

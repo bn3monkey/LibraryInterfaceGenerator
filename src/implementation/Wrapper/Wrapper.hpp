@@ -12,7 +12,7 @@
 #include "../NativeSourceStream/NativeSourceStream.hpp"
 #include "../NativeInterface/NativeInterface.hpp"
 #include "../Environment.hpp"
-#include "../Converter/KotlinWrapperConverter.hpp"
+#include "../Converter/KotlinWrapperConverter/KotlinWrapperConverter.h"
 
 namespace LibraryInterfaceGenerator
 {
@@ -67,6 +67,9 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> createDestructorDefinition(const std::string& prefix, const SymbolClass& clazz);
             std::string callDestructor(const SymbolClass& clazz);
 
+            std::vector<std::string> createAddReleaserDefinition(const std::string& prefix, const SymbolClass& clazz);
+            std::vector<std::string> callAddReleaser(const SymbolClass& clazz);
+
             std::vector<std::string> createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object);
 
@@ -104,6 +107,7 @@ namespace LibraryInterfaceGenerator
 
             std::string createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             std::string createWrapperDestructorDeclaration(const SymbolClass& clazz);
+            std::string createWrapperAddReleaserDeclaration(const SymbolClass& clazz);
             std::string createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::string createWrapperStaticMethodDeclaration(const SymbolMethod& object, int number);
 

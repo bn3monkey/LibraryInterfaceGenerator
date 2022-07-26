@@ -13,7 +13,7 @@
 #include "../NativeSourceDirectory/NativeSourceDirectory.hpp"
 #include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
 #include "../Environment.hpp"
-#include "../Converter/NativerInterfaceConverter.hpp"
+#include "../Converter/NativeInterfaceConverter/NativeInterfaceConverter.h"
 
 namespace LibraryInterfaceGenerator
 {
@@ -75,6 +75,10 @@ namespace LibraryInterfaceGenerator
             std::string createDestructorDeclaration(const SymbolClass& clazz);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
             std::string deallocate(const SymbolClass& clazz);
+
+            std::string createAddReleaserDeclaration(const SymbolClass& clazz);
+            std::vector<std::string> createAddReleaserDefinition(const SymbolClass& clazz);
+            std::string addReleaser(const SymbolClass& clazz);
 
             std::string createClassMethodDeclaration(const SymbolMethod& object);
             std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);

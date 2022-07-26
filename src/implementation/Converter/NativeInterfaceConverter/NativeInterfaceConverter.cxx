@@ -53,6 +53,11 @@ inline std::shared_ptr<T>* cloneReference(std::shared_ptr<T>& cptr)
 #endif
     return ret;
 }
+inline void addReferenceReleaser(void* releaser)
+{
+	auto* param = reinterpret_cast<std::function<void()>*>(releaser);
+	MemoryPool::addReleaser(*param);
+}
 
 
 template<class ENUM>
