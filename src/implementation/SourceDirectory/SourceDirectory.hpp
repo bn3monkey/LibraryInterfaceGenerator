@@ -73,16 +73,16 @@ namespace LibraryInterfaceGenerator
 
             // Method Block »ý¼º
 
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object);
+            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
 
             std::vector<std::string> createInterfaceMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createDerivedMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
+            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
+            std::vector<std::string> createDerivedMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
+            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object, int number);
 
-            std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string callStaticMethod(const SymbolMethod& object);
+            std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object, int number);
+            std::string callStaticMethod(const SymbolMethod& object, int number);
 
             std::string createReturnValueChanger(const SymbolMethod& object);
             std::string createInputParameterChanger(const SymbolParameter& object);

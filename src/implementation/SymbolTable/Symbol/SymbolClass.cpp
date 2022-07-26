@@ -2,9 +2,9 @@
 
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
-std::vector<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolMethod>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseMethods() const
+std::vector<std::pair<std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolMethod>, int>> LibraryInterfaceGenerator::Implementation::SymbolClass::getBaseMethods() const
 {
-	std::vector<std::shared_ptr<SymbolMethod>> ret{};
+	std::vector<std::pair<std::shared_ptr<SymbolMethod>, int>> ret{};
 	for (auto& wbase : bases)
 	{
 		if (auto base = wbase.lock())
@@ -44,6 +44,8 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 	SymbolEnumTable& enumTable, 
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes) : isInterface(isInterface), parentModules(module_paths), parentObjects(object_paths)
 {
+	std::unordered_map<std::string, int> method_name_map;
+
 	{
 		auto iter = object.find(Field::Name);
 		if (iter == object.end())
@@ -86,6 +88,8 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 			return;
 		}
 
+		
+
 		nlohmann::json constructorObject;
 		constructorObject["name"] = "constructor";
 		constructorObject["type"] = "void";
@@ -102,7 +106,10 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 			_object_references,
 			_enum_references
 			);
-		constructors.push_back(defaultConstructor);
+
+		method_name_map["constructor"] = 0;
+
+		constructors.push_back(std::make_pair(defaultConstructor, 0));
 		hasTypes.push_back(defaultConstructor);
 
 		auto& childs = *iter;
@@ -157,14 +164,28 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 				if (!_result)
 					return;
 
+
+				std::string method_name = tempMethod->name;
+				auto name_iter = method_name_map.find(method_name);
+				int name_count = 0;
+				if (name_iter != method_name_map.end())
+				{
+					name_count = ++(name_iter->second);
+				}
+				else
+				{
+					method_name_map[method_name] = 0;
+				}
+
 				if (tempMethod->name != "constructor")
 				{
-					methods.push_back(tempMethod);
+
+					methods.push_back(std::make_pair(tempMethod, name_count));
 				}
 				else
 				{
 					if (!tempMethod->parameters.empty())
-						constructors.push_back(tempMethod);
+						constructors.push_back(std::make_pair(tempMethod, name_count));
 				}
 				hasTypes.push_back(tempMethod);
 			}

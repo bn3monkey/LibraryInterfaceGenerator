@@ -127,8 +127,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 {
 	DefineNamespace defineNamespace(ss, symbolObject.name, indent);
 
-	for (auto& method : symbolObject.globla_methods)
+	for (auto& methodObject : symbolObject.global_methods)
 	{
+		auto& method = methodObject.first;
 		auto line = createStaticMethodDeclaration(*method);
 		defineNamespace.addLine(line);
 	}
@@ -154,8 +155,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 {
 	DefineNamespace defineNamespace{ ss, clazz.name, indent };
 	{
-		for (auto& constructor : clazz.constructors)
+		for (auto& constructorObject : clazz.constructors)
 		{
+			auto& constructor = constructorObject.first;
 			auto line = createConstructorDeclaration(clazz, *constructor);
 			defineNamespace.addLine(line);
 		}
@@ -183,13 +185,15 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		}
 
 		auto base_methods = clazz.getBaseMethods();
-		for (auto& base_method: base_methods)
+		for (auto& baseMethodObject: base_methods)
 		{
+			auto base_method = baseMethodObject.first;
 			auto line = createClassMethodDeclaration(*base_method);
 			defineNamespace.addLine(line);
 		}
-		for (auto& method : clazz.methods)
+		for (auto& methodObject : clazz.methods)
 		{
+			auto method = methodObject.first;
 			auto line = createClassMethodDeclaration(*method);
 			defineNamespace.addLine(line);
 		}
@@ -230,8 +234,9 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 }
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDefinition(const SymbolModule& mod, std::stringstream& ss)
 {
-	for (auto& method : mod.globla_methods)
+	for (auto& methodObject : mod.global_methods)
 	{
+		auto& method = methodObject.first;
 		auto lines = createStaticMethodDefinition(*method);
 		for (auto& line : lines)
 		{
@@ -256,8 +261,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDef
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefinition(const SymbolClass& clazz, std::stringstream& ss)
 {
-	for (auto& constructor : clazz.constructors)
+	for (auto& constructorObject : clazz.constructors)
 	{
+		auto& constructor = constructorObject.first;
 		auto lines = createConstructorDefinition(clazz, *constructor);
 		for(auto& line : lines)
 		{
@@ -289,16 +295,19 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefi
 		}
 	}
 	auto base_methods = clazz.getBaseMethods();
-	for (auto& base_method: base_methods)
+	for (auto& baseMethodObject: base_methods)
 	{
+		auto& base_method = baseMethodObject.first;
+
 		auto decls = createClassMethodDefinition(clazz, *base_method);
 		for (auto& decl : decls)
 		{
 			ss << decl << "\n";
 		}
 	}
-	for (auto& method : clazz.methods)
+	for (auto& methodObject : clazz.methods)
 	{
+		auto& method = methodObject.first;
 		auto decls = createClassMethodDefinition(clazz, *method);
 		for (auto& decl : decls)
 		{

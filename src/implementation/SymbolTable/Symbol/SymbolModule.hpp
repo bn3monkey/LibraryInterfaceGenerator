@@ -25,7 +25,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::shared_ptr<SymbolClass>> classes;
             std::vector<std::shared_ptr<SymbolClass>> interfaces;
-            std::vector<std::shared_ptr<SymbolMethod>> globla_methods;
+            std::vector<std::pair<std::shared_ptr<SymbolMethod>, int>> global_methods;
             std::vector<std::shared_ptr<SymbolModule>> submodules;
             std::vector<std::shared_ptr<SymbolEnum>> enums;
 

@@ -90,7 +90,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 			return result;
 	}
 
-	auto& global_methods = object.globla_methods;
+	auto& global_methods = object.global_methods;
 	if (!global_methods.empty())
 	{
 		auto result = createMethodFile(object, module_path);
@@ -228,8 +228,10 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 			}
 			*/
 
-			for (auto& method : object.methods)
+			for (auto& methodObject : object.methods)
 			{
+				auto method = methodObject.first;
+				auto method_count = methodObject.second;
 				{
 					Comment comment{ ss, indent };
 					comment.add(*method);
@@ -292,13 +294,15 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		ss << "{\n";
 		{
 			indent += "\t";
-			for (auto& constructor : object.constructors)
+			for (auto& constructorObject : object.constructors)
 			{
+				auto& constructor = constructorObject.first;
+				auto method_count = constructorObject.second;
 				{
 					Comment comment{ ss, indent };
 					comment.add(*constructor);
 				}
-				auto lines = createConstructorDefinition(object, *constructor);
+				auto lines = createConstructorDefinition(object, *constructor, method_count);
 				for (auto& line : lines)
 				{
 					ss << indent << line << "\n";
@@ -319,13 +323,15 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 			}
 
 			auto baseMethods = object.getBaseMethods();
-			for (auto& method : baseMethods)
+			for (auto& methodObject : baseMethods)
 			{
+				auto& method = methodObject.first;
+				auto method_count = methodObject.second;
 				{
 					Comment comment{ ss, indent };
 					comment.add(*method);
 				}
-				auto lines = createDerivedMethodDefinition(object, *method);
+				auto lines = createDerivedMethodDefinition(object, *method, method_count);
 				for (auto& line : lines)
 				{
 					ss << indent << line << "\n";
@@ -333,13 +339,15 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 			}
 
 
-			for (auto& method : object.methods)
+			for (auto& methodObject : object.methods)
 			{
+				auto& method = methodObject.first;
+				auto method_count = methodObject.second;
 				{
 					Comment comment{ ss, indent };
 					comment.add(*method);
 				}
-				auto lines = createClassMethodDefinition(object, *method);
+				auto lines = createClassMethodDefinition(object, *method, method_count);
 				for (auto& line : lines)
 				{
 					ss << indent << line << "\n";
@@ -429,13 +437,15 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 		addForwardDeclaration(ss, indent, object);
 
 		{
-			for (auto& method : object.globla_methods)
+			for (auto& methodObject : object.global_methods)
 			{
+				auto& method = methodObject.first;
+				auto method_count = methodObject.second;
 				{
 					Comment comment{ ss, indent };
 					comment.add(*method);
 				}
-				auto lines = createStaticMethodDefinition(*method);
+				auto lines = createStaticMethodDefinition(*method, method_count);
 				for (auto& line : lines)
 				{
 					ss << indent << line << "\n";
@@ -610,7 +620,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 }
 
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
 	std::vector<std::string> lines{};
 
@@ -634,7 +644,12 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 			line += _wrapperDirectory.getKotlinWrapperClassName();
 			line += ".getInstance().";
 			line += createWrapperScope(clazz);
-			line += "construct(";
+			line += "construct";
+			if (number > 0)
+			{
+				line += std::to_string(number);
+			}
+			line += "(";
 			if (!object.parameters.empty())
 			{
 				for (auto& parameter : object.parameters)
@@ -694,7 +709,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 	return lines;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
 	std::vector<std::string> lines{};
 
@@ -714,7 +729,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 		{
 			lines.push_back(indent + createInputParameterChanger(*parameter));
 		}
-		lines.push_back(indent + callClassMethod(clazz, object));
+		lines.push_back(indent + callClassMethod(clazz, object, number));
 		for (auto& parameter : object.parameters)
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
@@ -730,14 +745,14 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 	return lines;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createDerivedMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createDerivedMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
-	auto lines = createClassMethodDefinition(clazz, object);
+	auto lines = createClassMethodDefinition(clazz, object, number);
 	lines[0] = "override " + lines[0];
 	return lines;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMethodDefinition(const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMethodDefinition(const SymbolMethod& object, int number)
 {
 	std::vector<std::string> lines{};
 
@@ -757,7 +772,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 		{
 			lines.push_back(indent + createInputParameterChanger(*parameter));
 		}
-		lines.push_back(indent + callStaticMethod(object));
+		lines.push_back(indent + callStaticMethod(object, number));
 		for (auto& parameter : object.parameters)
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
@@ -773,7 +788,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 	return lines;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callClassMethod(const SymbolClass& clazz, const SymbolMethod& object)
+std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callClassMethod(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
 	std::string ret;
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
@@ -784,6 +799,10 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callClas
 	ret += ".getInstance().";
 	ret += createWrapperScope(clazz);
 	ret += object.name;
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
 	ret += "(_handle";
 	if (!object.parameters.empty())
 	{
@@ -801,7 +820,7 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callClas
 	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callStaticMethod(const SymbolMethod& object)
+std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callStaticMethod(const SymbolMethod& object, int number)
 {
 	std::string ret;
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
@@ -812,6 +831,10 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::callStat
 	ret += ".getInstance().";
 	ret += createWrapperScope(object);
 	ret += object.name;
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
 	ret += "(";
 	if (!object.parameters.empty())
 	{

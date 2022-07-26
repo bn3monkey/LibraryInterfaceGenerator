@@ -9,6 +9,8 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 	SymbolEnumTable& enumTable, 
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes)
 {
+	std::unordered_map<std::string, int> method_name_map;
+
 	{
 		auto iter = object.find(Field::Name);
 		if (iter == object.end())
@@ -150,7 +152,20 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 				if (!_result)
 					return;
 
-				globla_methods.push_back(tempMethod);
+
+				std::string method_name = tempMethod->name;
+				auto name_iter = method_name_map.find(method_name);
+				int name_count = 0;
+				if (name_iter != method_name_map.end())
+				{
+					name_count = ++(name_iter->second);
+				}
+				else
+				{
+					method_name_map[method_name] = 0;
+				}
+
+				global_methods.push_back(std::make_pair(tempMethod, name_count));
 				hasTypes.push_back(tempMethod);
 			}
 			else if (order == Order::Module)

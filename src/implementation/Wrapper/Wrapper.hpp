@@ -61,16 +61,16 @@ namespace LibraryInterfaceGenerator
             void createModuleDefinition(const std::string& prefix, const SymbolModule& mod, std::stringstream& ss);
             void createClassDefinition(const std::string& prefix, const SymbolClass& clazz, std::stringstream& ss);
 
-            std::vector<std::string> createConstructorDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor);
+            std::vector<std::string> createConstructorDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             std::string callConstructor(const SymbolClass& clazz, const SymbolMethod& constructor);
 
             std::vector<std::string> createDestructorDefinition(const std::string& prefix, const SymbolClass& clazz);
             std::string callDestructor(const SymbolClass& clazz);
 
-            std::vector<std::string> createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object);
+            std::vector<std::string> createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object);
 
-            std::vector<std::string> createStaticMethodDefinition(const std::string& prefix, const SymbolMethod& object);
+            std::vector<std::string> createStaticMethodDefinition(const std::string& prefix, const SymbolMethod& object, int number);
             std::string callStaticMethod(const SymbolMethod& object);
 
             std::string createParametersDefinition(const SymbolMethod& object);
@@ -102,10 +102,10 @@ namespace LibraryInterfaceGenerator
             void createWrapperModuleDeclaration(const SymbolModule& mod, std::stringstream& ss, std::string indent);
             void createWrapperClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string indent);
 
-            std::string createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor);
+            std::string createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             std::string createWrapperDestructorDeclaration(const SymbolClass& clazz);
-            std::string createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string createWrapperStaticMethodDeclaration(const SymbolMethod& object);
+            std::string createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object, int number);
+            std::string createWrapperStaticMethodDeclaration(const SymbolMethod& object, int number);
 
             std::string createWrapperParametersDeclaration(const SymbolMethod& object);
             std::string createWrapperParameterDeclaration(const SymbolParameter& object);

@@ -106,7 +106,7 @@ Result NativeSourceDirectory::createModule(const SymbolModule& object, std::stri
             return result;
     }
 
-    auto& global_methods = object.globla_methods;
+    auto& global_methods = object.global_methods;
     if (!global_methods.empty())
     {
         auto result = createMethodFile(object, include_path, src_path);
@@ -327,11 +327,12 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
                 }
                 for (auto& methodObject : object.methods)
                 {
+                    auto& method = methodObject.first;
                     {
                         Comment comment{ ss, indent };
-                        comment.add(*methodObject);
+                        comment.add(*method);
                     }
-                    auto line = createInterfaceMethodDeclaration(object, *methodObject);
+                    auto line = createInterfaceMethodDeclaration(object, *method);
                     defineObject.addLine(line);
                 }
             }
@@ -504,8 +505,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
                     }
                 }
 
-                for (auto& constructor : constructors)
+                for (auto& constructorObject : constructors)
                 {
+                    auto& constructor = constructorObject.first;
                     {
                         Comment comment{ ss, indent };
                         comment.add(*constructor);
@@ -546,16 +548,18 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
 
                 for (auto& methodObject : methods)
                 {
+                    auto& method = methodObject.first;
                     {
                         Comment comment{ ss, indent };
-                        comment.add(*methodObject);
+                        comment.add(*method);
                     }
-                    auto line = createClassMethodDeclaration(object, *methodObject);
+                    auto line = createClassMethodDeclaration(object, *method);
                     defineObject.addLine(line);
                 }
 
-                for (auto& baseMethod : baseMethods)
+                for (auto& baseMethodObject : baseMethods)
                 {
+                    auto& baseMethod = baseMethodObject.first;
                     {
                         Comment comment{ ss, indent };
                         comment.add(*baseMethod);
@@ -619,8 +623,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
 
         ss << "\n";
 
-        for (auto& constructor : constructors)
+        for (auto& constructorObject : constructors)
         {
+            auto& constructor = constructorObject.first;
             auto ret = createConstructorDefinition(object, *constructor);
             for (auto& line : ret)
             {
@@ -636,8 +641,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
         }
         ss << "\n";
         
-        for (auto& method : methods)
+        for (auto& methodObject : methods)
         {
+            auto& method = methodObject.first;
             auto ret = createClassMethodDefinition(object, *method);
             for (auto& line : ret)
             {
@@ -645,8 +651,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createC
             }
             ss << "\n";
         }
-        for (auto& method : baseMethods)
+        for (auto& methodObject : baseMethods)
         {
+            auto& method = methodObject.first;
             auto ret = createClassMethodDefinition(object, *method);
             for (auto& line : ret)
             {
@@ -741,8 +748,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
 
         {
             DefineNamespace defineNamespace {ss, object.moduleNames, indent};
-            for (auto& method : object.globla_methods)
+            for (auto& methodObject : object.global_methods)
             {
+                auto& method = methodObject.first;
                 {
                     Comment comment{ ss, indent };
                     comment.add(*method);
@@ -786,8 +794,9 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createM
         }
 
         ss << "\n";
-        for (auto& method : object.globla_methods)
+        for (auto& methodObjects : object.global_methods)
         {
+            auto& method = methodObjects.first;
             auto ret = createStaticMethodDefinition(*method);
             for (auto& line : ret)
             {

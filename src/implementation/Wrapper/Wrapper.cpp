@@ -162,9 +162,12 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createModuleDefinition(const std::string& prefix, const SymbolModule& mod, std::stringstream& ss)
 {
-	for (auto& method : mod.globla_methods)
+	for (auto& methodObject : mod.global_methods)
 	{
-		auto lines = createStaticMethodDefinition(prefix, *method);
+		auto& method = methodObject.first;
+		auto& method_count = methodObject.second;
+
+		auto lines = createStaticMethodDefinition(prefix, *method, method_count);
 		for (auto& line : lines)
 		{
 			ss << line << "\n";
@@ -185,9 +188,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createModuleDefinition(
 void LibraryInterfaceGenerator::Implementation::Wrapper::createClassDefinition(const std::string& prefix, const SymbolClass& clazz, std::stringstream& ss)
 {
 	{
-		for (auto& constructor : clazz.constructors)
+		for (auto& constructorObject : clazz.constructors)
 		{
-			auto lines = createConstructorDefinition(prefix, clazz, *constructor);
+			auto& method = constructorObject.first;
+			auto& method_count = constructorObject.second;
+
+			auto lines = createConstructorDefinition(prefix, clazz, *method, method_count);
 			for (auto& line : lines)
 				ss << line << "\n";
 		}
@@ -199,17 +205,21 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createClassDefinition(c
 		}
 
 		auto& base_methods = clazz.getBaseMethods();
-		for (auto& method : base_methods)
+		for (auto& methodObject : base_methods)
 		{
-			auto lines = createClassMethodDefinition(prefix, clazz, *method);
+			auto& method = methodObject.first;
+			auto method_count = methodObject.second;
+			auto lines = createClassMethodDefinition(prefix, clazz, *method, method_count);
 			for (auto& line : lines)
 				ss << line << "\n";
 		}
 
 		auto& methods = clazz.methods;
-		for (auto& method : methods)
+		for (auto& methodObject : methods)
 		{
-			auto lines = createClassMethodDefinition(prefix, clazz, *method);
+			auto& method = methodObject.first;
+			auto method_count = methodObject.second;
+			auto lines = createClassMethodDefinition(prefix, clazz, *method, method_count);
 			for (auto& line : lines)
 				ss << line << "\n";
 		}
@@ -232,14 +242,19 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createClassDefinition(c
 	}
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createConstructorDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createConstructorDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
 {
 	std::vector<std::string> lines;
 	{
 		std::string line = "extern \"C\" JNIEXPORT jlong ";
 		line += prefix;
 		line += createScope(clazz);
-		line += "construct(JNIEnv* env, jobject thiz";
+		line += "construct";
+		if (number > 0)
+		{
+			line += std::to_string(number);
+		}
+		line += "(JNIEnv * env, jobject thiz";
 		if (!constructor.parameters.empty())
 		{
 			line += ", ";
@@ -311,7 +326,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::callDestructor(c
 	return line;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
 	std::vector<std::string> lines;
 
@@ -322,6 +337,10 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 		line += prefix;
 		line += createScope(clazz);
 		line += object.name;
+		if (number > 0)
+		{
+			line += std::to_string(number);
+		}
 		line += "(JNIEnv* env, jobject thiz, jlong handle";
 		if (!object.parameters.empty())
 		{
@@ -382,7 +401,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::callClassMethod(
 	return line;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createStaticMethodDefinition(const std::string& prefix, const SymbolMethod& object)
+std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createStaticMethodDefinition(const std::string& prefix, const SymbolMethod& object, int number)
 {
 	std::vector<std::string> lines;
 
@@ -393,6 +412,10 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::cre
 		line += prefix;
 		line += createScope(object);
 		line += object.name;
+		if (number > 0)
+		{
+			line += std::to_string(number);
+		}
 		line += "(JNIEnv* env, jobject thiz";
 		if (!object.parameters.empty())
 		{
@@ -1319,9 +1342,11 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDeclaration(const SymbolModule& mod, std::stringstream& ss, std::string indent)
 {
-	for (auto& method : mod.globla_methods)
+	for (auto& methodObject : mod.global_methods)
 	{
-		ss << indent << createWrapperStaticMethodDeclaration(*method) << "\n";
+		auto& method = methodObject.first;
+		auto method_count = methodObject.second;
+		ss << indent << createWrapperStaticMethodDeclaration(*method, method_count) << "\n";
 	}
 	/*
 	for (auto& inf : mod.interfaces)
@@ -1338,9 +1363,11 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDecl
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string indent)
 {
 	{
-		for (auto& constructor : clazz.constructors)
+		for (auto& constructorObject : clazz.constructors)
 		{
-			ss << indent << createWrapperConstructorDeclaration(clazz, *constructor) << "\n";
+			auto& method = constructorObject.first;
+			auto method_count = constructorObject.second;
+			ss << indent << createWrapperConstructorDeclaration(clazz, *method, method_count) << "\n";
 		}
 
 		{
@@ -1348,15 +1375,19 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDecla
 		}
 
 		auto& base_methods = clazz.getBaseMethods();
-		for (auto& method : base_methods)
+		for (auto& methodObject : base_methods)
 		{
-			ss << indent << createWrapperClassMethodDeclaration(clazz, *method) << "\n";
+			auto& method = methodObject.first;
+			auto method_count = methodObject.second;
+			ss << indent << createWrapperClassMethodDeclaration(clazz, *method, method_count) << "\n";
 		}
 
 		auto& methods = clazz.methods;
-		for (auto& method : methods)
+		for (auto& methodObject : methods)
 		{
-			ss << indent << createWrapperClassMethodDeclaration(clazz, *method) << "\n";
+			auto& method = methodObject.first;
+			auto method_count = methodObject.second;
+			ss << indent << createWrapperClassMethodDeclaration(clazz, *method, method_count) << "\n";
 		}
 
 		auto& base_properties = clazz.getBaseProperties();
@@ -1377,11 +1408,16 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDecla
 	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor)
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor, int number)
 {
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(clazz);
-	ret += "construct(";
+	ret += "construct";
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
+	ret += "(";
 	if (!constructor.parameters.empty())
 	{
 		ret += createWrapperParametersDeclaration(constructor);
@@ -1398,11 +1434,15 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDes
 	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object)
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(clazz);
 	ret += object.name;
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
 	ret += "(handle : Long";
 	if (!object.parameters.empty())
 	{
@@ -1414,11 +1454,15 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperCla
 	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMethodDeclaration(const SymbolMethod& object)
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMethodDeclaration(const SymbolMethod& object, int number)
 {
 	std::string ret = { "external fun " };
 	ret += createWrapperScope(object);
 	ret += object.name;
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
 	ret += "(";
 	if (!object.parameters.empty())
 	{
