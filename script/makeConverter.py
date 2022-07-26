@@ -33,7 +33,8 @@ def makeConverter() :
                     while True :
                         line = f.readline()
                         if not line : break
-                        replaced = line.replace("\t", "\\t")
+                        replaced = line.replace("\\", "\\\\")
+                        replaced = replaced.replace("\t", "\\t")
                         replaced = replaced.replace("\n", "\\n")
                         replaced = replaced.replace("\"", "\\\"")
                         macro_file.write("\"")

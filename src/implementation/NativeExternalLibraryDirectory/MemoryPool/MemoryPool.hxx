@@ -6,11 +6,7 @@
 #include "../Log/Log.hpp"
 #include <memory>
 #include <functional>
-
-#if defined(__ANDROID__)
-#include <jni.h>
-#endif
-
+#include <vector>
 
 class MemoryPool
 {

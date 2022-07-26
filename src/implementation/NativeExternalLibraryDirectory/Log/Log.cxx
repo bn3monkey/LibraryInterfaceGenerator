@@ -156,6 +156,6 @@ size_t Log::setTag(char* buffer, const char* tag)
     std::copy(tag, tag + tag_size, buffer + 1);
     buffer[tag_size + 1] = '}';
     buffer[tag_size + 2] = ' ';
-    buffer[tag_size + 3] = '\\0';
+    buffer[tag_size + 3] = '\0';
     return tag_size + 3;
 }

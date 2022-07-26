@@ -6,7 +6,7 @@ inline void* createReference(Args... args)
 {
 #ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
     auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
-    ret = std::shared_ptr<T>(MemoryPool::allocate<T>(args), [](T* p) {
+    *ret = std::shared_ptr<T>(MemoryPool::allocate<T>(1, args...), [](T* p) {
         MemoryPool::deallocate<T>(p);
     });
 #else
@@ -19,7 +19,8 @@ inline void* createReference()
 {
 #ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
     auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
-    ret = std::shared_ptr<T>(MemoryPool::allocate<T>(), [](T* p) {
+    Log::D(__FUNCTION__, "ret address : %p", ret);
+    *ret = std::shared_ptr<T>(MemoryPool::allocate<T>(), [](T* p) {
         MemoryPool::deallocate<T>(p);
     });
 #else
@@ -37,17 +38,17 @@ inline void releaseReference(void* cptr)
 #endif
 }
 template<class T>
-inline std::shared_ptr<T>& getReference(void* cptr)
+inline std::shared_ptr<T>& getReference(const void* cptr)
 {
-    auto* ret = reinterpret_cast<std::shared_ptr<T>*>(cptr);
+    auto* ret = const_cast<std::shared_ptr<T>*>(reinterpret_cast<const std::shared_ptr<T>*>(cptr));
     return *ret;
 }
 template<class T>
-inline std::shared_ptr<T>* cloneReference(std::shared_ptr<T>& cptr)
+inline std::shared_ptr<T>* cloneReference(const std::shared_ptr<T>& cptr)
 {
 #ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
     auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
-    *ret = value;
+    *ret = cptr;
 #else
     auto* ret = new shared_ptr<T>(cptr);
 #endif
@@ -66,9 +67,9 @@ inline int32_t createInterfaceEnum(ENUM value)
 	return static_cast<int32_t>(value);
 }
 template<class CLASS>
-inline void* createInterfaceObject(std::shared_ptr<CLASS>& value)
+inline void* createInterfaceObject(const std::shared_ptr<CLASS>& value)
 {
-	return (void*)cloneReference<T>(value);
+	return (void*)cloneReference<CLASS>(value);
 }
 template<class ENUM>
 inline std::vector<int32_t> createInterfaceEnumArray(const std::vector<ENUM>& value)
@@ -93,23 +94,23 @@ inline std::vector<int32_t> createInterfaceEnumVector(const std::vector<ENUM>& v
 	return ret;
 }
 template<class CLASS>
-inline std::vector<void*> createInterfaceObjectArray(const std::vector<CLASS>& value)
+inline std::vector<void*> createInterfaceObjectArray(const std::vector<std::shared_ptr<CLASS>>& value)
 {
 	std::vector<void*> ret;
 	for (auto& element : value)
 	{
-		auto* ielement = createInterfaceObject(element);
+		auto ielement = createInterfaceObject(element);
 		ret.push_back(ielement);
 	}
 	return ret;
 }
 template<class CLASS>
-inline std::vector<void*> createInterfaceObjectVector(const std::vector<CLASS>& value)
+inline std::vector<void*> createInterfaceObjectVector(const std::vector<std::shared_ptr<CLASS>>& value)
 {
 	std::vector<void*> ret;
 	for (auto& element : value)
 	{
-		auto* ielement = createInterfaceObject(element);
+		auto ielement = createInterfaceObject(element);
 		ret.push_back(ielement);
 	}
 	return ret;
@@ -158,22 +159,24 @@ std::vector<CLASS> createNativeObjectArray(const std::vector<void *>& value)
 		auto* ielement = createNativeObject<CLASS>(element);
 		ret.push_back(ielement);
 	}
+	return ret;
 }
 template<class CLASS>
 std::vector<std::shared_ptr<CLASS>> createNativeObjectVector(const std::vector<void*>& value)
 {
-	std::vector<CLASS> ret;
+	std::vector<std::shared_ptr<CLASS>> ret;
 	for (auto& element : value)
 	{
-		auto* ielement = createNativeObject<CLASS>(element);
+		auto ielement = createNativeObject<CLASS>((const void*&)element);
 		ret.push_back(ielement);
 	}
+	return ret;
 }
 
 template<class ENUM>
 void copyEnum(const ENUM src, int32_t& dest)
 {
-	value = static_cast<int32_t>(src);
+	dest = static_cast<int32_t>(src);
 }
 template<class CLASS>
 void copyObject(const std::shared_ptr<CLASS>& src, void*& dest)
@@ -204,24 +207,22 @@ void copyEnumVector(const std::vector<ENUM>& src, std::vector<int32_t>& dest)
 }
 
 template<class CLASS>
-inline std::vector<void*> copyObjectArray(const std::vector<CLASS>& src, std::vector<void*>& dest)
+inline void copyObjectArray(const std::vector<CLASS>& src, std::vector<void*>& dest)
 {
 	dest.clear();
-	for (auto& element : value)
+	for (auto& element : src)
 	{
 		auto* ielement = createInterfaceObject(element);
-		ret.push_back(ielement);
+		dest.push_back(ielement);
 	}
-	return ret;
 }
 template<class CLASS>
 inline std::vector<void*> copyObjectVector(const std::vector<CLASS>& src, std::vector<void*>& dest)
 {
 	dest.clear();
-	for (auto& element : value)
+	for (auto& element : src)
 	{
 		auto* ielement = createInterfaceObject(element);
-		ret.push_back(ielement);
+		dest.push_back(ielement);
 	}
-	return ret;
 }
