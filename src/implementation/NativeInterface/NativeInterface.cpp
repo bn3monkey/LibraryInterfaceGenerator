@@ -117,6 +117,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 
 		for (auto& mod : symbolObject.modules)
 		{
+			{
+            	Comment comment{ ss, indent };
+            	comment.add(*mod);
+        	}
 			createModuleDeclaration(*mod, ss, indent);
 		}
 	}
@@ -130,6 +134,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 	for (auto& methodObject : symbolObject.global_methods)
 	{
 		auto& method = methodObject.first;
+		{
+            Comment comment{ ss, indent };
+            comment.add(*method);
+        }
 		auto line = createStaticMethodDeclaration(*method);
 		defineNamespace.addLine(line);
 	}
@@ -141,11 +149,19 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 	*/
 	for (auto& clazz : symbolObject.classes)
 	{
+		{
+            Comment comment{ ss, indent };
+            comment.add(*clazz);
+        }
 		createClassDeclaration(*clazz, ss, indent);
 	}
 
 	for (auto& subModule : symbolObject.submodules)
 	{
+		{
+            Comment comment{ ss, indent };
+            comment.add(*subModule);
+        }
 		createModuleDeclaration(symbolObject, ss, indent);
 	}
 
@@ -173,6 +189,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		auto base_props = clazz.getBaseProperties();
 		for (auto& base_prop : base_props)
 		{
+			{
+            	Comment comment{ ss, indent };
+            	comment.add(*base_prop);
+        	}
 			auto lines = createPropertyDeclaration(*base_prop);
 			for (auto& line : lines)
 			{
@@ -181,6 +201,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		}
 		for (auto& prop : clazz.properties)
 		{
+			{
+            	Comment comment{ ss, indent };
+            	comment.add(*prop);
+        	}
 			auto lines = createPropertyDeclaration(*prop);
 			for (auto& line : lines)
 			{
@@ -192,12 +216,20 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		for (auto& baseMethodObject: base_methods)
 		{
 			auto base_method = baseMethodObject.first;
+			{
+            	Comment comment{ ss, indent };
+            	comment.add(*base_method);
+        	}
 			auto line = createClassMethodDeclaration(*base_method);
 			defineNamespace.addLine(line);
 		}
 		for (auto& methodObject : clazz.methods)
 		{
 			auto method = methodObject.first;
+			{
+            	Comment comment{ ss, indent };
+            	comment.add(*method);
+        	}
 			auto line = createClassMethodDeclaration(*method);
 			defineNamespace.addLine(line);
 		}
