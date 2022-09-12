@@ -17,7 +17,13 @@
                     "description" : "intialize library",
                     "return" : "whether library is initialized",
                     "parameters" : [
-
+                        {
+                            "order" : "parameter",
+                            "name" : "streamDirectory",
+                            "type" : "string",
+                            "description" : "Directory to store streams to hold DICOM format data when sending multi-frame images.\nApplications that use this library must have permission to the directory.",
+                            "io" : "in"
+                        }
                     ]
                 },
                 {
