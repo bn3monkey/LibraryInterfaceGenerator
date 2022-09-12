@@ -69,7 +69,8 @@ namespace LibraryInterfaceGenerator
             friend LibraryInterfaceGenerator::Implementation::SourceScopedStream& operator<<(LibraryInterfaceGenerator::Implementation::SourceScopedStream& stream, const char* str);
             friend LibraryInterfaceGenerator::Implementation::SourceScopedStream& operator<<(LibraryInterfaceGenerator::Implementation::SourceScopedStream& stream, const std::string& str);
 
-            friend class UnindentedSourceScopedStream;
+
+            inline SourceStream& stream() { return _stream; }
 
             void pop(size_t end_string_size = 1);
 
@@ -93,6 +94,8 @@ namespace LibraryInterfaceGenerator
             friend LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& operator<<(LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& stream, const std::string& str);
 
             void pop(size_t end_string_size = 1);
+
+            inline SourceStream& stream() { return _stream->stream(); }
 
         private:
             SourceScopedStream* _stream{ nullptr };

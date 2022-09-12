@@ -159,7 +159,7 @@ LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::Uninden
 
 LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(SourceScopedStream& ss, const char* str, CodeStyle style)
 {
-	ss._stream.removeIndent();
+	ss.stream().removeIndent();
 	_stream = reinterpret_cast<SourceScopedStream*>(&_local_pool);
 	new(_stream) SourceScopedStream(ss, str, style);
 	if (!_stream)
@@ -178,7 +178,7 @@ LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::Uninden
 
 LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::~UnindentedSourceScopedStream()
 {
-	SourceStream& stream = _stream->_stream;
+	SourceStream& stream = _stream->stream();
 	_stream->~SourceScopedStream();
 	stream.addIndent();
 }
