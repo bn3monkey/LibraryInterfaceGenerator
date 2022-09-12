@@ -17,6 +17,23 @@ message("include_dirs = ${include_dir}")
 set(implementation_dir ${src_dir}/implementation)
 message("implementation_dirs = ${implementation_dir}")
 
+set(test_dir "${repository_dir}/test")
+message("test_dir = ${test_dir}")
+set(test_source_dir "${test_dir}/test")
+message("test_source_dir = ${test_source_dir}")
+set(gtest_dir "${test_dir}/gtest")
+message("gtest_dir = ${gtest_dir}")
+
+include(FetchContent)
+FetchContent_Declare(
+  gtest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.12.1
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(gtest)
+
 file(GLOB_RECURSE include_files 
 	LIST_DIRECTORIES true
 	"${include_dir}/*.h"
@@ -49,3 +66,29 @@ target_include_directories(LibraryInterfaceGeneratorWindow PUBLIC "C:/Program Fi
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD 17)
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD_REQUIRED ON)
 # TODO: 필요한 경우 테스트를 추가하고 대상을 설치합니다.
+
+
+enable_testing()
+
+file(GLOB_RECURSE test_files
+	${test_source_dir}/*.hpp
+	${test_source_dir}/*.h
+	${test_source_dir}/*.cpp
+	${test_source_dir}/*.c
+)
+add_executable(LibraryInerfaceGeneratorTest 
+	${include_files}
+	${implementation_files}
+	${test_files}
+	)
+
+
+target_link_libraries(LibraryInerfaceGeneratorTest gtest)
+target_include_directories(LibraryInerfaceGeneratorTest PUBLIC
+	"${include_dir}")
+
+include(GoogleTest)
+gtest_discover_tests(LibraryInerfaceGeneratorTest)
+
+set_property(TARGET LibraryInerfaceGeneratorTest PROPERTY CXX_STANDARD 17)
+set_property(TARGET LibraryInerfaceGeneratorTest PROPERTY CXX_STANDARD_REQUIRED ON)
