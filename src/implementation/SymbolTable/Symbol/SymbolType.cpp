@@ -161,7 +161,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 					{
 						enumReferenceSet->insert(object);
 					}
-					return std::make_unique< SymbolTypeVector<SymbolTypeEnum>>(object);
+ 					return std::make_unique< SymbolTypeVector<SymbolTypeEnum>>(object);
 				}
 			}
 		}

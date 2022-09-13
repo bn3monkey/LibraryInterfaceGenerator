@@ -1648,6 +1648,37 @@
                             ]
                         },
                         {
+                            "order" : "method",
+                            "type" : "bool",
+                            "description" : "Save Ultrasound Image as Local DICOM File",
+                            "name" : "save",
+                            "return" : "whether the function execution is successful",
+                            "parameters" : 
+                            [
+                                {
+                                    "order" : "parameter",
+                                    "type" : "string",
+                                    "io" : "in",
+                                    "name" : "path",
+                                    "description" : "the path where the local DICOM file will be saved"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Type/ImageMode",
+                                    "io" : "in",
+                                    "name" : "imageMode",
+                                    "description" : "the image mode of the local DICOM file"                                    
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "type" : "HsnUltrasoundDICOM/Type/CodePage",
+                                    "io" : "in",
+                                    "name" : "codePage",
+                                    "description" : "the code page of the local DICOM file"  
+                                }
+                            ]
+                        },
+                        {
                             "order" : "property",
                             "type" : "string",
                             "readonly" : false,
