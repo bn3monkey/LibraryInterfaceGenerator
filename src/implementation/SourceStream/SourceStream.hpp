@@ -57,9 +57,6 @@ namespace LibraryInterfaceGenerator
         {
         public:
             SourceScopedStream() = delete;
-            enum class Style {
-                
-            };
             explicit SourceScopedStream(SourceStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);
             explicit SourceScopedStream(SourceStream& ss, const char* str, CodeStyle style = CodeStyle::Cpp);
             explicit SourceScopedStream(SourceScopedStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);

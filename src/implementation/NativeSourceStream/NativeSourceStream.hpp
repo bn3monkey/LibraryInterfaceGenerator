@@ -16,7 +16,7 @@ namespace LibraryInterfaceGenerator
         static const char new_indent[] = "    ";
         static size_t indent_size = sizeof(new_indent)-1;
 
-        class DefineOnce
+        class [[deprecated]] DefineOnce
         {
         public:
             explicit DefineOnce(std::stringstream& ss, const std::vector<std::string>& moduleNames, const std::string& name, std::string& indent);
@@ -28,7 +28,7 @@ namespace LibraryInterfaceGenerator
             std::string macro{ "" };
         };
 
-       class DefineInclude
+       class [[deprecated]] DefineInclude
        {
        public:
            explicit DefineInclude(std::stringstream& ss, std::string& indent);
@@ -39,7 +39,7 @@ namespace LibraryInterfaceGenerator
            std::string& _indent;
        };
 
-       class DefineNamespace
+       class [[deprecated]] DefineNamespace
        {
        public:
            explicit DefineNamespace(std::stringstream& ss, const std::vector<std::string>& modules, std::string& indent);
@@ -55,7 +55,7 @@ namespace LibraryInterfaceGenerator
        };
               
 
-       class DefineObject
+       class [[deprecated]] DefineObject
        {
        public:
            explicit DefineObject(std::stringstream& ss, const std::string& object, std::string& indent);
@@ -67,7 +67,7 @@ namespace LibraryInterfaceGenerator
            std::string& _indent;
        };
 
-       class Comment
+       class [[deprecated]] Comment
        {
        public:
            Comment(std::stringstream& ss, std::string& indent);
