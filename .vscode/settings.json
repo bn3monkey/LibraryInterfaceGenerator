@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.json": "jsonc",
         "algorithm": "cpp",
         "array": "cpp",
         "atomic": "cpp",
@@ -78,6 +79,10 @@
         "cstdarg": "cpp",
         "mutex": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "any": "cpp",
+        "condition_variable": "cpp",
+        "unordered_set": "cpp",
+        "variant": "cpp"
     }
 }
