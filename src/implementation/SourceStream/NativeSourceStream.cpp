@@ -1,8 +1,10 @@
 #include "NativeSourceStream.hpp"
 #include "UIDGenerator.hpp"
 
-LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::HeaderGuardNativeSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& module_names, const std::string& name)
+LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::HeaderGuardNativeSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& module_names, const std::string& name) :
+    
 {
+
 }
 
 LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::~HeaderGuardNativeSourceScopedStream()

@@ -123,7 +123,7 @@ namespace LibraryInterfaceGenerator
         private:
             SourceStream& stream;
             std::vector<std::string> tokenize(const std::string& description);
-        }
+        };
     }
 }
 
