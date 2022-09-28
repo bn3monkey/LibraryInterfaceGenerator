@@ -1,73 +1,4 @@
 #include "NativeSourceStream.hpp"
-#include "UIDGenerator.hpp"
-
-LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::HeaderGuardNativeSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& module_names, const std::string& name) :
-    
-{
-
-}
-
-LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::~HeaderGuardNativeSourceScopedStream()
-{
-}
-
-std::string LibraryInterfaceGenerator::Implementation::HeaderGuardNativeSourceScopedStream::makeGUID(const std::vector<std::string>& strs)
-{
-	constexpr static char characters[] = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	constexpr size_t length = sizeof(characters);
-
-	size_t slots[12] = { 0 };
-	size_t idx = 0;
-
-	constexpr size_t upper_length = 'A' - 'Z' + 1;
-	constexpr size_t lower_length = 'z' - 'a' + 1;
-
-	for (auto& str : strs)
-	{
-		for (auto& ch : str)
-		{
-			auto& slot = slots[idx++];
-			if ('a' <= ch && ch <= 'z')
-			{
-				slot += ch - 'a' + upper_length;
-			}
-			else if ('A' <= ch && ch <= 'Z')
-			{
-				slot += ch - 'A';
-			}
-			else if ('0' <= ch && ch <= '9')
-			{
-				slot += ch - '0' + lower_length + upper_length;
-			}
-		}
-	}
-
-	for (auto& slot : slots)
-	{
-		slot %= length;
-	}
-
-	std::string ret{ "" };
-	ret += slots[0];
-	ret += slots[1];
-	ret += slots[2];
-	ret += slots[3];
-	ret += "_";
-	ret += slots[4];
-	ret += slots[5];
-	ret += slots[6];
-	ret += slots[7];
-	ret += "_";
-	ret += slots[8];
-	ret += slots[9];
-	ret += slots[10];
-	ret += slots[11];
-	return ret;
-}
-
-
-/*
-#include "NativeSourceStream.hpp"
 
 LibraryInterfaceGenerator::Implementation::DefineOnce::DefineOnce(std::stringstream& ss, const std::vector<std::string>& moduleNames, const std::string& name, std::string& indent)
 	: _ss(ss), _indent(indent)
@@ -101,7 +32,7 @@ std::string LibraryInterfaceGenerator::Implementation::DefineOnce::makeGUID()
 
 	const char* characters = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	std::uniform_int_distribution<int> dis(0, strlen(characters) - 1);
-
+	
 	std::string ret{ "" };
 
 	ret += characters[dis(gen)];
@@ -149,18 +80,18 @@ LibraryInterfaceGenerator::Implementation::DefineNamespace::DefineNamespace(std:
 	{
 		_ss << _indent << "namespace " << modules[_depth] << "\n";
 		_ss << _indent << "{\n";
-		_indent += new_indent;
+		_indent += new_indent;	
 	}
 }
 
 LibraryInterfaceGenerator::Implementation::DefineNamespace::DefineNamespace(std::stringstream&ss, const std::string& name, std::string& indent)
 :	_ss(ss), _indent(indent)
-{
+{	
 	_depth += 1;
 	_ss << _indent << "namespace " << name << "\n";
 	_ss << _indent << "{\n";
 	_indent += new_indent;
-}
+}	
 
 LibraryInterfaceGenerator::Implementation::DefineNamespace::~DefineNamespace()
 {
@@ -199,19 +130,19 @@ void LibraryInterfaceGenerator::Implementation::DefineObject::addLine(const std:
 LibraryInterfaceGenerator::Implementation::Comment::Comment(std::stringstream& ss, std::string& indent)
 	: _ss(ss), _indent(indent)
 {
-	_ss << _indent << "\/*" << "\n";
+	_ss << _indent << "/*" << "\n";
 }
 
 LibraryInterfaceGenerator::Implementation::Comment::~Comment()
 {
-	_ss << _indent << "*\/" << "\n";
+	_ss << _indent << "*/" << "\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolPackage& obj)
 {
 	_ss << _indent << "* Library Name : " << obj.name << "\n";
 	_ss << _indent << "* Author : " << obj.author << "\n";
-
+	
 	auto descriptions = tokenize(obj.description);
 	_ss << _indent << "* Description :\n";
 	for (auto& line : descriptions)
@@ -223,7 +154,7 @@ void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolPackage
 void LibraryInterfaceGenerator::Implementation::Comment::add(const SymbolModule& obj)
 {
 	_ss << _indent << "* Module Name : " << obj.name << "\n";
-
+	
 	auto descriptions = tokenize(obj.description);
 	_ss << _indent << "* Description :\n";
 	for (auto& line : descriptions)
@@ -294,6 +225,3 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::Comment::tok
 	}
 	return ret;
 }
-
-
-*/

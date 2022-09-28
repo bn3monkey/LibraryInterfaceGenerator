@@ -72,18 +72,9 @@ LibraryInterfaceGenerator::Implementation::SourceStream& LibraryInterfaceGenerat
 	return stream;
 }
 
-LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceStream& ss, const std::string& str, CodeStyle style) : 
-	SourceScopedStream(ss, str.c_str(), style)
-{
-}
-
-LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceStream& ss, const char* str, CodeStyle style) : _stream(ss)
+LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceStream& ss, CodeStyle style) : _stream(ss)
 {
 	using namespace LibraryInterfaceGenerator::Implementation;
-
-	if (str != nullptr)
-		ss << str;
-	ss << "\n";
 
 	_scopeStart = nullptr;
 	_scopeEnd = nullptr;
@@ -109,13 +100,13 @@ LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStrea
 	ss.addIndent();
 }
 
-LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceScopedStream& ss, const std::string& str, CodeStyle style) :
-	SourceScopedStream(ss._stream, str.c_str(), style)
+LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceScopedStream& ss, CodeStyle style) :
+	SourceScopedStream(ss._stream,  style)
 {
 }
 
-LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(SourceScopedStream& ss, const char* str, CodeStyle style) :
-	SourceScopedStream(ss._stream, str, style)
+LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStream(UnindentedSourceScopedStream& ss, CodeStyle style) :
+	SourceScopedStream(ss.stream(), style)
 {
 }
 
@@ -152,49 +143,38 @@ LibraryInterfaceGenerator::Implementation::SourceScopedStream& LibraryInterfaceG
 
 
 
-LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(SourceScopedStream& ss, const std::string& str, CodeStyle style)
-	: UnindentedSourceScopedStream(ss, str.c_str(), style)
+
+LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(SourceStream& ss, CodeStyle style) : _stream(ss)
+{
+	_stream.removeIndent();
+}
+
+LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(SourceScopedStream& ss, CodeStyle style) : UnindentedSourceScopedStream(ss.stream(), style)
 {
 }
 
-LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(SourceScopedStream& ss, const char* str, CodeStyle style)
-{
-	ss.stream().removeIndent();
-	_stream = reinterpret_cast<SourceScopedStream*>(&_local_pool);
-	new(_stream) SourceScopedStream(ss, str, style);
-	if (!_stream)
-		abort();
-}
-
-LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, const std::string& str, CodeStyle style) 
-	: UnindentedSourceScopedStream(*ss._stream, str.c_str(), style)
+LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, CodeStyle style) : UnindentedSourceScopedStream(ss.stream(), style)
 {
 }
 
-LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, const char* str, CodeStyle style)
-	: UnindentedSourceScopedStream(*ss._stream, str, style)
-{
-}
 
 LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::~UnindentedSourceScopedStream()
 {
-	SourceStream& stream = _stream->stream();
-	_stream->~SourceScopedStream();
-	stream.addIndent();
+	_stream.addIndent();
 }
 
 LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& LibraryInterfaceGenerator::Implementation::operator<<(LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& stream, const char* str)
 {
-	*(stream._stream) << str;
+	stream._stream << str;
 	return stream;
 }
 
 LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& LibraryInterfaceGenerator::Implementation::operator<<(LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& stream, const std::string& str)
 {
-	*(stream._stream) << str;
+	stream._stream << str;
 	return stream;
 }
 void LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream::pop(size_t end_string_size)
 {
-	_stream->pop(end_string_size);
+	_stream.pop(end_string_size);
 }

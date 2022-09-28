@@ -57,10 +57,9 @@ namespace LibraryInterfaceGenerator
         {
         public:
             SourceScopedStream() = delete;
-            explicit SourceScopedStream(SourceStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);
-            explicit SourceScopedStream(SourceStream& ss, const char* str, CodeStyle style = CodeStyle::Cpp);
-            explicit SourceScopedStream(SourceScopedStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);
-            explicit SourceScopedStream(SourceScopedStream& ss, const char* str, CodeStyle style = CodeStyle::Cpp);
+            explicit SourceScopedStream(SourceStream& ss, CodeStyle style = CodeStyle::Cpp);
+            explicit SourceScopedStream(SourceScopedStream& ss, CodeStyle style = CodeStyle::Cpp);
+            explicit SourceScopedStream(UnindentedSourceScopedStream& ss, CodeStyle style = CodeStyle::Cpp);
             virtual ~SourceScopedStream();
 
             friend LibraryInterfaceGenerator::Implementation::SourceScopedStream& operator<<(LibraryInterfaceGenerator::Implementation::SourceScopedStream& stream, const char* str);
@@ -81,10 +80,9 @@ namespace LibraryInterfaceGenerator
         {
         public:
             UnindentedSourceScopedStream() = delete;
-            explicit UnindentedSourceScopedStream(SourceScopedStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);
-            explicit UnindentedSourceScopedStream(SourceScopedStream& ss, const char* str, CodeStyle style = CodeStyle::Cpp);
-            explicit UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, const std::string& str, CodeStyle style = CodeStyle::Cpp);
-            explicit UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, const char* str, CodeStyle style = CodeStyle::Cpp);
+            explicit UnindentedSourceScopedStream(SourceStream& ss, CodeStyle style = CodeStyle::Cpp);
+            explicit UnindentedSourceScopedStream(SourceScopedStream& ss, CodeStyle style = CodeStyle::Cpp);
+            explicit UnindentedSourceScopedStream(UnindentedSourceScopedStream& ss, CodeStyle style = CodeStyle::Cpp);
             virtual ~UnindentedSourceScopedStream();
 
             friend LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& operator<<(LibraryInterfaceGenerator::Implementation::UnindentedSourceScopedStream& stream, const char* str);
@@ -92,11 +90,10 @@ namespace LibraryInterfaceGenerator
 
             void pop(size_t end_string_size = 1);
 
-            inline SourceStream& stream() { return _stream->stream(); }
+            inline SourceStream& stream() { return _stream; }
 
         private:
-            SourceScopedStream* _stream{ nullptr };
-            char _local_pool[sizeof(SourceScopedStream)] {0, };
+            SourceStream& _stream;
         };
     }
 }

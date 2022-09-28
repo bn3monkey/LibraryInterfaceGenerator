@@ -62,8 +62,10 @@ TEST(SourceScopedStream, WriteCppFunction)
 	using namespace LibraryInterfaceGenerator::Implementation;
 
 	SourceStream sourceStream;
+
+	sourceStream << "int main()\n";
 	{
-		SourceScopedStream sourceScopedStream{ sourceStream, "int main()", CodeStyle::Cpp };
+		SourceScopedStream sourceScopedStream{ sourceStream, CodeStyle::Cpp };
 		sourceScopedStream << "printf(\"Do you know Sans?\");" << "\n";
 	}
 
@@ -83,9 +85,11 @@ TEST(SourceScopedStream, WriteCppClass)
 
 	SourceStream sourceStream;
 	{
-		SourceScopedStream outer{ sourceStream, "namespace OuterScope", CodeStyle::Cpp };
+		sourceStream << "namespace OuterScope\n";
+		SourceScopedStream outer{ sourceStream, CodeStyle::Cpp };
 		{
-			SourceScopedStream inner{ outer, "namespace InnerScope", CodeStyle::Cpp };
+			outer << "namespace InnerScope\n";
+			SourceScopedStream inner{ outer, CodeStyle::Cpp };
 			{
 				inner << "class Derived : ";
 				char* base_classes[] = { "Base1", "Base2", "Base3" };
@@ -94,18 +98,24 @@ TEST(SourceScopedStream, WriteCppClass)
 					inner << base_class << ", ";
 				}
 				inner.pop(sizeof(", ") - 1);
+				inner << "\n";
 
 				{
-					SourceScopedStream clazz{ outer, nullptr, CodeStyle::CppClass };
+					SourceScopedStream clazz{ outer, CodeStyle::CppClass };
+					UnindentedSourceScopedStream accessor{ clazz, CodeStyle::None };
 					{
-						UnindentedSourceScopedStream public_{ clazz, "public : ", CodeStyle::None };
-						public_ << "void func(int param1, char param2);\n";
-						public_ << "void func2(int param1, char param2);\n";
-					}
-					{
-						UnindentedSourceScopedStream private_{ clazz, "private : ", CodeStyle::None };
-						private_ << "char _field1;\n";
-						private_ << "char _field2;\n";
+						accessor << "public : \n";
+						{
+							SourceScopedStream public_ {clazz, CodeStyle::None };
+							public_ << "void func(int param1, char param2);\n";
+							public_ << "void func2(int param1, char param2);\n";
+						}
+						accessor << "private : \n";
+						{
+							SourceScopedStream private_{ clazz, CodeStyle::None };
+							private_ << "char _field1;\n";
+							private_ << "char _field2;\n";
+						}
 					}
 				}
 			}
