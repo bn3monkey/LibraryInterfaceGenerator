@@ -53,9 +53,14 @@ namespace LibraryInterfaceGenerator
             explicit NamespaceCXXSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& namespace_names);
             virtual ~NamespaceCXXSourceScopedStream();
         
+            NamespaceCXXSourceScopedStream(NamespaceCXXSourceScopedStream&& other);
         private:
             std::vector<NamespaceCXXSourceScopedStream> _stack;
             SourceScopedStream* _stream {nullptr};
+
+#if _DEBUG
+            std::string _namespace_name;
+#endif
         };
 
         class ClassCXXSourceScopedStream
@@ -91,7 +96,7 @@ namespace LibraryInterfaceGenerator
             explicit EnumCXXSourceScopedStream(SourceStream& sourceStream, const std::string& name);
             virtual ~EnumCXXSourceScopedStream();
 
-            void addElement(std::string& key, std::string& value);
+            void addElement(const std::string& key, const std::string& value);
         private:
             SourceScopedStream* _stream{nullptr};
         };
@@ -101,12 +106,30 @@ namespace LibraryInterfaceGenerator
         {
         public:
             struct Parameter {
-                bool isInputParameter;
-                std::string& type;
-                std::string& name;
+                const static int REFERENCE_IN = 0;
+                const static int REFERENCE_OUT = 1;
+                const static int VALUE = 2;
+
+                int io;
+                std::string type;
+                std::string name;
+
+                Parameter(int io, const std::string& type, const std::string& name) :
+                    io(io),
+                    type(type),
+                    name(name)
+                {
+                }
             };
 
-            explicit MethodCXXSourceScopedStream(SourceStream& sourceStream, bool isDeclaration, const std::string& prefix, const std::string& type, const std::string& name, std::vector<Parameter> parameters = std::vector<Parameter>());
+            explicit MethodCXXSourceScopedStream(
+                SourceStream& sourceStream, 
+                bool isDeclaration, 
+                const std::string& prefix, 
+                const std::string& type, 
+                const std::vector<std::string>& scopes,
+                const std::string& name, 
+                const std::vector<Parameter>& parameters = std::vector<Parameter>());
             virtual ~MethodCXXSourceScopedStream();
 
             

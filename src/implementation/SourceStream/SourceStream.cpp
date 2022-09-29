@@ -43,6 +43,17 @@ char*& LibraryInterfaceGenerator::Implementation::SourceStream::str()
 	return reinterpret_cast<char*&>(_content);
 }
 
+void LibraryInterfaceGenerator::Implementation::SourceStream::clear()
+{
+	memset(_current_indent, 0, _indent_size);
+	_indent_size = 0;
+
+	_is_new_line_started = false;
+
+	_size = 0;
+	memset(_content, 0, MAX_STREAM_SIZE);
+}
+
 LibraryInterfaceGenerator::Implementation::SourceStream& LibraryInterfaceGenerator::Implementation::operator<<(LibraryInterfaceGenerator::Implementation::SourceStream& stream, const char* str)
 {
 	auto* ptr = str;

@@ -8,11 +8,15 @@ LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScopedStream::Hea
 	_macro += "__";
 	for (auto& module_name : module_names)
 	{
-		_macro += module_name;
+		std::string converted_module_name { module_name };
+		std::transform(converted_module_name.begin(), converted_module_name.end(), converted_module_name.begin(), toupper);
+		_macro += converted_module_name;
 		_macro += "_";
 	}
 	auto guid = makeGUID(module_names);
-	_macro += name;
+	std::string converted_name {name};
+	std::transform(converted_name.begin(), converted_name.end(), converted_name.begin(), toupper);
+	_macro += converted_name;
 	_macro += "_";
 	_macro += guid;
 	_macro += "__";
@@ -36,7 +40,7 @@ std::string LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScope
 	size_t slots[12] = { 0 };
 	size_t idx = 0;
 
-	constexpr size_t upper_length = 'A' - 'Z' + 1;
+	constexpr size_t upper_length = 'Z' - 'A' + 1;
 	constexpr size_t lower_length = 'z' - 'a' + 1;
 
 	for (auto& str : strs)
@@ -65,20 +69,20 @@ std::string LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScope
 	}
 
 	std::string ret{ "" };
-	ret += slots[0];
-	ret += slots[1];
-	ret += slots[2];
-	ret += slots[3];
+	ret += characters[slots[0]];
+	ret += characters[slots[1]];
+	ret += characters[slots[2]];
+	ret += characters[slots[3]];
 	ret += "_";
-	ret += slots[4];
-	ret += slots[5];
-	ret += slots[6];
-	ret += slots[7];
+	ret += characters[slots[4]];
+	ret += characters[slots[5]];
+	ret += characters[slots[6]];
+	ret += characters[slots[7]];
 	ret += "_";
-	ret += slots[8];
-	ret += slots[9];
-	ret += slots[10];
-	ret += slots[11];
+	ret += characters[slots[8]];
+	ret += characters[slots[9]];
+	ret += characters[slots[10]];
+	ret += characters[slots[11]];
 	return ret;
 }
 
@@ -112,11 +116,25 @@ LibraryInterfaceGenerator::Implementation::NamespaceCXXSourceScopedStream::Names
 {
 	sourceStream << "namespace " << namespace_name << "\n";
 	_stream = new SourceScopedStream(sourceStream, CodeStyle::Cpp);
+
+#if _DEBUG
+	_namespace_name = namespace_name;
+	printf("Consturctor : %s, Address : %p\n", _namespace_name.c_str(), this);
+#endif
 }
 
 LibraryInterfaceGenerator::Implementation::NamespaceCXXSourceScopedStream::NamespaceCXXSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& namespace_names)
 	: _stream(nullptr)
 {
+#if _DEBUG
+	for (auto& namespace_name : namespace_names)
+	{
+		_namespace_name += namespace_name;
+		_namespace_name += "/";
+	}
+	printf("Consturctor : %s, Address : %p\n", _namespace_name.c_str(), this);
+#endif
+	_stack.reserve(namespace_names.size());
 	for (auto& namespace_name : namespace_names)
 	{
 		_stack.emplace_back(sourceStream, namespace_name);
@@ -125,11 +143,30 @@ LibraryInterfaceGenerator::Implementation::NamespaceCXXSourceScopedStream::Names
 
 LibraryInterfaceGenerator::Implementation::NamespaceCXXSourceScopedStream::~NamespaceCXXSourceScopedStream()
 {
+#if _DEBUG
+	printf("Destructor : %s, Address : %p\n", _namespace_name.c_str(), this);
+#endif
+
 	while (!_stack.empty())
 		_stack.pop_back();
 	
 	if (_stream)
+	{
 		delete _stream;
+		_stream = nullptr;
+	}
+}
+
+LibraryInterfaceGenerator::Implementation::NamespaceCXXSourceScopedStream::NamespaceCXXSourceScopedStream(NamespaceCXXSourceScopedStream&& other)
+{
+	this->_stack = std::move(other._stack);
+	this->_stream = other._stream;
+	this->_namespace_name = other._namespace_name;
+	other._stream = nullptr;
+
+#if _DEBUG
+	printf("Consturctor : %s, Address : %p Other Address : %p\n", _namespace_name.c_str(), this, &other);
+#endif
 }
 
 LibraryInterfaceGenerator::Implementation::ClassCXXSourceScopedStream::ClassCXXSourceScopedStream(SourceStream& sourceStream, bool isDeclaration, const std::string& name, const std::vector<std::string>& base_names)
@@ -179,7 +216,7 @@ LibraryInterfaceGenerator::Implementation::AccessCXXSourceScopedStream::AccessCX
 		sourceStream << "protected : \n";
 		break;
 	}
-	_inner_stream = new SourceScopedStream(sourceStream, CodeStyle::CppClass);
+	_inner_stream = new SourceScopedStream(sourceStream, CodeStyle::None);
 }
 
 LibraryInterfaceGenerator::Implementation::AccessCXXSourceScopedStream::~AccessCXXSourceScopedStream()
@@ -198,29 +235,55 @@ LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::EnumCXXSou
 
 LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::~EnumCXXSourceScopedStream()
 {
-	if (!_stream)
+	if (_stream)
 		delete _stream;
 }
 
-void LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::addElement(std::string& key, std::string& value)
+void LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::addElement(const std::string& key, const std::string& value)
 {
 	*_stream << key << " = " << value << ", \n";
 }
 
-LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCXXSourceScopedStream(SourceStream& sourceStream, bool isDeclaration, const std::string& prefix, const std::string& type, const std::string& name, std::vector<Parameter> parameters)
+LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCXXSourceScopedStream(
+	SourceStream& sourceStream,
+	bool isDeclaration,
+	const std::string& prefix,
+	const std::string& type,
+	const std::vector<std::string>& scopes,
+	const std::string& name,
+	const std::vector<Parameter>& parameters)
 {
-	sourceStream << prefix << " " << type << " " << name;
+	if (prefix != "")
+	{
+		sourceStream << prefix << " ";
+	}
+	sourceStream << type << " ";
+	if (!scopes.empty())
+	{
+		for (auto& scope : scopes)
+		{
+			sourceStream << scope;
+			sourceStream << "::";
+		}
+	}
+
+	sourceStream << name;
 	sourceStream << "(";
 
 	if (!parameters.empty())
 	{
 		for (auto& parameter : parameters)
 		{
-			if (parameter.isInputParameter)
+			if (parameter.io == Parameter::REFERENCE_IN)
 			{
 				sourceStream << "const ";
 			}
-			sourceStream << parameter.type << "& " << parameter.name << ", ";
+			sourceStream << parameter.type;
+			if (parameter.io == Parameter::REFERENCE_IN || parameter.io == Parameter::REFERENCE_OUT)
+			{
+				sourceStream << "&";
+			}
+			sourceStream << " " << parameter.name << ", ";
 		}
 		sourceStream.pop(sizeof(", ") - 1);
 	}
@@ -288,7 +351,7 @@ void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addRetur
 
 void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addParameter(bool isInputParameter, const std::string& name, const std::string& description)
 {
-	_stream << " * @param[" << (isInputParameter ? "in" : "out") << "]" << name << " " << description << "\n";
+	_stream << " * @param[" << (isInputParameter ? "in" : "out") << "]  " << name << "  " << description << "\n";
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::tokenize(const std::string& description)

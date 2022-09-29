@@ -43,6 +43,7 @@ namespace LibraryInterfaceGenerator
 
             operator bool() { return _content != nullptr; }
 
+            void clear();
         private:
             size_t _indent_size {0};
             char _current_indent[MAX_INDENT] {0, };
