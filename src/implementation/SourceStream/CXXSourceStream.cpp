@@ -248,6 +248,7 @@ LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCX
 	SourceStream& sourceStream,
 	bool isDeclaration,
 	const std::string& prefix,
+	const std::string& postfix,
 	const std::string& type,
 	const std::vector<std::string>& scopes,
 	const std::string& name,
@@ -289,6 +290,11 @@ LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCX
 	}
 	
 	sourceStream << ")";
+
+	if (postfix != "")
+	{
+		sourceStream << " " << postfix;
+	}
 
 	if (isDeclaration)
 	{

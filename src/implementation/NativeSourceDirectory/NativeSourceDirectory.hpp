@@ -9,7 +9,10 @@
 #include "../Auxiliary/Definition.hpp"
 #include "../Auxiliary/StringHelper.hpp"
 #include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
-#include "../NativeSourceStream/NativeSourceStream.hpp"
+
+//#include "../NativeSourceStream/NativeSourceStream.hpp"
+
+#include "../SourceStream/CXXSourceStream.hpp"
 #include <algorithm>
 #include <set>
 
@@ -90,66 +93,76 @@ namespace LibraryInterfaceGenerator
             Result createIncludeFile(const SymbolPackage& package, std::string& parent_include_path);
 
             // 2. Interface 전문 제작
-            Result createInterfaceFileContent(const SymbolClass& object, std::string& header_content);
+            SourceStream createInterfaceFileContent(const SymbolClass& object);
 
             // 3. Class 전문 제작
-            Result createClassFileContent(const SymbolClass& object, std::string& header_content, std::string& cpp_content);
+            SourceStream createClassHeaderFileContent(const SymbolClass& object);
+            SourceStream createClassCppFileContent(const SymbolClass& object);
             
             // 4. Enum 전문 제작
-            Result createEnumFileContent(const SymbolEnum& object, std::string& header_content);
+            SourceStream createEnumFileContent(const SymbolEnum& object);
             
             // 5. Method 전문 제작
-            Result createMethodFileContent(const SymbolModule& object, std::string& header_content, std::string& cpp_content);
+            SourceStream createMethodHeaderFileContent(const SymbolModule& object);
+            SourceStream createMethodCppFileContent(const SymbolModule& object);
 
             // 6. 전체 파일의 include file
-            Result createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path, std::string& header_content);
+            SourceStream createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path);
 
-            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
-            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
+            // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
+            // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
+
+            void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
+            void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
 
 
             // 7. Code Block 제작
             
             // Enum Block 생성
-            std::vector<std::string> createEnumDefinition(const SymbolEnum& object);
+            //std::vector<std::string> createEnumDefinition(const SymbolEnum& object);
+            void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
 
             // Method Block 생성
-            std::string createMethodDeclaration(const SymbolMethod& object);
+            // std::string createMethodDeclaration(const SymbolMethod& object);
+            void createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
+            void createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createInterfaceMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createDerivedMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
 
-            std::string createStaticMethodDeclaration(const SymbolMethod& object);
-            std::string createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string createDerivedMethodDeclaration(const SymbolMethod& object);
+            // std::string createStaticMethodDeclaration(const SymbolMethod& object);
+            // std::string createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            // std::string createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
+            // std::string createDerivedMethodDeclaration(const SymbolMethod& object);
 
-            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object);
+            void createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
 
-            std::string createDestructorDeclaration(const SymbolClass& clazz);
-            std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
+            void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
+            void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
             
-            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
-            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
+            void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object);
+            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
 
             // Parameter Block 생성
-            std::string createParametersDefinition(const SymbolMethod& parameters);
-            std::string createParameterDefinition(const SymbolParameter& object);
+            void createParametersDefinition(SourceStream& ss, const SymbolMethod& parameters);
+            void createParameterDefinition(SourceStream& ss, const SymbolParameter& object);
             
             // Property Block 생성
             std::string createPropertyName(const SymbolProperty& object);
-            std::string createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
-            std::string createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
+            void createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
 
-            std::vector<std::string> createClassPropertyDeclaration(const SymbolProperty& object);
-            std::vector<std::string> createInterfacePropertyDeclaration(const SymbolProperty& object);
-            std::vector<std::string> createDerivedPropertyDeclaration(const SymbolProperty& object);
+            void createClassPropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
+            void createInterfacePropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
+            void createDerivedPropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
 
-            std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
+            void createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
             
-            std::string createPropertyField(const SymbolProperty& object);
+            void createPropertyField(SourceStream& ss, const SymbolProperty& object);
 
             // Property, Method의 범위
-            std::string createScope(const SymbolMethod& method);
-            std::string createScope(const SymbolClass& clazz);
+            // std::string createScope(const SymbolMethod& method);
+            // std::string createScope(const SymbolClass& clazz);
 
 
             // 특정 헤더에서 상대적 헤더 위치 찾기

@@ -256,6 +256,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 			ss,
 			true,
 			"",
+			"",
 			"void",
 			{},
 			"main"
@@ -275,6 +276,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 			ss,
 			true,
 			"extern LIBRARY_API",
+			"",
 			"void",
 			{},
 			"main"
@@ -293,6 +295,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 		MethodCXXSourceScopedStream global_method_definition{
 			ss,
 			false,
+			"",
 			"",
 			"void",
 			{"Library", "Global"},
@@ -314,6 +317,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 		MethodCXXSourceScopedStream global_method_declaration_with_parameter{
 			ss,
 			true,
+			"",
 			"",
 			"void",
 			{},
@@ -347,9 +351,47 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 	}
 
 	{
+		MethodCXXSourceScopedStream derived_method_declaration_with_parameter{
+			ss,
+			true,
+			"",
+			"override",
+			"void",
+			{},
+			"main",
+			{
+				MethodCXXSourceScopedStream::Parameter {
+					MethodCXXSourceScopedStream::Parameter::VALUE,
+					"int",
+					"argc"
+				},
+				MethodCXXSourceScopedStream::Parameter {
+					MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+					"std::vector<std::string>",
+					"argv"
+				},
+				MethodCXXSourceScopedStream::Parameter {
+					MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT,
+					"int",
+					"result"
+				},
+			}
+		};
+	}
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"void main(int argc, const std::vector<std::string>& argv, int& result) override;\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+
+	{
 		MethodCXXSourceScopedStream global_method_definition_with_parameter{
 			ss,
 			false,
+			"",
 			"",
 			"void",
 			{"Library", "Global"},

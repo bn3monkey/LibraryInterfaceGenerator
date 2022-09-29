@@ -125,7 +125,8 @@ namespace LibraryInterfaceGenerator
             explicit MethodCXXSourceScopedStream(
                 SourceStream& sourceStream, 
                 bool isDeclaration, 
-                const std::string& prefix, 
+                const std::string& prefix,
+                const std::string& postfix,
                 const std::string& type, 
                 const std::vector<std::string>& scopes,
                 const std::string& name, 

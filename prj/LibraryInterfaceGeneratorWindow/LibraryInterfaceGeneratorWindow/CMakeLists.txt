@@ -76,12 +76,18 @@ file(GLOB_RECURSE test_files
 	${test_source_dir}/*.cpp
 	${test_source_dir}/*.c
 )
-add_executable(LibraryInerfaceGeneratorTest 
-	${include_files}
-	${implementation_files}
+
+# add_executable(LibraryInerfaceGeneratorTest 
+#	${include_files}
+#	${implementation_files}
+#	${test_files}
+#	)
+
+add_executable(LibraryInerfaceGeneratorTest
+	"${implementation_dir}/SourceStream/SourceStream.cpp"
+	"${implementation_dir}/SourceStream/CXXSourceStream.cpp"
 	${test_files}
 	)
-
 
 target_link_libraries(LibraryInerfaceGeneratorTest gtest)
 target_include_directories(LibraryInerfaceGeneratorTest PUBLIC
