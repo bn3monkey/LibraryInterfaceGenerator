@@ -223,7 +223,19 @@ TEST(CXXSourceStream, EnumCXXSourceScopedStream)
 	SourceStream ss;
 
 	{
-		EnumCXXSourceScopedStream startingType{ ss, "StartingType" };
+		EnumCXXSourceScopedStream startingType{ ss, true, "StartingType" };
+	}
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"enum class StartingType;\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+
+	{
+		EnumCXXSourceScopedStream startingType{ ss, false, "StartingType" };
 		startingType.addElement("FIRE", "0");
 		startingType.addElement("WATER", "1");
 		startingType.addElement("GRASS", "2");

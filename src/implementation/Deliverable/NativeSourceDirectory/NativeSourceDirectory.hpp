@@ -3,16 +3,16 @@
 
 #include <string>
 
-#include "../FileSystem/FileSystem.hpp"
-#include "../Result/Result.hpp"
-#include "../SymbolTable/SymbolTable.hpp"
-#include "../Auxiliary/Definition.hpp"
-#include "../Auxiliary/StringHelper.hpp"
-#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
+#include "../../FileSystem/FileSystem.hpp"
+#include "../../Result/Result.hpp"
+#include "../../Auxiliary/Definition.hpp"
+#include "../../Auxiliary/StringHelper.hpp"
 
-//#include "../NativeSourceStream/NativeSourceStream.hpp"
+#include "../../SymbolTable/SymbolTable.hpp"
+#include "../../SourceStream/CXXSourceStream.hpp"
+#include "../../Converter/CXXConverter.hpp"
+#include "../../ExternalLibrary/NativeExternalLibraryDirectory.hpp"
 
-#include "../SourceStream/CXXSourceStream.hpp"
 #include <algorithm>
 #include <set>
 
@@ -107,7 +107,7 @@ namespace LibraryInterfaceGenerator
             SourceStream createMethodCppFileContent(const SymbolModule& object);
 
             // 6. 전체 파일의 include file
-            SourceStream createIncludeFileContent(const SymbolPackage& package, std::string& parent_include_path);
+            SourceStream createIncludeFileContent(const SymbolPackage& package, const std::vector<std::string>& include_files);
 
             // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
             // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
@@ -119,20 +119,16 @@ namespace LibraryInterfaceGenerator
             // 7. Code Block 제작
             
             // Enum Block 생성
-            //std::vector<std::string> createEnumDefinition(const SymbolEnum& object);
             void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
 
             // Method Block 생성
-            // std::string createMethodDeclaration(const SymbolMethod& object);
             void createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
             void createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
             void createInterfaceMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
             void createDerivedMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
 
-            // std::string createStaticMethodDeclaration(const SymbolMethod& object);
-            // std::string createClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            // std::string createInterfaceMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object);
-            // std::string createDerivedMethodDeclaration(const SymbolMethod& object);
+            void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object);
+            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
 
             void createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
             void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
@@ -140,9 +136,7 @@ namespace LibraryInterfaceGenerator
             void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
             
-            void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object);
-            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
-
+            
             // Parameter Block 생성
             void createParametersDefinition(SourceStream& ss, const SymbolMethod& parameters);
             void createParameterDefinition(SourceStream& ss, const SymbolParameter& object);
@@ -168,8 +162,8 @@ namespace LibraryInterfaceGenerator
             // 특정 헤더에서 상대적 헤더 위치 찾기
             //std::set<std::string> collectDeclarations(const SymbolClass& clazz);
             //std::set<std::string> collectDeclarations(const SymbolMethod& method);
-            
         };
     }
+
 }
 #endif

@@ -93,7 +93,7 @@ namespace LibraryInterfaceGenerator
         class EnumCXXSourceScopedStream
         {
         public:
-            explicit EnumCXXSourceScopedStream(SourceStream& sourceStream, const std::string& name);
+            explicit EnumCXXSourceScopedStream(SourceStream& sourceStream, bool isDeclaration, const std::string& name);
             virtual ~EnumCXXSourceScopedStream();
 
             void addElement(const std::string& key, const std::string& value);

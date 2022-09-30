@@ -227,10 +227,20 @@ LibraryInterfaceGenerator::Implementation::AccessCXXSourceScopedStream::~AccessC
 		delete _outer_stream;
 }
 
-LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::EnumCXXSourceScopedStream(SourceStream& sourceStream, const std::string& name)
+LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::EnumCXXSourceScopedStream(SourceStream& sourceStream, bool isDeclaration, const std::string& name)
 {
-	sourceStream << "enum class " << name << "\n";
-	_stream = new SourceScopedStream(sourceStream, CodeStyle::CppClass);
+	sourceStream << "enum class " << name;
+	if (isDeclaration)
+	{
+		sourceStream << ";";
+	}
+
+	sourceStream << "\n";
+
+	if (!isDeclaration)
+	{
+		_stream = new SourceScopedStream(sourceStream, CodeStyle::CppClass);
+	}
 }
 
 LibraryInterfaceGenerator::Implementation::EnumCXXSourceScopedStream::~EnumCXXSourceScopedStream()
