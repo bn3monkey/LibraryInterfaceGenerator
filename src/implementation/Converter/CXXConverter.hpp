@@ -149,8 +149,8 @@ namespace LibraryInterfaceGenerator
             scopes.insert(scopes.end(), src.parentObjects.begin(), src.parentObjects.end());
             scopes.push_back(src.name);
             return scopes;
-
         }
+
     }
 } 
 #endif

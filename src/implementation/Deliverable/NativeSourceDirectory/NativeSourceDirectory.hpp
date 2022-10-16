@@ -135,24 +135,27 @@ namespace LibraryInterfaceGenerator
 
             void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
-            
-            
+                        
             // Property Block 생성
             std::string createPropertyName(const SymbolProperty& object);
-            void createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
-            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
-
+            void createClassPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createClassPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
             void createClassPropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
-            void createInterfacePropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
-            void createDerivedPropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
 
+            void createInterfacePropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createInterfacePropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createInterfacePropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
+            
+            void createDerivedPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createDerivedPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createDerivedPropertyDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+
+
+            void createPropertyGetterDefinition(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+            void createPropertySetterDefinition(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
             
             void createPropertyField(SourceStream& ss, const SymbolProperty& object);
-
-            // Property, Method의 범위
-            std::vector<std::string> createScope(const SymbolMethod& method);
-            std::vector<std::string> createScope(const SymbolClass& clazz);
 
 
             // 특정 헤더에서 상대적 헤더 위치 찾기
