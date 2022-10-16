@@ -59,7 +59,7 @@ namespace LibraryInterfaceGenerator
             }
         }
 
-        std::string createRelativeHeaderPath(const SymbolModule& self)
+        inline std::string createRelativeHeaderPath(const SymbolModule& self)
         {
             std::string prefix = "../";
             std::string postfix = "include/";
@@ -77,7 +77,7 @@ namespace LibraryInterfaceGenerator
             prefix += postfix;
             return prefix;
         }
-        std::string createRelativeHeaderPath(const SymbolClass& self)
+        inline std::string createRelativeHeaderPath(const SymbolClass& self)
         {
             std::string prefix = "../";
             std::string postfix = "include/";
@@ -96,7 +96,7 @@ namespace LibraryInterfaceGenerator
             return prefix;
         }
 
-        std::string createRelativeHeaderPath(const SymbolClass& src, const SymbolClass& dest)
+        inline std::string createRelativeHeaderPath(const SymbolClass& src, const SymbolClass& dest)
         {
             std::string path;
 
@@ -137,7 +137,20 @@ namespace LibraryInterfaceGenerator
 
         }
 
-        
+        inline std::vector<std::string> createScope(const SymbolMethod& src)
+        {
+            return src.parentModules;
+        }
+
+        inline std::vector<std::string> createScope(const SymbolClass& src)
+        {
+            std::vector<std::string> scopes;
+            scopes.insert(scopes.end(), src.parentModules.begin(), src.parentModules.end());
+            scopes.insert(scopes.end(), src.parentObjects.begin(), src.parentObjects.end());
+            scopes.push_back(src.name);
+            return scopes;
+
+        }
     }
 } 
 #endif

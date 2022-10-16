@@ -432,7 +432,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
                     {
                         auto& method = method_object.first;
                         createComment(ss, *method);
-                        createClassMethodDeclaration(ss, object, *method);
+                        createClassMethodDeclaration(ss, *method);
                     }
 
                     for (auto& base_method_object : base_methods)
@@ -706,29 +706,33 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnu
         }
     }
 }
+static MethodCXXSourceScopedStream::Parameter createParameter(const SymbolParameter& parameter)
+{
+    int io;
+    if (parameter.type->isPrimitive())
+    {
+        io = MethodCXXSourceScopedStream::Parameter::VALUE;
+    }
+    else
+    {
+        if (parameter.io == SymbolParameter::IO::OUT)
+        {
+            io = MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT;
+        }
+        else
+        {
+            io = MethodCXXSourceScopedStream::Parameter::REFERENCE_IN;
+        }
+    }
+    return MethodCXXSourceScopedStream::Parameter(io, parameter.type->toCppType(), parameter.name);
+}
 
 static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(const SymbolMethod& object)
 {
     std::vector<MethodCXXSourceScopedStream::Parameter> ret;
     for (auto& parameter : object.parameters)
     {
-        int io;
-        if (parameter->type->isPrimitive())
-        {
-            io = MethodCXXSourceScopedStream::Parameter::VALUE;
-        }
-        else
-        {
-            if (parameter->io == SymbolParameter::IO::OUT)
-            {
-                io = MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT;
-            }
-            else
-            {
-                io = MethodCXXSourceScopedStream::Parameter::REFERENCE_IN;
-            }
-        }
-        ret.emplace_back(io, parameter->type->toCppType(), parameter->name);
+        ret.push_back(createParameter(*parameter));
     }
 }
 
@@ -740,57 +744,116 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createSta
     }
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDeclaration(SourceStream& ss, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", object.type->toCppType(), {}, object.name, parameters };
+    }
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceMethodDeclaration(SourceStream& ss, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", object.type->toCppType(), {}, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedMethodDeclaration(SourceStream& ss, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", object.type->toCppType(), {}, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        auto scopes = createScope(object);
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toCppType(), scopes, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        auto scopes = createScope(clazz);
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toCppType(), scopes, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        MethodCXXSourceScopedStream method_scope{ ss, true, "explicit", "", "", {}, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
 {
+    {
+        auto parameters = createParameters(object);
+        auto scopes = createScope(clazz);
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "", scopes, object.name, parameters };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+    {
+        std::string name = "~";
+        name.append(clazz.name);
+
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "", {}, name, {} };
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz)
 {
+    {
+        std::string name = "~";
+        name.append(clazz.name);
+        auto scopes = createScope(clazz);
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "", scopes, name, {} };
+    }
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParametersDefinition(SourceStream& ss, const SymbolMethod& parameters)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createParameterDefinition(SourceStream& ss, const SymbolParameter& object)
-{
-}
 
 std::string LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyName(const SymbolProperty& object)
 {
-    return std::string();
+    std::string propertyName = object.name;
+    char firstChar = propertyName[0];
+    if ('a' <= firstChar && firstChar <= 'z')
+        firstChar += ('A' - 'a');
+    propertyName[0] = firstChar;
+    return propertyName;
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object)
 {
+    std::string setter{ "void set" };
+    setter += propertyName;
+    setter += "(const ";
+    setter += object.type->toCppType();
+    if (!object.type->isPrimitive())
+        setter += "&";
+    setter += " value)";
+    return setter;
+
+    {
+        std::string name = "set";
+        name += propertyName;
+
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", {}, name, 
+            {
+            } 
+        }
+    }
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object)

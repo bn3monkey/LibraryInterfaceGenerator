@@ -123,8 +123,8 @@ namespace LibraryInterfaceGenerator
 
             // Method Block 생성
             void createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
-            void createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
-            void createInterfaceMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createClassMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
+            void createInterfaceMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
             void createDerivedMethodDeclaration(SourceStream& ss, const SymbolMethod& object);
 
             void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object);
@@ -136,10 +136,6 @@ namespace LibraryInterfaceGenerator
             void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
             
-            
-            // Parameter Block 생성
-            void createParametersDefinition(SourceStream& ss, const SymbolMethod& parameters);
-            void createParameterDefinition(SourceStream& ss, const SymbolParameter& object);
             
             // Property Block 생성
             std::string createPropertyName(const SymbolProperty& object);
@@ -155,8 +151,8 @@ namespace LibraryInterfaceGenerator
             void createPropertyField(SourceStream& ss, const SymbolProperty& object);
 
             // Property, Method의 범위
-            // std::string createScope(const SymbolMethod& method);
-            // std::string createScope(const SymbolClass& clazz);
+            std::vector<std::string> createScope(const SymbolMethod& method);
+            std::vector<std::string> createScope(const SymbolClass& clazz);
 
 
             // 특정 헤더에서 상대적 헤더 위치 찾기
