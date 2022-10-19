@@ -148,7 +148,7 @@ namespace LibraryInterfaceGenerator
             
             void createDerivedPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
             void createDerivedPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
-            void createDerivedPropertyDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object);
+            void createDerivedPropertyDeclaration(SourceStream& ss, const SymbolProperty& object);
 
 
             void createPropertyGetterDefinition(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);

@@ -1,5 +1,5 @@
 #include "NativeSourceDirectory.hpp"
-#include "../Converter/CXXConverter.hpp"
+#include "../../Converter/CXXConverter.hpp"
 
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
@@ -260,8 +260,8 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
         ExternalIncludeCXXSourceStream ex1{ ss, "cstdint" };
         ExternalIncludeCXXSourceStream ex2{ ss, "vector" };
-        ExternalIncludeCXXSourceStream ex2{ ss, "string" };
-        ExternalIncludeCXXSourceStream ex2{ ss, "memory" };
+        ExternalIncludeCXXSourceStream ex3{ ss, "string" };
+        ExternalIncludeCXXSourceStream ex4{ ss, "memory" };
 
         createForwardDeclaration(ss, object);
 
@@ -289,7 +289,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
                     {
                         auto& method = method_object.first;
                         createComment(ss, *method);
-                        createInterfaceMethodDeclaration(ss, object, *method);
+                        createInterfaceMethodDeclaration(ss,  *method);
                     }
                 }
             }
@@ -734,6 +734,7 @@ static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(cons
     {
         ret.push_back(createParameter(*parameter));
     }
+    return ret;
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object)
@@ -949,7 +950,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
     }
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertyDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertyDeclaration(SourceStream& ss, const SymbolProperty& object)
 {
     auto name = createPropertyName(object);
 

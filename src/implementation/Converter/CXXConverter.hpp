@@ -8,7 +8,7 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        void createComment(SourceStream& ss, const SymbolPackage& object)
+        inline void createComment(SourceStream& ss, const SymbolPackage& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
@@ -16,7 +16,7 @@ namespace LibraryInterfaceGenerator
                 comment.addDescription(object.description);
             }
         }
-        void createComment(SourceStream& ss, const SymbolModule& object)
+        inline void createComment(SourceStream& ss, const SymbolModule& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
@@ -24,21 +24,21 @@ namespace LibraryInterfaceGenerator
                 comment.addDescription(object.description);
             }
         }
-        void createComment(SourceStream& ss, const SymbolClass& object)
+        inline void createComment(SourceStream& ss, const SymbolClass& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
                 comment.addBrief(object.description);
             }
         }
-        void createComment(SourceStream& ss, const SymbolEnum& object)
+        inline void createComment(SourceStream& ss, const SymbolEnum& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
                 comment.addBrief(object.description);
             }
         }
-        void createComment(SourceStream& ss, const SymbolMethod& object)
+        inline void createComment(SourceStream& ss, const SymbolMethod& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
@@ -50,7 +50,7 @@ namespace LibraryInterfaceGenerator
                 comment.addReturn(object.return_description);
             }
         }
-        void createComment(SourceStream& ss, const SymbolProperty& object)
+        inline void createComment(SourceStream& ss, const SymbolProperty& object)
         {
             {
                 CommentCXXSourceStream comment{ ss };
@@ -134,7 +134,7 @@ namespace LibraryInterfaceGenerator
                 path += dest.parentObjects[0];
             }
             path += ".hpp";
-
+            return path;
         }
 
         inline std::vector<std::string> createScope(const SymbolMethod& src)

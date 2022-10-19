@@ -1,5 +1,4 @@
 #include "CXXSourceStream.hpp"
-#include "UIDGenerator.hpp"
 #include <algorithm>
 
 LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScopedStream::HeaderGuardCXXSourceScopedStream(SourceStream& sourceStream, const std::vector<std::string>& module_names, const std::string& name)

@@ -83,9 +83,42 @@ file(GLOB_RECURSE test_files
 #	${test_files}
 #	)
 
+file(GLOB_RECURSE source_files_for_test
+	${implementation_dir}/SourceStream/*.h
+	${implementation_dir}/SourceStream/*.hpp
+	${implementation_dir}/SourceStream/*.cpp
+	${implementation_dir}/SourceStream/*.c
+	${implementation_dir}/SymbolTable/*.h
+	${implementation_dir}/SymbolTable/*.hpp
+	${implementation_dir}/SymbolTable/*.cpp
+	${implementation_dir}/SymbolTable/*.c
+	${implementation_dir}/FileSystem/*.h
+	${implementation_dir}/FileSystem/*.hpp
+	${implementation_dir}/FileSystem/*.cpp
+	${implementation_dir}/FileSystem/*.c
+	${implementation_dir}/ExternalLibrary/*.h
+	${implementation_dir}/ExternalLibrary/*.hpp
+	${implementation_dir}/ExternalLibrary/*.cpp
+	${implementation_dir}/ExternalLibrary/*.c
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.h
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.hpp
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.cpp
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.c
+
+	${implementation_dir}/Auxiliary/*.h
+	${implementation_dir}/Auxiliary/*.hpp
+	${implementation_dir}/Auxiliary/*.cpp
+	${implementation_dir}/Auxiliary/*.c
+
+
+	${implementation_dir}/Converter/*.h
+	${implementation_dir}/Converter/*.hpp
+	${implementation_dir}/Converter/*.cpp
+	${implementation_dir}/Converter/*.c)
+
 add_executable(LibraryInerfaceGeneratorTest
-	"${implementation_dir}/SourceStream/SourceStream.cpp"
-	"${implementation_dir}/SourceStream/CXXSourceStream.cpp"
+	${source_files_for_test}
+
 	${test_files}
 	)
 
