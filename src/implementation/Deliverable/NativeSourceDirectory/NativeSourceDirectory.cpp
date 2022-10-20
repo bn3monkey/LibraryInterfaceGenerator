@@ -791,7 +791,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCon
 {
     {
         auto parameters = createParameters(object);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "explicit", "", "", {}, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, true, "explicit", "", "", {}, clazz.name, parameters };
     }
 }
 
@@ -800,7 +800,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCon
     {
         auto parameters = createParameters(object);
         auto scopes = createScope(clazz);
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "", scopes, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "", scopes, clazz.name, parameters };
     }
 }
 
@@ -820,7 +820,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDes
         std::string name = "~";
         name.append(clazz.name);
         auto scopes = createScope(clazz);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "", scopes, name, {} };
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "", scopes, name, {} };
     }
 }
 
@@ -841,7 +841,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
         std::string name = "set";
         name += propertyName;
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "void", {}, name,
             {
                 MethodCXXSourceScopedStream::Parameter(
                     MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
@@ -862,7 +862,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
         if (!object.type->isPrimitive())
             type += "&";
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", type, {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", type, {}, name,
             {}
         };
     }
@@ -882,7 +882,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
         std::string name = "set";
         name += propertyName;
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "virtual", "= 0", "void", {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", "void", {}, name,
             {
                 MethodCXXSourceScopedStream::Parameter(
                     MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
@@ -903,7 +903,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
         if (!object.type->isPrimitive())
             type += "&";
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "virtual", "= 0", type, {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", type, {}, name,
             {}
         };
     }
@@ -923,7 +923,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
         std::string name = "set";
         name += propertyName;
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "override", "void", {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", "void", {}, name,
             {
                 MethodCXXSourceScopedStream::Parameter(
                     MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
@@ -944,7 +944,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
         if (!object.type->isPrimitive())
             type += "&";
 
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "override", type, {}, name,
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", type, {}, name,
             {}
         };
     }
@@ -970,9 +970,9 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     auto scopes = createScope(clazz);
 
     {
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", type, scopes, name, {} };
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", type, scopes, name, {} };
 
-        ss << "return _" << propertyName << ";\n";
+        ss << "return _" << object.name << ";\n";
     }
 }
 
@@ -984,7 +984,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     auto scopes = createScope(clazz);
 
     {
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "void", scopes, name,
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, name,
             {
                 MethodCXXSourceScopedStream::Parameter(
                     MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
@@ -993,7 +993,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
             }
         };
 
-        ss << "_" << propertyName << " = value;\n";
+        ss << "_" << object.name << " = value;\n";
     }
 }
 
@@ -1007,5 +1007,5 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyField(SourceStream& ss, const SymbolProperty& object)
 {
-    ss << object.type->toCppType() << " " << object.name << ";\n";
+    ss << object.type->toCppType() << " _" << object.name << ";\n";
 }

@@ -12,6 +12,17 @@ LibraryInterfaceGenerator::Implementation::SourceStream::~SourceStream()
 		delete[] _content;
 }
 
+LibraryInterfaceGenerator::Implementation::SourceStream::SourceStream(SourceStream&& other)
+{
+	this->_content = other._content;
+	other._content = nullptr;
+
+	this->_indent_size = other._indent_size;
+	std::copy(other._current_indent, other._current_indent + MAX_INDENT, this->_current_indent);
+	this->_size = other._size;
+	this->_is_new_line_started = other._is_new_line_started;
+}
+
 void LibraryInterfaceGenerator::Implementation::SourceStream::pop(size_t end_string_size)
 {
 	if (_content[_size - 1] == '\n')

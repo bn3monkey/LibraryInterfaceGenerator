@@ -34,7 +34,7 @@ LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScopedStream::~He
 std::string LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScopedStream::makeGUID(const std::vector<std::string>& strs)
 {
 	constexpr static char characters[] = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	constexpr size_t length = sizeof(characters);
+	constexpr size_t length = sizeof(characters) - 1;
 
 	size_t slots[12] = { 0 };
 	size_t idx = 0;
@@ -46,7 +46,8 @@ std::string LibraryInterfaceGenerator::Implementation::HeaderGuardCXXSourceScope
 	{
 		for (auto& ch : str)
 		{
-			auto& slot = slots[idx++];
+			auto& slot = slots[idx];
+			idx = (idx + 1) % 12;
 			if ('a' <= ch && ch <= 'z')
 			{
 				slot += ch - 'a' + upper_length;

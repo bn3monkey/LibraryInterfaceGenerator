@@ -31,6 +31,8 @@ namespace LibraryInterfaceGenerator
             explicit SourceStream();
             virtual ~SourceStream();
 
+            SourceStream(SourceStream&& other);
+
             friend LibraryInterfaceGenerator::Implementation::SourceStream& operator<<(LibraryInterfaceGenerator::Implementation::SourceStream& stream, const char* str);
             friend LibraryInterfaceGenerator::Implementation::SourceStream& operator<<(LibraryInterfaceGenerator::Implementation::SourceStream& stream, const std::string& str);
             
