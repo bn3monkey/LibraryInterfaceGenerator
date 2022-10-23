@@ -4,16 +4,16 @@
 #include <string>
 #include <algorithm>
 
-#include "../FileSystem/FileSystem.hpp"
-#include "../Result/Result.hpp"
-#include "../SymbolTable/SymbolTable.hpp"
-#include "../Auxiliary/Definition.hpp"
-#include "../Auxiliary/StringHelper.hpp"
-#include "../NativeSourceStream/NativeSourceStream.hpp"
+#include "../../FileSystem/FileSystem.hpp"
+#include "../../Result/Result.hpp"
+#include "../../SymbolTable/SymbolTable.hpp"
+#include "../../Auxiliary/Definition.hpp"
+#include "../../Auxiliary/StringHelper.hpp"
+#include "../../SourceStream/CXXSourceStream.hpp"
 #include "../NativeSourceDirectory/NativeSourceDirectory.hpp"
-#include "../NativeExternalLibraryDirectory/NativeExternalLibraryDirectory.hpp"
-#include "../Environment.hpp"
-#include "../Converter/NativeInterfaceConverter/NativeInterfaceConverter.h"
+#include "../../ExternalLibrary/NativeExternalLibraryDirectory.hpp"
+#include "../../Environment.hpp"
+#include "../../Converter/CXXConverter.hpp"
 
 namespace LibraryInterfaceGenerator
 {
@@ -58,63 +58,61 @@ namespace LibraryInterfaceGenerator
             std::string root_namespace;
 
             Result createInterfaceFile(const SymbolPackage& symbolObject, std::string& parent_include_path);
-            Result createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content);
+
+            SourceStream createInterfaceHeaderContent(const SymbolPackage& symbolObject);
+            SourceStream createInterfaceCppContent(const SymbolPackage& symbolObject);
             
-            void createPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss);
-            void createModuleDeclaration(const SymbolModule& symbolObject, std::stringstream& ss, std::string& indent);
-            void createClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string& indent);
+            void createPackageDeclaration(SourceStream& ss, const SymbolPackage& obj);
+            void createModuleDeclaration(SourceStream& ss, const SymbolModule& obj);
+            void createClassDeclaration(SourceStream& ss, const SymbolClass& clazz);
 
-            Result createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss);
-            void createModuleDefinition(const SymbolModule& mod, std::stringstream& ss);
-            void createClassDefinition(const SymbolClass& clazz, std::stringstream& ss);
+            void createPackageDefinition(SourceStream& ss, const SymbolPackage& obj);
+            void createModuleDefinition(SourceStream& ss, const SymbolModule& obj);
+            void createClassDefinition(SourceStream& ss, const SymbolClass& clazz);
 
-            std::string createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor);
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& constructor);
-            std::string allocate(const SymbolClass& clazz, const SymbolMethod& constructor);
+            void createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& consturctor);
+            void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor);
+            void allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& consturctor);
 
-            std::string createDestructorDeclaration(const SymbolClass& clazz);
-            std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
-            std::string deallocate(const SymbolClass& clazz);
+            void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
+            void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
+            void deallocate(const SymbolClass& clazz);
 
-            std::string createAddReleaserDeclaration(const SymbolClass& clazz);
-            std::vector<std::string> createAddReleaserDefinition(const SymbolClass& clazz);
-            std::string addReleaser(const SymbolClass& clazz);
+            void createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz);
+            void createAddReleaserDefinition(SourceStream& ss, const SymbolClass& clazz);
+            void addReleaser(SourceStream& ss, const SymbolClass& clazz);
 
-            std::string createClassMethodDeclaration(const SymbolMethod& object);
-            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::string callClassMethod(const SymbolMethod& object);
+            void createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj);
+            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj);
+            void callClassMethod(SourceStream& ss, const SymbolMethod& obj);
 
-            std::string createStaticMethodDeclaration(const SymbolMethod& object);
-            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object);
-            std::string callStaticMethod(const SymbolMethod& object);
+            void createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& obj);
+            void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& obj);
+            void callStaticMethod(SourceStream& ss, const SymbolMethod& obj);
 
             // Parameter Block ����
-            std::string createParametersDefinition(const SymbolMethod& object);
-            std::string createParameterDefinition(const SymbolParameter& object);
+            void createParametersDefinition(SourceStream& ss, const SymbolMethod& obj);
+            void createParameterDefinition(SourceStream& ss, const SymbolParameter& obj);
 
-            std::string createReturnValueChanger(const SymbolMethod& object);
-            std::string createInputParameterChanger(const SymbolParameter& object);
-            std::string createOutputParameterChanger(const SymbolParameter& object);
-            
+            void createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj);
+            void createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj);
+            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj);
 
             // Property Block ����
             std::string createPropertyName(const SymbolProperty& object);
-            
-            std::string createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
-            std::string createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object);
-            std::vector<std::string> createPropertyDeclaration(const SymbolProperty& object);
 
-            std::string createPropertySetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            std::string createPropertyGetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            std::vector<std::string> callPropertySetter(const SymbolClass& clazz, const SymbolProperty& object);
-            std::vector<std::string> callPropertyGetter(const SymbolClass& clazz, const SymbolProperty& object);
-            std::vector<std::string> createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
+            void createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj);
+            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj);
+            void createPropertyDeclaration(SourceStream& ss, const SymbolProperty& obj);
 
-            std::string createInputPropertyChanger(const SymbolProperty& object);
-            std::string createOutputPropertyChanger(const SymbolProperty& object);
+            void callPropertySetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
+            void callPropertyGetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
+            void createPropertySetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
+            void createPropertyGetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
+            void createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
 
-            std::string createScope(const SymbolClass& clazz);
-            std::string createScope(const SymbolMethod& method);
+            void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj);
+            void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj);
 
             std::string createNativeInterfaceConverter();
         };

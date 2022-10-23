@@ -60,23 +60,360 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
     cpp_path += "Interface.cpp";
 
     Result result;
-    std::string header_content;
-	std::string cpp_content;
-    result = createInterfaceContent(symbolObject, header_content, cpp_content);
-    if (!result)
-        return result;
 
-    result = FileSystem::createFile(header_path, header_content);
-    if (!result)
-        return result;
+	{
+		auto ss = createInterfaceHeaderContent(symbolObject);
+		auto str = ss.str();
 
-	result = FileSystem::createFile(cpp_path, cpp_content);
-    if (!result)
-        return result;
+		result = FileSystem::createFile(header_path, str);
+		if (!result)
+			return result;
+
+	}
+	{
+		auto ss = createInterfaceCppContent(symbolObject);
+		auto str = ss.str();
+		result = FileSystem::createFile(cpp_path, str);
+		if (!result)
+			return result;
+	}
 
     return Result();
 }
 
+LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerator::Implementation::NativeInterface::createInterfaceHeaderContent(const SymbolPackage& symbolObject)
+{
+	SourceStream ss;
+	createPackageDeclaration(ss, symbolObject);
+	return ss;
+}
+
+LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerator::Implementation::NativeInterface::createInterfaceCppContent(const SymbolPackage& symbolObject)
+{
+	SourceStream ss;
+	createPackageDefinition(ss, symbolObject);
+	return ss;
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDeclaration(SourceStream& ss, const SymbolPackage& obj)
+{
+	{
+		HeaderGuardCXXSourceScopedStream headerGuard{ ss, { obj.name}, "INTERFACE" };
+
+		{
+			ExternalIncludeCXXSourceStream exclude{ ss, "string" };
+		}
+		{
+			ExternalIncludeCXXSourceStream exclude{ ss, "vector" };
+		}
+
+		ss << "#ifdef" << export_macro << "\n";
+		ss << "#define" << api_macro << "\n";
+		ss << "#else" << "\n";
+		ss << "#define" << api_macro << "\n";
+		ss << "#endif\n\n";
+
+		{
+			NamespaceCXXSourceScopedStream nameSpace{ ss, root_namespace };
+
+			for (auto& module_ : obj.modules)
+			{
+				createComment(ss, obj);
+				createModuleDeclaration(ss, *module_);
+			}
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDeclaration(SourceStream& ss, const SymbolModule& obj)
+{
+	{
+		NamespaceCXXSourceScopedStream nameSpace{ ss, obj.name };
+
+		for (auto& methodObject : obj.global_methods)
+		{
+			auto& method = methodObject.first;
+			createComment(ss, *method);
+			createStaticMethodDeclaration(ss, *method);
+		}
+
+		for (auto& clazz : obj.classes)
+		{
+			createComment(ss, *clazz);
+			createClassDeclaration(ss, *clazz);
+		}
+
+		for (auto& subModule : obj.submodules)
+		{
+			createComment(ss, *subModule);
+			createModuleDeclaration(ss, *subModule);
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDeclaration(SourceStream& ss, const SymbolClass& clazz)
+{
+	{
+		NamespaceCXXSourceScopedStream nameSpace{ ss, clazz.name };
+
+		for (auto& consturctorObject : clazz.constructors)
+		{
+			auto& constructor = consturctorObject.first;
+			createConstructorDeclaration(ss, clazz, *constructor);
+		}
+		{
+			createDestructorDeclaration(ss, clazz);
+		}
+		{
+			createAddReleaserDeclaration(ss, clazz);
+		}
+
+		auto base_props = clazz.getBaseProperties();
+		for (auto& base_prop : base_props)
+		{
+			createComment(ss, *base_prop);
+			createPropertyDeclaration(ss, *base_prop);
+		}
+
+		for (auto& prop : clazz.properties)
+		{
+			createComment(ss, *prop);
+			createPropertyDeclaration(ss, *prop);
+		}
+
+		auto base_methods = clazz.getBaseMethods();
+		for (auto& baseMethodObject : base_methods)
+		{
+			auto base_method = baseMethodObject.first;
+			createComment(ss, *base_method);
+			createClassMethodDeclaration(ss, clazz, *base_method);
+		}
+
+		for (auto& methodObject : clazz.methods)
+		{
+			auto method = methodObject.first;
+			createComment(ss, *method);
+			createClassMethodDeclaration(ss, clazz, *method);
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDefinition(SourceStream& ss, const SymbolPackage& obj)
+{
+	{
+		{
+			InternalIncludeCXXSourceStream selfHeaderInclude{ ss,  obj.name + "Interface.hpp" };
+		}
+		{
+			std::stringstream libraryHeaderPathSS;
+			libraryHeaderPathSS << "../" << _srcDirectory.getIncludeDirName() << "/" << obj.name << ".hpp";
+			InternalIncludeCXXSourceStream libraryHeaderInclude{ ss, libraryHeaderPathSS.str() };
+		}
+		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
+		{
+			auto poolPath = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
+			InternalIncludeCXXSourceStream poolInclude{ ss, poolPath };
+		}
+
+		ss << "\n";
+		ss << "using namespace" << root_namespace << ";\n";
+		ss << "\n";
+
+		ss << createNativeInterfaceConverter();
+
+		for (auto& module_ : obj.modules)
+		{
+			createModuleDefinition(ss, *module_);
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDefinition(SourceStream& ss, const SymbolModule& obj)
+{
+	for (auto& methodObject : obj.global_methods)
+	{
+		auto& method = methodObject.first;
+		createStaticMethodDefinition(ss, *method);
+	}
+	for (auto& clazz : obj.classes)
+	{
+		createClassDefinition(ss, *clazz);
+	}
+	for (auto& subModule : obj.submodules)
+	{
+		createModuleDefinition(ss, *subModule);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefinition(SourceStream& ss, const SymbolClass& clazz)
+{
+	for (auto& consturctorObject : clazz.constructors)
+	{
+		auto& consturctor = consturctorObject.first;
+		createConstructorDefinition(ss, clazz, *consturctor);
+	}
+	{
+		createDestructorDefinition(ss, clazz);
+	}
+	{
+		createAddReleaserDefinition(ss, clazz);
+	}
+	auto base_props = clazz.getBaseProperties();
+	for (auto& base_prop : base_props)
+	{
+		 createPropertyDefinition(ss, clazz, *base_prop);
+	}
+	
+	for (auto& prop : clazz.properties)
+	{
+		createPropertyDefinition(ss, clazz, *prop);
+	}
+
+	auto base_methods = clazz.getBaseMethods();
+	for (auto& baseMethodObject : base_methods)
+	{
+		auto& base_method = baseMethodObject.first;
+		createClassMethodDefinition(ss, clazz, *base_method);
+	}
+
+	for (auto& methodObject : clazz.methods)
+	{
+		auto& method = methodObject.first;
+		createClassMethodDefinition(ss, clazz, *method);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& consturctor)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDefinition(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::addReleaser(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callStaticMethod(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createParametersDefinition(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameterDefinition(SourceStream& ss, const SymbolParameter& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
+{
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyName(const SymbolProperty& object)
+{
+	return std::string();
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDeclaration(SourceStream& ss, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
+{
+}
+
+std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
+{
+	return std::string();
+}
+
+/*
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
 {
 	std::stringstream ss {""};
@@ -141,12 +478,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 		auto line = createStaticMethodDeclaration(*method);
 		defineNamespace.addLine(line);
 	}
-	/*
-	for (auto& interface : symbolObject.interfaces)
-	{
-		createClassDeclaration(*interface, ss, indent);
-	}
-	*/
+	// for (auto& interface : symbolObject.interfaces)
+	// {
+	// 	createClassDeclaration(*interface, ss, indent);
+	// }
 	for (auto& clazz : symbolObject.classes)
 	{
 		{
@@ -279,12 +614,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDef
 			ss << line << "\n";
 		}
 	}
-	/*
-	for (auto& interface : mod.interfaces)
-	{
-		createClassDefinition(*interface, ss);
-	}
-	*/
+	// for (auto& interface : mod.interfaces)
+	// {
+	// 	createClassDefinition(*interface, ss);
+	// }
 	for (auto& clazz : mod.classes)
 	{
 		createClassDefinition(*clazz, ss);
@@ -1253,3 +1586,4 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNa
 // object array : std::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
 // object vector : ::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
 
+*/
