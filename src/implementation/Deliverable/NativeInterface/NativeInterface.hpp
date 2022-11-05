@@ -76,7 +76,7 @@ namespace LibraryInterfaceGenerator
 
             void createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
-            void deallocate(const SymbolClass& clazz);
+            void deallocate(SourceStream& ss, const SymbolClass& clazz);
 
             void createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz);
             void createAddReleaserDefinition(SourceStream& ss, const SymbolClass& clazz);
@@ -90,9 +90,6 @@ namespace LibraryInterfaceGenerator
             void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& obj);
             void callStaticMethod(SourceStream& ss, const SymbolMethod& obj);
 
-            // Parameter Block ����
-            void createParametersDefinition(SourceStream& ss, const SymbolMethod& obj);
-            void createParameterDefinition(SourceStream& ss, const SymbolParameter& obj);
 
             void createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj);
             void createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj);

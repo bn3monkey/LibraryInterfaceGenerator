@@ -1,4 +1,8 @@
-#include "NativeInterface.hpp"
+﻿#include "NativeInterface.hpp"
+#include "../../Converter/CXXConverter.hpp"
+
+using namespace LibraryInterfaceGenerator::Implementation;
+using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
 #ifdef __linux__
 static char* delimeter = "/";
@@ -283,28 +287,129 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefi
 	}
 }
 
+// Parameter Block ����
+static MethodCXXSourceScopedStream::Parameter createParameter(const SymbolParameter& parameter)
+{
+	int io;
+	if (parameter.type->isPrimitive())
+	{
+		io = MethodCXXSourceScopedStream::Parameter::VALUE;
+	}
+	else
+	{
+		if (parameter.io == SymbolParameter::IO::OUT)
+		{
+			io = MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT;
+		}
+		else
+		{
+			io = MethodCXXSourceScopedStream::Parameter::REFERENCE_IN;
+		}
+	}
+	return MethodCXXSourceScopedStream::Parameter(io, parameter.type->toCppInterfaceType(), parameter.name);
+}
+
+static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(const SymbolMethod& object)
+{
+	std::vector<MethodCXXSourceScopedStream::Parameter> ret;
+	for (auto& parameter : object.parameters)
+	{
+		ret.push_back(createParameter(*parameter));
+	}
+	return ret;
+}
+
+static std::vector<MethodCXXSourceScopedStream::Parameter> createHandleParameter()
+{
+	std::vector<MethodCXXSourceScopedStream::Parameter> ret;
+	ret.push_back(MethodCXXSourceScopedStream::Parameter(MethodCXXSourceScopedStream::Parameter::VALUE, "void *", "handle"));
+	return ret;
+}
+
+static std::vector<MethodCXXSourceScopedStream::Parameter> createParametersWithHandle(const SymbolMethod& object)
+{
+	auto ret = createHandleParameter();
+	auto parameters = createParameters(object);
+	ret.insert(ret.end(), parameters.begin(), parameters.end());
+	return ret;
+}
+
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
+	{
+		auto parameters = createParameters(constructor);
+		std::string prefix = "extern " + api_macro;
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void *", {}, "construct", parameters };
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
+	{
+		auto parameters = createParameters(constructor);
+		auto scopes = createScope(clazz);
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void *", scopes, clazz.name, parameters };
+
+		for (auto& parameter : constructor.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
+		allocate(ss, clazz, constructor);
+		for (auto& parameter : constructor.parameters)
+		{
+			createOutputParameterChanger(ss, *parameter);
+		}
+	}
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& consturctor)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& construrctor)
 {
+	auto scopes = createScope(clazz);
+	ss << "return createReferences<";
+	for (auto& scope : scopes)
+		ss << scope << "::";
+	ss.pop(2);
+	ss << ">(";
+
+	if (!construrctor.parameters.empty())
+	{
+		for (auto& parameter : construrctor.parameters)
+		{
+			ss << "i_" << parameter->name << ", ";
+		}
+		ss.pop(2);
+	}
+	ss << ");\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		auto parameters = createHandleParameter();
+		std::string prefix = "extern " + api_macro;
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void", {}, "release", parameters };
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		auto parameters = createHandleParameter();
+		auto scopes = createScope(clazz);
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, "release", parameters };
+
+		deallocate(ss, clazz);
+	}
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(const SymbolClass& clazz)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(SourceStream& ss, const SymbolClass& clazz)
 {
+	auto scopes = createScope(clazz);
+	ss << "return createReferences<";
+	for (auto& scope : scopes)
+		ss << scope << "::";
+	ss.pop(2);
+	ss << ">(handle);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
@@ -343,11 +448,11 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::callStaticMetho
 {
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createParametersDefinition(SourceStream& ss, const SymbolMethod& obj)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameters(SourceStream& ss, const SymbolMethod& obj)
 {
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameterDefinition(SourceStream& ss, const SymbolParameter& obj)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameter(SourceStream& ss, const SymbolParameter& obj)
 {
 }
 
