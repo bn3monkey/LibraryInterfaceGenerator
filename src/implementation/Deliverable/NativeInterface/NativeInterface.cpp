@@ -414,26 +414,82 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(Sour
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		auto parameters = createHandleParameter();
+		std::string prefix = "extern " + api_macro;
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void", {}, "addReleaser", parameters };
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDefinition(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		auto parameters = createHandleParameter();
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", {}, "addReleaser", parameters };
+
+		addReleaser(ss, clazz);
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::addReleaser(SourceStream& ss, const SymbolClass& clazz)
 {
+	ss << "addReferenceReleaser(handle);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj)
 {
+	{
+		auto parameters = createParametersWithHandle(obj);
+		std::string prefix = "extern " + api_macro;
+
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, obj.name, parameters};
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj)
 {
+	{
+		auto parameters = createParametersWithHandle(obj);
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), {}, obj.name, parameters };
+
+		ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
+		for (auto& parameter : obj.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
+		callClassMethod(ss, obj);
+		for (auto& parameter : obj.parameters)
+		{
+			if (parameter->io == SymbolParameter::IO::OUT)
+			{
+				createOutputParameterChanger(ss, *parameter);
+			}
+		}
+
+		if (obj.type->getTypeName() != SymbolType::Name::VOID)
+		{
+			createReturnValueChanger(ss, obj);
+		}
+		ss << "return __ret;\n";
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod(SourceStream& ss, const SymbolMethod& obj)
 {
+	if (obj.type->getTypeName() != SymbolType::Name::VOID)
+	{
+		ss << "auto __temp_ret = ";
+	}
+	ss << "ptr->" << obj.name << "(";
+	if (!obj.parameters.empty())
+	{
+		for (auto& parameter : obj.parameters)
+		{
+			ss << "i_" << parameter->name << ", ";
+		}
+		ss.pop(2);
+	}
+	ss << ");\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& obj)
