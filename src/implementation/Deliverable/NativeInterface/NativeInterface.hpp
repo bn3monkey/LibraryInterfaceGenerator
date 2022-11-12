@@ -98,14 +98,14 @@ namespace LibraryInterfaceGenerator
             // Property Block ����
             std::string createPropertyName(const SymbolProperty& object);
 
-            void createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj);
-            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj);
+            void createPropertySetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolProperty& obj);
+            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolProperty& obj);
             void createPropertyDeclaration(SourceStream& ss, const SymbolProperty& obj);
 
-            void callPropertySetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
-            void callPropertyGetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
-            void createPropertySetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
-            void createPropertyGetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
+            void callPropertySetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj);
+            void callPropertyGetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj);
+            void createPropertySetterDefinition(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj);
+            void createPropertyGetterDefinition(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj);
             void createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj);
 
             void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj);

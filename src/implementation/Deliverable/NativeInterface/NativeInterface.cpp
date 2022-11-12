@@ -1,5 +1,6 @@
 ﻿#include "NativeInterface.hpp"
 #include "../../Converter/CXXConverter.hpp"
+#include "../../ExternalLibrary/NativeInterfaceConverter/NativeInterfaceConverter.h"
 
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
@@ -334,6 +335,19 @@ static std::vector<MethodCXXSourceScopedStream::Parameter> createParametersWithH
 	return ret;
 }
 
+static std::vector<MethodCXXSourceScopedStream::Parameter> createPropertyParameters(const SymbolProperty& obj)
+{
+	auto ret = createHandleParameter();
+	ret.push_back(
+
+		MethodCXXSourceScopedStream::Parameter(
+			MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+			obj.type->toCppInterfaceType(),
+			"value")
+	);
+	return ret;
+}
+
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
 	{
@@ -478,7 +492,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod
 {
 	if (obj.type->getTypeName() != SymbolType::Name::VOID)
 	{
-		ss << "auto __temp_ret = ";
+		ss << "auto __temp_ss = ";
 	}
 	ss << "ptr->" << obj.name << "(";
 	if (!obj.parameters.empty())
@@ -494,16 +508,69 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& obj)
 {
+	{
+		auto parameters = createParameters(obj);
+		std::string prefix = "extern " + api_macro;
+
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, obj.name, parameters };
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& obj)
 {
+	{
+		
+		auto parameters = createParameters(obj);
+		auto scope = createScope(obj);
+
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), scope, obj.name, parameters };
+
+		for (auto& parameter : obj.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
+		callClassMethod(ss, obj);
+		for (auto& parameter : obj.parameters)
+		{
+			if (parameter->io == SymbolParameter::IO::OUT)
+			{
+				createOutputParameterChanger(ss, *parameter);
+			}
+		}
+
+		if (obj.type->getTypeName() != SymbolType::Name::VOID)
+		{
+			createReturnValueChanger(ss, obj);
+		}
+		ss << "return __ret;\n";
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callStaticMethod(SourceStream& ss, const SymbolMethod& obj)
 {
+	if (obj.type->getTypeName() != SymbolType::Name::VOID)
+	{
+		ss << "auto __temp_ss = ";
+	}
+	auto scopes = createScope(obj);
+	for (auto& scope : scopes)
+	{
+		ss << scope << "::";
+	}
+
+	ss << obj.name << "(";
+	if (!obj.parameters.empty())
+	{
+		for (auto& parameter : obj.parameters)
+		{
+			ss << "i_" << parameter->name << ", ";
+		}
+		ss.pop(2);
+	}
+	ss << ");\n";
 }
 
+/*
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameters(SourceStream& ss, const SymbolMethod& obj)
 {
 }
@@ -511,1206 +578,266 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameter
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameter(SourceStream& ss, const SymbolParameter& obj)
 {
 }
+*/
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj)
 {
+	switch (obj.type->getTypeName())
+	{
+	case SymbolType::Name::ENUM:
+		ss << "auto __ss = createInterfaceEnum(__temp_ret);\n";
+		break;
+	case SymbolType::Name::OBJECT:
+		ss << "auto __ss = createInterfaceObject(__temp_ret);\n";
+		break;
+	case SymbolType::Name::ENUMARRAY:
+		ss << "auto __ss = createInterfaceEnumArray(__temp_ret);\n";
+		break;
+	case SymbolType::Name::ENUMVECTOR:
+		ss << "auto __ss = createInterfaceEnumVector(__temp_ret);\n";
+		break;
+	case SymbolType::Name::OBJECTARRAY:
+		ss << "auto __ss = createInterfaceObjectArray(__temp_ret);\n";
+		break;
+	case SymbolType::Name::OBJECTVECTOR:
+		ss << "auto _ss = createInterfaceObjectVector(__temp_ret);\n";
+		break;
+	default:
+		if (obj.type->isPrimitive())
+			ss << "auto __ss = __temp_ret;\n";
+		else
+			ss << "auto& __ss =  __temp_ret;\n";
+		break;
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
 {
+	switch (obj.type->getTypeName())
+	{
+	case SymbolType::Name::ENUM:
+		ss << "auto i_" << obj.name << " = createNativeEnum<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		break;
+	case SymbolType::Name::OBJECT:
+		ss << "auto i_" << obj.name << " = createNativeObject<" << obj.type->toCppInnerType() << ">(" << obj.name 	<< ");\n";
+		break;
+	case SymbolType::Name::ENUMARRAY:
+		ss << "auto i_" << obj.name << " = createNativeEnumArray<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		break;
+	case SymbolType::Name::ENUMVECTOR:
+		ss << "auto i_" << obj.name << " = createNativeEnumVector<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		break;
+	case SymbolType::Name::OBJECTARRAY:
+		ss << "auto i_" << obj.name << " = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(" << obj.name << ");\n";
+		break;
+	case SymbolType::Name::OBJECTVECTOR:
+		ss << "auto i_" << obj.name << " = createNativeObjectVector<" << obj.type->toCppInnerType() << ">(" << obj.name	<< ");\n";
+		break;
+	default:
+		if (obj.type->isPrimitive())
+		{
+			ss << "auto i_" << obj.name << " = " << obj.name << ";\n";
+		}
+		else
+		{
+			ss << "auto& i_" << obj.name << " = " << obj.name << ";\n";
+		}
+		break;
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
 {
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyName(const SymbolProperty& object)
-{
-	return std::string();
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDeclaration(SourceStream& ss, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
-{
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
-{
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
-{
-	return std::string();
-}
-
-/*
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::createInterfaceContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
-{
-	std::stringstream ss {""};
-	createPackageDeclaration(symbolObject, ss);
-	header_content = ss.str();
-
-	ss.str("");
-	auto result = createPackageDefinition(symbolObject, ss);
-	if (!result)
-		return result;
-	cpp_content = ss.str();
-
-	return Result();
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss)
-{
-	std::string indent;
-	std::vector<std::string> moduleName{ symbolObject.name };
-
-	{
-		DefineOnce defineOnce(ss, moduleName, "INTERFACE", indent);
-
-		{
-			DefineInclude defineInclude(ss, indent);
-			defineInclude.addExternal("string");
-			defineInclude.addExternal("vector");
-		}
-
-		ss << "#ifdef " << export_macro << "\n";
-		ss << "#define " << api_macro << "\n";
-		ss << "#else" << "\n";
-		ss << "#define " << api_macro << "\n";
-		ss << "#endif\n\n";
-
-
-		DefineNamespace defineNamespace(ss, root_namespace, indent);
-
-		for (auto& mod : symbolObject.modules)
-		{
-			{
-            	Comment comment{ ss, indent };
-            	comment.add(*mod);
-        	}
-			createModuleDeclaration(*mod, ss, indent);
-		}
-	}
-
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDeclaration(const SymbolModule& symbolObject, std::stringstream& ss, std::string& indent)
-{
-	DefineNamespace defineNamespace(ss, symbolObject.name, indent);
-
-	for (auto& methodObject : symbolObject.global_methods)
-	{
-		auto& method = methodObject.first;
-		{
-            Comment comment{ ss, indent };
-            comment.add(*method);
-        }
-		auto line = createStaticMethodDeclaration(*method);
-		defineNamespace.addLine(line);
-	}
-	// for (auto& interface : symbolObject.interfaces)
-	// {
-	// 	createClassDeclaration(*interface, ss, indent);
-	// }
-	for (auto& clazz : symbolObject.classes)
-	{
-		{
-            Comment comment{ ss, indent };
-            comment.add(*clazz);
-        }
-		createClassDeclaration(*clazz, ss, indent);
-	}
-
-	for (auto& subModule : symbolObject.submodules)
-	{
-		{
-            Comment comment{ ss, indent };
-            comment.add(*subModule);
-        }
-		createModuleDeclaration(symbolObject, ss, indent);
-	}
-
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string& indent)
-{
-	DefineNamespace defineNamespace{ ss, clazz.name, indent };
-	{
-		for (auto& constructorObject : clazz.constructors)
-		{
-			auto& constructor = constructorObject.first;
-			auto line = createConstructorDeclaration(clazz, *constructor);
-			defineNamespace.addLine(line);
-		}
-		{
-			auto line = createDestructorDeclaration(clazz);
-			defineNamespace.addLine(line);
-		}
-		{
-			auto line = createAddReleaserDeclaration(clazz);
-			defineNamespace.addLine(line);
-		}
-
-		auto base_props = clazz.getBaseProperties();
-		for (auto& base_prop : base_props)
-		{
-			{
-            	Comment comment{ ss, indent };
-            	comment.add(*base_prop);
-        	}
-			auto lines = createPropertyDeclaration(*base_prop);
-			for (auto& line : lines)
-			{
-				defineNamespace.addLine(line);
-			}
-		}
-		for (auto& prop : clazz.properties)
-		{
-			{
-            	Comment comment{ ss, indent };
-            	comment.add(*prop);
-        	}
-			auto lines = createPropertyDeclaration(*prop);
-			for (auto& line : lines)
-			{
-				defineNamespace.addLine(line);
-			}
-		}
-
-		auto base_methods = clazz.getBaseMethods();
-		for (auto& baseMethodObject: base_methods)
-		{
-			auto base_method = baseMethodObject.first;
-			{
-            	Comment comment{ ss, indent };
-            	comment.add(*base_method);
-        	}
-			auto line = createClassMethodDeclaration(*base_method);
-			defineNamespace.addLine(line);
-		}
-		for (auto& methodObject : clazz.methods)
-		{
-			auto method = methodObject.first;
-			{
-            	Comment comment{ ss, indent };
-            	comment.add(*method);
-        	}
-			auto line = createClassMethodDeclaration(*method);
-			defineNamespace.addLine(line);
-		}
-	}
-}
-
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
-{
-	std::string indent;
-	{
-		DefineInclude defineInclude{ ss, indent };
-		defineInclude.addInternal(symbolObject.name + "Interface.hpp");
-
-		std::string library_header_path = "../";
-		library_header_path += _srcDirectory.getIncludeDirName();
-		library_header_path += "/";
-		library_header_path += symbolObject.name;
-		library_header_path += ".hpp";
-		defineInclude.addInternal(library_header_path);
-		
-		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
-		{
-			auto pool_path = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
-			defineInclude.addInternal(pool_path);
-		}	
-	}
-	ss << "\n";
-	ss << "using namespace " << root_namespace << ";\n";
-	ss << "\n";
-
-	ss <<  createNativeInterfaceConverter();
-	
-	for (auto& mod : symbolObject.modules)
-	{
-		createModuleDefinition(*mod, ss);
-	}
-	return Result();
-}
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDefinition(const SymbolModule& mod, std::stringstream& ss)
-{
-	for (auto& methodObject : mod.global_methods)
-	{
-		auto& method = methodObject.first;
-		auto lines = createStaticMethodDefinition(*method);
-		for (auto& line : lines)
-		{
-			ss << line << "\n";
-		}
-	}
-	// for (auto& interface : mod.interfaces)
-	// {
-	// 	createClassDefinition(*interface, ss);
-	// }
-	for (auto& clazz : mod.classes)
-	{
-		createClassDefinition(*clazz, ss);
-	}
-	for (auto& subModule : mod.submodules)
-	{
-		createModuleDefinition(*subModule, ss);
-	}
-}
-
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefinition(const SymbolClass& clazz, std::stringstream& ss)
-{
-	for (auto& constructorObject : clazz.constructors)
-	{
-		auto& constructor = constructorObject.first;
-		auto lines = createConstructorDefinition(clazz, *constructor);
-		for(auto& line : lines)
-		{
-			ss << line << "\n";
-		}
-	}
-	{
-		auto lines = createDestructorDefinition(clazz);
-		for(auto& line : lines)
-		{
-			ss << line << "\n";
-		}
-	}
-	{
-		auto lines = createAddReleaserDefinition(clazz);
-		for (auto& line : lines)
-		{
-			ss << line << "\n";
-		}
-	}
-	auto base_props = clazz.getBaseProperties();
-	for (auto& base_prop : base_props)
-	{
-		auto decls = createPropertyDefinition(clazz, *base_prop);
-		for (auto& decl : decls)
-		{
-			ss << decl << "\n";
-		}
-	}
-	for (auto& prop : clazz.properties)
-	{
-		auto decls = createPropertyDefinition(clazz, *prop);
-		for (auto& decl : decls)
-		{
-			ss << decl << "\n";
-		}
-	}
-	auto base_methods = clazz.getBaseMethods();
-	for (auto& baseMethodObject: base_methods)
-	{
-		auto& base_method = baseMethodObject.first;
-
-		auto decls = createClassMethodDefinition(clazz, *base_method);
-		for (auto& decl : decls)
-		{
-			ss << decl << "\n";
-		}
-	}
-	for (auto& methodObject : clazz.methods)
-	{
-		auto& method = methodObject.first;
-		auto decls = createClassMethodDefinition(clazz, *method);
-		for (auto& decl : decls)
-		{
-			ss << decl << "\n";
-		}
-	}
-}
-
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor)
-{
-	std::string ret;
-	ret += "extern ";
-	ret += api_macro;
-	ret += " void* construct(";
-	if (!constructor.parameters.empty())
-	{
-		ret += createParametersDefinition(constructor);
-	}
-	ret += ");";
-	return ret;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& constructor)
-{
-	std::vector<std::string> ret;
-	{
-		std::string line {"void* "};
-		line += createScope(clazz);
-		line += "construct(";
-
-		if (!constructor.parameters.empty())
-			line += createParametersDefinition(constructor);
-
-		line += ")";
-		ret.push_back(line);
-	}
-	{
-		ret.push_back("{");
-
-		std::string indent{ "   " };
-		for (auto& parameter : constructor.parameters)
-		{
-			ret.push_back(indent + createInputParameterChanger(*parameter));
-		}
-		{
-			ret.push_back(indent + allocate(clazz, constructor));
-		}
-		for (auto& parameter : constructor.parameters)
-		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-			{
-				ret.push_back(indent + createOutputParameterChanger(*parameter));
-			}
-		}
-		ret.push_back("}");
-	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(const SymbolClass& clazz, const SymbolMethod& constructor)
-{
-	std::string ret {"return createReference<"};
-	for (auto& moduleName : clazz.parentModules)
-	{
-		ret += moduleName;
-		ret += "::";
-	}
-	for (auto& className : clazz.parentObjects)
-	{
-		ret += className;
-		ret += "::";
-	}
-	ret += clazz.name;
-	ret += ">(";
-	std::string parameters;
-	if (!constructor.parameters.empty())
-	{
-		for (auto& parameter : constructor.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		ret += parameters;
-	}
-	ret += ");";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDeclaration(const SymbolClass& clazz)
-{
-	std::string line{ "extern " };
-	line += api_macro;
-	line += " void release(void* handle); ";
-	return line;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructorDefinition(const SymbolClass& clazz)
-{
-	std::vector<std::string> ret;
-	{
-		std::string line {"void "};
-		line += createScope(clazz);
-		line += "release(void* handle)";
-		ret.push_back(line);
-	}
-	{
-		ret.push_back("{");
-		std::string line = "    ";
-		line += deallocate(clazz);
-		ret.push_back(line);
-		ret.push_back("}");
-	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(const SymbolClass& clazz)
-{
-	std::string ret {"releaseReference<"};
-	for (auto& moduleName : clazz.parentModules)
-	{
-		ret += moduleName;
-		ret += "::";
-	}
-	for (auto& className : clazz.parentObjects)
-	{
-		ret += className;
-		ret += "::";
-	}
-	ret += clazz.name;
-	ret += ">(handle);";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(const SymbolClass& clazz)
-{
-	std::string line{ "extern " };
-	line += api_macro;
-	line += " void addReleaser(void* reference); ";
-	return line;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDefinition(const SymbolClass& clazz)
-{
-	std::vector<std::string> ret;
-	{
-		std::string line{ "void " };
-		line += createScope(clazz);
-		line += "addReleaser(void* reference)";
-		ret.push_back(line);
-	}
-	{
-		ret.push_back("{");
-		std::string line = "    ";
-		line += addReleaser(clazz);
-		ret.push_back(line);
-		ret.push_back("}");
-	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::addReleaser(const SymbolClass& clazz)
-{
-	return "addReferenceReleaser(reference);";
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDeclaration(const SymbolMethod& object)
-{
-	std::string method{ "extern " };
-	method += api_macro;
-	method += " ";
-	method += object.type->toCppInterfaceType();
-    method += " ";
-	method += object.name;
-    method += "(";
-	method += "void* handle";
-	if (!object.parameters.empty())
-	{
-		method += ", ";
-		method += createParametersDefinition(object);
-	}
-	method += ");";
-	return method;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object)
-{
-	std::vector<std::string> ret;
-	{
-		std::string line;
-		line += object.type->toCppInterfaceType();
-    	line += " ";
-		line += createScope(clazz);
-		line += object.name;
-    	line += "(void* handle";
-		if (!object.parameters.empty())
-		{
-			line += ", ";
-			line += createParametersDefinition(object);
-		}
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-
-	std::string indent{ "    " };
-	{
-		{
-			std::string line = "    auto ptr = getReference<";
-			line += clazz.getCppName();
-			line += ">(handle);";
-			ret.push_back(line);
-		}
-		for (auto& parameter : object.parameters)
-		{
-			ret.push_back(indent + createInputParameterChanger(*parameter));
-		}
-		{
-			ret.push_back(indent + callClassMethod(object));
-		}
-		for (auto& parameter : object.parameters)
-		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-			{
-				ret.push_back(indent + createOutputParameterChanger(*parameter));
-			}
-		}
-		if (object.type->getTypeName() != SymbolType::Name::VOID)
-		{
-			ret.push_back(indent + createReturnValueChanger(object));
-			ret.push_back(indent + "return __ret;");
-		}
-	}
-	ret.push_back("}");
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod(const SymbolMethod& object)
-{
-	std::string ret;
-	if (object.type->getTypeName() != SymbolType::Name::VOID)
-	{
-		ret += "auto __temp_ret = ";
-	}
-	ret += "ptr->";
-	ret += object.name;
-	ret += "(";
-
-	if (!object.parameters.empty())
-	{
-		std::string parameters;
-		for (auto& parameter : object.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		ret += parameters;
-	}
-	ret += ");";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDeclaration(const SymbolMethod& object)
-{
-	std::string method{ "extern " };
-	method += api_macro;
-	method += " ";
-	method += object.type->toCppInterfaceType();
-    method += " ";
-	method += object.name;
-    method += "(";
-	method += createParametersDefinition(object);
-	method += ");";
-	return method;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMethodDefinition(const SymbolMethod& object)
-{
-	std::vector<std::string> ret;
-	{
-		std::string line;
-		line += object.type->toCppInterfaceType();
-    	line += " ";
-		line += createScope(object);
-		line += object.name;
-    	line += "(";
-		line += createParametersDefinition(object);
-		line += ")";
-		ret.push_back(line);
-	}
-	ret.push_back("{");
-	{
-		std::string indent { "    " };
-		for (auto& parameter : object.parameters)
-		{
-			
-			ret.push_back(indent + createInputParameterChanger(*parameter));
-		}
-		{
-			ret.push_back(indent + callStaticMethod(object));
-		}
-		for (auto& parameter : object.parameters)
-		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-			{
-				ret.push_back(indent + createOutputParameterChanger(*parameter));
-			}
-		}
-		if (object.type->getTypeName() != SymbolType::Name::VOID)
-		{
-			ret.push_back(indent + createReturnValueChanger(object));
-			ret.push_back(indent + "return __ret;");
-		}
-	}
-	ret.push_back("}");
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::callStaticMethod(const SymbolMethod& object)
-{
-	std::string ret;
-	if (object.type->getTypeName() != SymbolType::Name::VOID)
-	{
-		ret += "auto __temp_ret = ";
-	}
-	for (auto& moduleName : object.parentModules)
-	{
-		ret += moduleName;
-		ret += "::";
-	}
-	ret += object.name;
-	ret += "(";
-
-	if (!object.parameters.empty())
-	{
-		std::string parameters;
-		for (auto& parameter : object.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		ret += parameters;
-	}
-	ret += ");";
-	return ret;
-}
-
-
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createParametersDefinition(const SymbolMethod& object)
-{
-	std::string line;
-	if (!object.parameters.empty())
-	{
-		for (auto& parameter : object.parameters)
-		{
-			line += createParameterDefinition(*parameter);
-			line += ", ";
-		}
-		line.pop_back();
-		line.pop_back();
-	}
-    return line;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createParameterDefinition(const SymbolParameter& object)
-{
-	std::string content = object.io == SymbolParameter::IO::IN ? "const " : "";
-    content += object.type->toCppInterfaceType();
-    content += object.type->isPrimitive() ? " " : "& ";
-    content += object.name;
-    return content;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(const SymbolMethod& object)
-{
-	std::string ret;
-	switch (object.type->getTypeName())
+	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ret = "auto __ret = createInterfaceEnum(__temp_ret);";
+		ss << obj.name << " = createInterfaceEnum(i_" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto __ret = createInterfaceObject(__temp_ret);";
+		ss << obj.name << " = createInterfaceObject(i_" << obj.name	<< ");\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto __ret = createInterfaceEnumArray(__temp_ret);";
+		ss << obj.name << " = createInterfaceEnumArray(i_" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto __ret = createInterfaceEnumVector(__temp_ret);";
+		ss << obj.name << " = createInterfaceEnumVector(i_" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto __ret = createInterfaceObjectArray(__temp_ret);";
+		ss << obj.name << " = createInterfaceObjectArray(i_" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto _ret = createInterfaceObjectVector(__temp_ret);";
+		ss << obj.name << " = createInterfaceObjectVector(i_" << obj.name << ");\n";
 		break;
 	default:
-		if (object.type->isPrimitive())
-			ret = "auto __ret = __temp_ret;";
-		else
-			ret = "auto& __ret =  __temp_ret;";
+		ss << obj.name << " = i_" << obj.name << ";\n";
 		break;
 	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(const SymbolParameter& object)
-{
-	std::string ret;
-	switch (object.type->getTypeName())
-	{
-	case SymbolType::Name::ENUM:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeEnum<";
-		ret += object.type->toCppType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECT:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeObject<";
-		ret += object.type->toCppInnerType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeEnumArray<";
-		ret += object.type->toCppType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeEnumVector<";
-		ret += object.type->toCppType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeObjectArray<";
-		ret += object.type->toCppInnerType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeObjectVector<";
-		ret += object.type->toCppInnerType();
-		ret += ">(";
-		ret += object.name;
-		ret += "); ";
-		break;
-	default:
-		if (object.type->isPrimitive())
-		{
-			ret = "auto i_";
-			ret += object.name;
-			ret += " = ";
-			ret += object.name;
-			ret += ";";
-		}
-		else
-		{
-			ret = "auto& i_";
-			ret += object.name;
-			ret += " = ";
-			ret += object.name;
-			ret += ";";
-		}
-		break;
-	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(const SymbolParameter& object)
-{
-	std::string ret;
-	switch (object.type->getTypeName())
-	{
-	case SymbolType::Name::ENUM:
-		ret += object.name;
-		ret += " = createInterfaceEnum(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECT:
-		ret += object.name;
-		ret += " = createInterfaceObject(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ret += object.name;
-		ret += " = createInterfaceEnumArray(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ret += object.name;
-		ret += " = createInterfaceEnumVector(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ret += object.name;
-		ret += " = createInterfaceObjectArray(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ret += object.name;
-		ret += " = createInterfaceObjectVector(i_";
-		ret += object.name;
-		ret += "); ";
-		break;
-	default:
-		ret = object.name;
-		ret += " = i_";
-		ret += object.name;
-		ret += ";";
-		break;
-	}
-	return ret;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyName(const SymbolProperty& object)
 {
 	std::string propertyName = object.name;
-    char firstChar = propertyName[0];
-    if ('a' <= firstChar && firstChar <= 'z')
-        firstChar += ('A' - 'a');
-    propertyName[0] = firstChar;
+	char firstChar = propertyName[0];
+	if ('a' <= firstChar && firstChar <= 'z')
+		firstChar += ('A' - 'a');
+	propertyName[0] = firstChar;
 	return propertyName;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolProperty& obj)
 {
-	std::string setter{ "extern " };
-	setter += api_macro;
-	setter += " void set";
-    setter += propertyName;
-    setter += "(void* handle, const ";
-	std::string type = object.type->toCppInterfaceType();
-	setter += type;
-    if (!object.type->isPrimitive())
 	{
-		if(type != "void*")
-        	setter += "&";
+		std::string prefix = "extern " + api_macro;
+		std::string name = "set" + property_name;
+		auto parameters = createPropertyParameters(obj);
+
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void", {}, name, parameters };
 	}
-    setter += " value);";
-    return setter;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolProperty& obj)
 {
-	std::string getter{ "extern " };
-	getter += api_macro;
-	getter += " ";
-	std::string type = object.type->toCppInterfaceType();
-	getter += type;
-    if (!object.type->isPrimitive())
 	{
-		if (type == "std::string")
-			getter += "&";
+		std::string prefix = "extern " + api_macro;
+		std::string name = "get" + property_name;
+		auto parameters = createHandleParameter();
+
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, name, parameters};
 	}
-    getter += " get";
-    getter += propertyName;
-    getter += "(void* handle);";
-    return getter;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDeclaration(const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDeclaration(SourceStream& ss, const SymbolProperty& obj)
 {
-	std::vector<std::string> ret;
-	std::string propertyName = createPropertyName(object);
-
+	auto property_name = createPropertyName(obj);
+	createPropertyGetterDeclaration(ss, property_name, obj);
+	if (!obj.readonly)
 	{
-		std::string line = createPropertyGetterDeclaration(propertyName, object);
-		ret.push_back(line);
+		createPropertySetterDeclaration(ss, property_name, obj);
 	}
-	{
-		std::string line = createPropertySetterDeclaration(propertyName, object);
-		ret.push_back(line);
-	}
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	std::string setter{ "void "};
-	setter += scope;
-	setter += "set";
-    setter += propertyName;
-    setter += "(void* handle, const ";
-	std::string type = object.type->toCppInterfaceType();
-	setter += type;
-    if (!object.type->isPrimitive())
-	{
-		if(type != "void*")
-        	setter += "&";
-	}
-    setter += " value)";
-    return setter;
+	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle)\m";
+	ss << "ptr->set" << property_name << "(i_value);\n";
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	std::string type = object.type->toCppInterfaceType();
-	std::string getter = type;
-	if (!object.type->isPrimitive())
-	{
-		if(type == "std::string")
-        	getter += "&";
-	}
-    getter += " ";
-	getter += scope;
-	getter += "get";
-    getter += propertyName;
-    getter += "(void* handle)";
-    return getter;
+	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle)\m";
+	ss << "auto __temp_ret = ptr->get" << property_name << "();\n";
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(const SymbolClass& clazz, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertySetterDefinition(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	std::vector<std::string> ret;
-	std::string propertyName = createPropertyName(object);
-
 	{
-		std::string line = "auto ptr = getReference<";
-		line += clazz.getCppName();
-		line += ">(handle);";
-		ret.push_back(line);
-	}
-	{
-		std::string line = "ptr->set";
-		line += propertyName;
-		line += "(i_value);";
-		ret.push_back(line);
-	}
+		auto parameters = createPropertyParameters(obj);
+		auto scopes = createScope(clazz);
+		std::string name = "set" + property_name;		
 
-	return ret;	
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::vector<std::string> ret;
-	std::string propertyName = createPropertyName(object);
-
-	{
-		std::string line = "auto ptr = getReference<";
-		line += clazz.getCppName();
-		line += ">(handle);";
-		ret.push_back(line);
-	}
-	{
-		std::string line = "auto";
-		if (!object.type->isPrimitive())
-			line += "&";
-		line += " __temp_ret = ptr->get";
-		line += propertyName;
-		line += "();";
-		ret.push_back(line);
-	}
-
-	return ret;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::vector<std::string> ret;
-
-    std::string scope = createScope(clazz);
-
-    std::string propertyName = createPropertyName(object);
-
-    std::string getter = createPropertyGetterDeclaration(scope, propertyName, object);
-
-    ret.push_back(getter);
-    ret.push_back("{");
-
-	std::string indent = "    ";
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, name, parameters };
 	
-
-	auto contents = callPropertyGetter(clazz, object);
-	for (auto& content : contents)
-	{
-		ret.push_back(indent + content);
+		createInputPropertyChanger(ss, obj);
+		callPropertySetter(ss, property_name, clazz, obj);
 	}
-	{
-		ret.push_back(indent + createOutputPropertyChanger(object));
-	}
-	{
-		ret.push_back(indent + "return __ret;");
-	}
-    ret.push_back("}");
-
-    if (!object.readonly)
-    {
-        std::string setter = createPropertySetterDeclaration(scope, propertyName, object);
-        ret.push_back(setter);
-        ret.push_back("{");
-		ret.push_back(indent + createInputPropertyChanger(object));
-
-		auto contents = callPropertySetter(clazz, object);
-		for (auto& content : contents)
-		{
-			ret.push_back(indent + content);
-		}
-
-		
-        ret.push_back("}");
-    }
-
-    return ret;
 }
 
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyGetterDefinition(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	std::string ret;
-	switch (object.type->getTypeName())
+	{
+		auto parameters = createHandleParameter();
+		auto scopes = createScope(clazz);
+		std::string name = "get" + property_name;
+
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "",  obj.type->toCppInterfaceType(), scopes, name, parameters };
+
+		callPropertyGetter(ss, property_name, clazz, obj);
+		createOutputPropertyChanger(ss, obj);
+		ss << "return __ret;\n";
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& obj)
+{
+	auto property_name = createPropertyName(obj);
+	createPropertyGetterDefinition(ss, property_name, clazz, obj);
+	if (!obj.readonly)
+	{
+		createPropertySetterDefinition(ss, property_name, clazz, obj);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
+{
+	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ret = "auto i_value = createNativeEnum<";
-		ret += object.type->toCppType();
-		ret += ">(value);";
+		ss << "auto i_value = createNativeEnum<" << obj.type->toCppType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret += "auto i_value = getReference<";
-		ret += object.type->toCppInnerType();
-		ret += ">(value);";
+		ss << "auto i_value = getReference<" << obj.type->toCppInnerType() << ">(value);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret += "auto i_value = createNativeEnumArray<";
-		ret += object.type->toCppType();
-		ret += ">(value);";
+		ss << "auto i_value = createNativeEnumArray<" << obj.type->toCppType() << ">(value);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret += "auto i_value = createNativeEnumVector<";
-		ret += object.type->toCppType();
-		ret += ">(value);";
+		ss << "auto i_value = createNativeEnumVector<" << obj.type->toCppType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret += "auto i_value = createNativeObjectArray<";
-		ret += object.type->toCppInnerType();
-		ret += ">(value);";
+		ss << "auto i_value = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret += "auto i_value = createNativeObjectArray<";
-		ret += object.type->toCppInnerType();
-		ret += ">(value);";
+		ss << "auto i_value = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(value);\n";
 		break;
 	default:
-		if (object.type->isPrimitive())
+		if (obj.type->isPrimitive())
 		{
-			ret = "auto i_value = value;";
+			ss << "auto i_value = value;\n";
 		}
 		else
 		{
-			ret = "auto& i_value = value;";
+			ss << "auto& i_value = value;\n";
 		}
 		break;
 	}
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
 {
-	std::string ret;
-	switch (object.type->getTypeName())
+	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ret = "auto __ret = createInterfaceEnum(__temp_ret);";
+		ss << "auto __ret = createInterfaceEnum(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto __ret = createInterfaceObject(__temp_ret);";
+		ss << "auto __ret = createInterfaceObject(__temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto __ret = createInterfaceEnumArray(__temp_ret);";
+		ss << "auto __ret = createInterfaceEnumArray(__temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto __ret = createInterfaceEnumVector(__temp_ret);";
+		ss << "auto __ret = createInterfaceEnumVector(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto __ret = createInterfaceObjectArray(__temp_ret);";
+		ss << "auto __ret = createInterfaceObjectArray(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto __ret = createInterfaceObjectVector(__temp_ret);";
+		ss << "auto __ret = createInterfaceObjectVector(__temp_ret);\n";
 		break;
 	default:
-		if (object.type->isPrimitive())
-			ret = "auto __ret = __temp_ret;";
+		if (obj.type->isPrimitive())
+			ss << "auto __ret = __temp_ret;\n";
 		else
-			ret = "auto& __ret =  __temp_ret;";
+			ss << "auto& __ret =  __temp_ret;\n";
 		break;
 	}
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createScope(const SymbolMethod& method)
-{
-    std::string scope;
-    auto& moduleNames = method.parentModules;
-
-	scope += root_namespace;
-	scope += "::";
-	for (size_t i = 1; i < moduleNames.size(); i++)
-	{
-		scope += moduleNames[i];
-		scope += "::";
-	}
-    return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createScope(const SymbolClass& clazz)
-{
-	std::string scope;
-    auto& objectNames = clazz.parentObjects;
-	auto& moduleNames = clazz.parentModules;
-
-	scope += root_namespace;
-	scope += "::";
-
-	for (size_t i = 1; i < moduleNames.size(); i++)
-	{
-		scope += moduleNames[i];
-		scope += "::";
-	}
-    for (auto& objectName : objectNames)
-    {
-        scope += objectName;
-        scope += "::";
-    }
-    scope += clazz.name;
-    scope += "::";
-
-    return scope;
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
 {
 	return NativeInterfaceConverter;
 }
+
 
 // Return Value (Create)
 
