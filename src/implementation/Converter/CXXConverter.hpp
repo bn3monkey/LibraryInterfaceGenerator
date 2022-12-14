@@ -151,6 +151,21 @@ namespace LibraryInterfaceGenerator
             return scopes;
         }
 
+        inline std::vector<std::string> createInterfaceScope(const std::string& root_namespace, const SymbolMethod& src)
+        {
+            std::vector<std::string> scopes{ root_namespace };
+            scopes.insert(scopes.end(), src.parentModules.begin() + 1, src.parentModules.end());
+            return scopes;
+        }
+
+        inline std::vector<std::string> createInterfaceScope(const std::string& root_namespace, const SymbolClass& src)
+        {
+            std::vector<std::string> scopes{ root_namespace };
+            scopes.insert(scopes.end(), src.parentModules.begin() + 1, src.parentModules.end());
+            scopes.insert(scopes.end(), src.parentObjects.begin(), src.parentObjects.end());
+            scopes.push_back(src.name);
+            return scopes;
+        }
     }
 } 
 #endif

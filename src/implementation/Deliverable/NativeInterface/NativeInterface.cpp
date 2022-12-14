@@ -112,10 +112,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 			ExternalIncludeCXXSourceStream exclude{ ss, "vector" };
 		}
 
-		ss << "#ifdef" << export_macro << "\n";
-		ss << "#define" << api_macro << "\n";
+		ss << "#ifdef " << export_macro << "\n";
+		ss << "#define " << api_macro << "\n";
 		ss << "#else" << "\n";
-		ss << "#define" << api_macro << "\n";
+		ss << "#define " << api_macro << "\n";
 		ss << "#endif\n\n";
 
 		{
@@ -221,10 +221,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		}
 
 		ss << "\n";
-		ss << "using namespace" << root_namespace << ";\n";
+		ss << "using namespace " << root_namespace << ";\n";
 		ss << "\n";
 
-		ss << createNativeInterfaceConverter();
+		ss << createNativeInterfaceConverter() << "\n";
 
 		for (auto& module_ : obj.modules)
 		{
@@ -323,7 +323,7 @@ static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(cons
 static std::vector<MethodCXXSourceScopedStream::Parameter> createHandleParameter()
 {
 	std::vector<MethodCXXSourceScopedStream::Parameter> ret;
-	ret.push_back(MethodCXXSourceScopedStream::Parameter(MethodCXXSourceScopedStream::Parameter::VALUE, "void *", "handle"));
+	ret.push_back(MethodCXXSourceScopedStream::Parameter(MethodCXXSourceScopedStream::Parameter::VALUE, "void*", "handle"));
 	return ret;
 }
 
@@ -353,7 +353,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstruct
 	{
 		auto parameters = createParameters(constructor);
 		std::string prefix = "extern " + api_macro;
-		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void *", {}, "construct", parameters };
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void*", {}, "construct", parameters };
 	}
 }
 
@@ -361,8 +361,8 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstruct
 {
 	{
 		auto parameters = createParameters(constructor);
-		auto scopes = createScope(clazz);
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void *", scopes, clazz.name, parameters };
+		auto scopes = createInterfaceScope(root_namespace, clazz);
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void*", scopes, "construct", parameters };
 
 		for (auto& parameter : constructor.parameters)
 		{
@@ -379,7 +379,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstruct
 void LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& construrctor)
 {
 	auto scopes = createScope(clazz);
-	ss << "return createReferences<";
+	ss << "return createReference<";
 	for (auto& scope : scopes)
 		ss << scope << "::";
 	ss.pop(2);
@@ -409,7 +409,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructo
 {
 	{
 		auto parameters = createHandleParameter();
-		auto scopes = createScope(clazz);
+		auto scopes = createInterfaceScope(root_namespace, clazz);
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, "release", parameters };
 
 		deallocate(ss, clazz);
@@ -419,7 +419,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructo
 void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(SourceStream& ss, const SymbolClass& clazz)
 {
 	auto scopes = createScope(clazz);
-	ss << "return createReferences<";
+	ss << "releaseReference<";
 	for (auto& scope : scopes)
 		ss << scope << "::";
 	ss.pop(2);
@@ -430,6 +430,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleas
 {
 	{
 		auto parameters = createHandleParameter();
+
 		std::string prefix = "extern " + api_macro;
 		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void", {}, "addReleaser", parameters };
 	}
@@ -439,7 +440,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleas
 {
 	{
 		auto parameters = createHandleParameter();
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", {}, "addReleaser", parameters };
+		auto scopes = createInterfaceScope(root_namespace, clazz);
+
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, "addReleaser", parameters };
 
 		addReleaser(ss, clazz);
 	}
@@ -454,6 +457,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 {
 	{
 		auto parameters = createParametersWithHandle(obj);
+	
 		std::string prefix = "extern " + api_macro;
 
 		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, obj.name, parameters};
@@ -464,7 +468,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 {
 	{
 		auto parameters = createParametersWithHandle(obj);
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), {}, obj.name, parameters };
+		auto scope = createInterfaceScope(root_namespace, clazz);
+
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), scope, obj.name, parameters };
 
 		ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
 		for (auto& parameter : obj.parameters)
@@ -483,8 +489,8 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 		if (obj.type->getTypeName() != SymbolType::Name::VOID)
 		{
 			createReturnValueChanger(ss, obj);
+			ss << "return __ret;\n";
 		}
-		ss << "return __ret;\n";
 	}
 }
 
@@ -492,7 +498,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::callClassMethod
 {
 	if (obj.type->getTypeName() != SymbolType::Name::VOID)
 	{
-		ss << "auto __temp_ss = ";
+		ss << "auto __temp_ret = ";
 	}
 	ss << "ptr->" << obj.name << "(";
 	if (!obj.parameters.empty())
@@ -521,7 +527,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 	{
 		
 		auto parameters = createParameters(obj);
-		auto scope = createScope(obj);
+		auto scope = createInterfaceScope(root_namespace, obj);
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), scope, obj.name, parameters };
 
@@ -529,7 +535,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 		{
 			createInputParameterChanger(ss, *parameter);
 		}
-		callClassMethod(ss, obj);
+		callStaticMethod(ss, obj);
 		for (auto& parameter : obj.parameters)
 		{
 			if (parameter->io == SymbolParameter::IO::OUT)
@@ -541,8 +547,8 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 		if (obj.type->getTypeName() != SymbolType::Name::VOID)
 		{
 			createReturnValueChanger(ss, obj);
+			ss << "return __ret;\n";
 		}
-		ss << "return __ret;\n";
 	}
 }
 
@@ -550,7 +556,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::callStaticMetho
 {
 	if (obj.type->getTypeName() != SymbolType::Name::VOID)
 	{
-		ss << "auto __temp_ss = ";
+		ss << "auto __temp_ret = ";
 	}
 	auto scopes = createScope(obj);
 	for (auto& scope : scopes)
@@ -585,28 +591,28 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnVal
 	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ss << "auto __ss = createInterfaceEnum(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceEnum(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto __ss = createInterfaceObject(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceObject(__temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ss << "auto __ss = createInterfaceEnumArray(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceEnumArray(__temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto __ss = createInterfaceEnumVector(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceEnumVector(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto __ss = createInterfaceObjectArray(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceObjectArray(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto _ss = createInterfaceObjectVector(__temp_ret);\n";
+		ss << "auto __ret = createInterfaceObjectVector(__temp_ret);\n";
 		break;
 	default:
 		if (obj.type->isPrimitive())
-			ss << "auto __ss = __temp_ret;\n";
+			ss << "auto __ret = __temp_ret;\n";
 		else
-			ss << "auto& __ss =  __temp_ret;\n";
+			ss << "auto& __ret =  __temp_ret;\n";
 		break;
 	}
 }
@@ -718,13 +724,13 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyD
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle)\m";
+	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
 	ss << "ptr->set" << property_name << "(i_value);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle)\m";
+	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
 	ss << "auto __temp_ret = ptr->get" << property_name << "();\n";
 }
 
@@ -732,7 +738,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyS
 {
 	{
 		auto parameters = createPropertyParameters(obj);
-		auto scopes = createScope(clazz);
+		auto scopes = createInterfaceScope(root_namespace, clazz);
 		std::string name = "set" + property_name;		
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, name, parameters };
@@ -746,7 +752,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyG
 {
 	{
 		auto parameters = createHandleParameter();
-		auto scopes = createScope(clazz);
+		auto scopes = createInterfaceScope(root_namespace, clazz);
 		std::string name = "get" + property_name;
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "",  obj.type->toCppInterfaceType(), scopes, name, parameters };
@@ -842,7 +848,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNa
 // Return Value (Create)
 
 // enum : enum class -> int32_t
-// object : std::shared_ptr<T> -> (void *)(std::shared_ptr<T>*)
+// object : std::shared_ptr<T> -> (void*)(std::shared_ptr<T>*)
 
 // enum array : std::vector<enum class> -> std::vector<int>
 // enum vector : std::vector<enum class> -> std::vector<int>
@@ -854,7 +860,7 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNa
 // Input (Create)
 
 // enum : int -> enum class
-// object : (void *)(std::shared_ptr<T>*) -> std::shared_ptr<T> 
+// object : (void*)(std::shared_ptr<T>*) -> std::shared_ptr<T> 
 
 // enum array : std::vector<int> -> std::vector<enum class> 
 // enum vector : std::vector<int> -> std::vector<enum class>
@@ -866,12 +872,10 @@ std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNa
 // Output (Copy)
 
 // enum : enum class -> int
-// object : std::shared_ptr<T> -> (void *)(std::shared_ptr<T>*)
+// object : std::shared_ptr<T> -> (void*)(std::shared_ptr<T>*)
 
 // enum array : std::vector<enum class> -> std::vector<int>
 // enum vector : std::vector<enum class> -> std::vector<int>
 
 // object array : std::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
 // object vector : ::vector<std::shared_ptr<T>> -> std::vector<void*> + cloneReference
-
-*/

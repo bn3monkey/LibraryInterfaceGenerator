@@ -41,11 +41,56 @@ file(GLOB_RECURSE include_files
 
 message("include_files = ${include_files}")
 
+
+# file(GLOB_RECURSE implementation_files
+#	${implementation_dir}/*.h
+#	${implementation_dir}/*.hpp
+#	${implementation_dir}/*.cpp
+#	${implementation_dir}/*.c)
+
 file(GLOB_RECURSE implementation_files
-	${implementation_dir}/*.h
-	${implementation_dir}/*.hpp
-	${implementation_dir}/*.cpp
-	${implementation_dir}/*.c)
+	${implementation_dir}/SourceStream/*.h
+	${implementation_dir}/SourceStream/*.hpp
+	${implementation_dir}/SourceStream/*.cpp
+	${implementation_dir}/SourceStream/*.c
+	${implementation_dir}/SymbolTable/*.h
+	${implementation_dir}/SymbolTable/*.hpp
+	${implementation_dir}/SymbolTable/*.cpp
+	${implementation_dir}/SymbolTable/*.c
+	${implementation_dir}/FileSystem/*.h
+	${implementation_dir}/FileSystem/*.hpp
+	${implementation_dir}/FileSystem/*.cpp
+	${implementation_dir}/FileSystem/*.c
+	${implementation_dir}/ExternalLibrary/*.h
+	${implementation_dir}/ExternalLibrary/*.hpp
+	${implementation_dir}/ExternalLibrary/*.cpp
+	${implementation_dir}/ExternalLibrary/*.c
+
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.h
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.hpp
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.cpp
+	${implementation_dir}/Deliverable/NativeSourceDirectory/*.c
+
+	${implementation_dir}/Deliverable/NativeInterface/*.h
+	${implementation_dir}/Deliverable/NativeInterface/*.hpp
+	${implementation_dir}/Deliverable/NativeInterface/*.cpp
+	${implementation_dir}/Deliverable/NativeInterface/*.c
+
+	${implementation_dir}/Auxiliary/*.h
+	${implementation_dir}/Auxiliary/*.hpp
+	${implementation_dir}/Auxiliary/*.cpp
+	${implementation_dir}/Auxiliary/*.c
+
+
+	${implementation_dir}/Converter/*.h
+	${implementation_dir}/Converter/*.hpp
+	${implementation_dir}/Converter/*.cpp
+	${implementation_dir}/Converter/*.c
+
+	${implementation_dir}/Environment.hpp
+	${implementation_dir}/LibraryInterfaceGenerator.cpp
+
+)
 
 message("implementation_files =  ${implementation_files}")
 
@@ -100,10 +145,16 @@ file(GLOB_RECURSE source_files_for_test
 	${implementation_dir}/ExternalLibrary/*.hpp
 	${implementation_dir}/ExternalLibrary/*.cpp
 	${implementation_dir}/ExternalLibrary/*.c
+
 	${implementation_dir}/Deliverable/NativeSourceDirectory/*.h
 	${implementation_dir}/Deliverable/NativeSourceDirectory/*.hpp
 	${implementation_dir}/Deliverable/NativeSourceDirectory/*.cpp
 	${implementation_dir}/Deliverable/NativeSourceDirectory/*.c
+
+	${implementation_dir}/Deliverable/NativeInterface/*.h
+	${implementation_dir}/Deliverable/NativeInterface/*.hpp
+	${implementation_dir}/Deliverable/NativeInterface/*.cpp
+	${implementation_dir}/Deliverable/NativeInterface/*.c
 
 	${implementation_dir}/Auxiliary/*.h
 	${implementation_dir}/Auxiliary/*.hpp
