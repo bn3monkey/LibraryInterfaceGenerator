@@ -166,6 +166,38 @@ namespace LibraryInterfaceGenerator
             scopes.push_back(src.name);
             return scopes;
         }
+
+        inline std::string createNativeWrapperScope(const SymbolClass& clazz)
+        {
+            std::string scope;
+	        auto& moduleNames = clazz.parentModules;
+	        auto& objectNames = clazz.parentObjects;
+	        for (auto& moduleName : moduleNames)
+	        {
+	        	scope += moduleName;
+	        	scope += "_1";
+	        }
+	        for (auto& objectName : objectNames)
+	        {
+	        	scope += objectName;
+	        	scope += "_1";
+	        }
+	        scope += clazz.name;
+	        scope += "_1";
+	        return scope;
+        }
+        inline std::string createNativeWrapperScope(const SymbolMethod& method)
+        {
+             std::string scope;
+	        auto& moduleNames = method.parentModules;
+	        for (auto& moduleName : moduleNames)
+	        {
+	        	scope += moduleName;
+	        	scope += "_1";
+	        }
+	        return scope;
+        }
+        
     }
 } 
 #endif

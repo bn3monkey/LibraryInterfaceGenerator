@@ -24,7 +24,9 @@ namespace LibraryInterfaceGenerator
 
             std::string name;
             std::string description;
-            std::vector<std::pair<std::string, std::string>> values;
+
+            std::unordered_map<std::string, std::string> keys_to_values;
+            std::unordered_map<std::string, std::string> keys_to_names;
 
             explicit SymbolEnum(const nlohmann::json& object,
                 const std::vector<std::string>& module_paths,

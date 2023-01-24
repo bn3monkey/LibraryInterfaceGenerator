@@ -700,7 +700,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnu
 {
     {
         EnumCXXSourceScopedStream enum_scope{ ss, false, object.name };
-        for (auto& value : object.values)
+        for (auto& value : object.keys_to_values)
         {
             enum_scope.addElement(value.first, value.second);
         }

@@ -58,38 +58,41 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	target_path += "Wrapper.kt";
 
 	Result result;
-	std::string native_content;
-	std::string target_content;
-	result = createWrapperContent(symbolObject, native_content, target_content);
+	auto native_content = createNativeWrapperContent(symbolObject);
+	auto target_content = createKotlinWrapperContent(symbolObject);
+
+
+	result = FileSystem::createFile(native_path, native_content.str());
 	if (!result)
 		return result;
 
-	result = FileSystem::createFile(native_path, native_content);
-	if (!result)
-		return result;
-
-	result = FileSystem::createFile(target_path, target_content);
+	result = FileSystem::createFile(target_path, target_content.str());
 	if (!result)
 		return result;
 
 	return Result();
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperContent(const SymbolPackage& symbolObject, std::string& header_content, std::string& cpp_content)
+LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerator::Implementation::Wrapper::createNativeWrapperContent(const SymbolPackage& symbolObject)
 {
-	std::stringstream ss{""};
-	std::string indent{ "" };
+	SourceStream ss;
 
 	{
-		DefineInclude defineInclude{ ss, indent };
-		defineInclude.addExternal("string");
-		defineInclude.addExternal("vector");
-		defineInclude.addExternal("jni.h");
-		defineInclude.addExternal("android/log.h");
-
-		std::string interfaceHeaderPath = symbolObject.name;
-		interfaceHeaderPath += "Interface.hpp";
-		defineInclude.addExternal(interfaceHeaderPath);
+		ExternalIncludeCXXSourceStream exclude{ss,  "string" };
+	}
+	{
+		ExternalIncludeCXXSourceStream exclude{ ss,  "vector" };
+	}
+	{
+		ExternalIncludeCXXSourceStream exclude{ ss,  "jni.h" };
+	}
+	{
+		ExternalIncludeCXXSourceStream exclude{ ss,  "android/log.h" };
+	}
+	{
+		std::string interface_header_path = symbolObject.name;
+		interface_header_path += "Interface.hpp";
+		ExternalIncludeCXXSourceStream exclude{ ss, interface_header_path };
 	}
 
 	ss << "\n";
@@ -97,21 +100,29 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	{
 		ss << "using namespace " << _infDirectory.getRootNamespace() << ";\n\n";
 	}
+
 	{
-		ss << createChangerFunction() << "\n\n";
+		createChangerFunction(ss);
+		ss << "\n";
 	}
-	createPackageDefinition(symbolObject, ss);
-	header_content = ss.str();
 
 
+	createNativePackageDefinition(ss, symbolObject);
 
-	ss.str("");
+	return ss;
+}
+
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path)
+{
+	SourceStream ss;
 
 	{
 		ss << "package " << _kotlin_package_name << ";\n\n";
 	}
 
 	{
+		
+
 		std::string classStart = "class " + _kotlin_wrapper_class_name;
 		DefineObject defineObject(ss, classStart, indent);
 		{
@@ -125,18 +136,15 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				defineObject.addLine("System.loadLibrary(\"" + _kotlin_wrapper_class_name + "\")");
 
 			}
-			
+
 			defineObject.addLine("@Volatile private var instance: " + _kotlin_wrapper_class_name + "? = null");
 			defineObject.addLine("@JvmStatic fun getInstance() : " + _kotlin_wrapper_class_name + "=");
 			defineObject.addLine("	instance ?: synchronized(this) { instance ?: " + _kotlin_wrapper_class_name + "().also { instance = it} }");
 		}
 		createWrapperPackageDeclaration(symbolObject, ss, indent);
 	}
-	
-	
-	cpp_content = ss.str();
 
-	return Result();
+	return ss;
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
@@ -1330,7 +1338,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createNativeScop
 	return scope;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction()
+void LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction(SourceStream& ss)
 {
 
 	// bool : bool <-> jboolean
@@ -1366,7 +1374,7 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFun
 	// vector<enum>   : std::vector<int> <-> java/util/ArrayList & java/lang/Integer
 	// vector<object> : std::vector<void*> <-> java/util/ArrayList & java/lang/Long 
 
-	return KotlinWrapperConverter;
+	ss << KotlinWrapperConverter;
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss, std::string indent)

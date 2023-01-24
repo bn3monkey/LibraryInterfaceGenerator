@@ -49,7 +49,11 @@ LibraryInterfaceGenerator::Implementation::SymbolEnum::SymbolEnum(
 			std::string value;
 			std::getline(ss, value, '/');
 
-			values.push_back({ key, value });
+			std::string name;
+			std::getline(ss, name, '/');
+
+			keys_to_values[key] = value;
+			keys_to_names[key] = name;
 		}
 	}
 
