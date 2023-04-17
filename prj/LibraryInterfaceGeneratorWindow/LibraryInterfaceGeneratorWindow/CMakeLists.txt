@@ -76,10 +76,10 @@ file(GLOB_RECURSE implementation_files
 	${implementation_dir}/Deliverable/NativeInterface/*.cpp
 	${implementation_dir}/Deliverable/NativeInterface/*.c
 
-	${implementation_dir}/Deliverable/Wrapper/*.h
-	${implementation_dir}/Deliverable/Wrapper/*.hpp
-	${implementation_dir}/Deliverable/Wrapper/*.cpp
-	${implementation_dir}/Deliverable/Wrapper/*.c
+	# ${implementation_dir}/Deliverable/Wrapper/*.h
+	# ${implementation_dir}/Deliverable/Wrapper/*.hpp
+	# ${implementation_dir}/Deliverable/Wrapper/*.cpp
+	# ${implementation_dir}/Deliverable/Wrapper/*.c
 
 	${implementation_dir}/Auxiliary/*.h
 	${implementation_dir}/Auxiliary/*.hpp

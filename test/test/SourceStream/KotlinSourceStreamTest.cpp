@@ -156,3 +156,127 @@ TEST(KotlinSourceStream, AdvancedEnumKotlinSourceScopedStream)
 	printf(result);
 	return;
 }
+
+TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	{
+		ClassKotlinSourceScopedStream classStream{ ss, "Undyne", {"monster", "guard"} };
+		{
+			{
+				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PUBLIC, "", "", "Int", "func",
+					{
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Int",
+							"attack"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Float",
+							"defence"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+							"String",
+							"sans"
+						},
+					}
+				};
+			}
+
+			{
+				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PRIVATE, "", "", "Int", "funcPrivate",
+					{
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Int",
+							"attack"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Float",
+							"defence"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+							"String",
+							"sans"
+						},
+					}
+				};
+			}
+
+			{
+				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PROTECTED, "", "", "String", "baseFunction",
+					{
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::VALUE,
+							"Int",
+							"baseParam"
+						}
+					}
+				};
+			}
+
+			{
+				MethodKotlinSourceScopedStream internalFunction{ ss, MethodKotlinSourceScopedStream::Access::INTERNAL, "", "", "StringArray", "internalFunction",
+					{
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::VALUE,
+							"Short",
+							"pickachu"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Int",
+							"raichu"
+						},
+					}
+				};
+			}
+
+			{
+				MethodKotlinSourceScopedStream derivedFunction{ ss, MethodKotlinSourceScopedStream::Access::EXTERNAL, "override", "", "Array<Int>", "derivedFunction",
+					{
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+							"Double",
+							"aa"
+						},
+						MethodKotlinSourceScopedStream::Parameter {
+							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+							"Double",
+							"bb"
+						},
+					}
+				};
+			}
+		}
+	}
+
+	const char* result = ss.str();
+	EXPECT_STREQ(result,
+		"class Undyne : monster, guard\n"
+		"{\n"
+		"	fun func(attack : Int, defence : Float, sans : String) : Int\n"
+		"	{\n"
+		"	}\n"
+		"	private fun funcPrivate(attack : Int, defence : Float, sans : String) : Int\n"
+		"	{\n"
+		"	}\n"
+		"	protected fun baseFunction(baseParam : Int) : String\n"
+		"	{\n"
+		"	}\n"
+		"	internal fun internalFunction(pickachu : Short, raichu : Int) : StringArray\n"
+		"	{\n"
+		"	}\n"
+		"	external override fun derivedFunction(aa : Double, bb : Double) : Array<Int>\n"
+		"}\n"
+	);
+
+	printf(result);
+	return;
+}

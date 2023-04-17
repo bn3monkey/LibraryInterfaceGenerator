@@ -145,7 +145,7 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 	case Access::PUBLIC: accessor = "";
 		break;
 	case Access::PROTECTED:
-		accessor = "public";
+		accessor = "protected";
 		break;
 	case Access::PRIVATE:
 		accessor = "private";
@@ -157,7 +157,11 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 		accessor = "external";
 		break;
 	}
-	sourceStream << accessor << " " << prefix << " fun " << name << "(";
+	if (accessor != "")
+		sourceStream << accessor << " ";
+	if (prefix != "")
+		sourceStream << prefix << " ";
+	sourceStream << "fun " << name << "(";
 
 	if (!parameters.empty())
 	{
@@ -169,6 +173,11 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 	}
 
 	sourceStream << ")";
+
+	if (type != "")
+		sourceStream << " : " << type;
+
+	sourceStream << "\n";
 
 	if (access != Access::EXTERNAL)
 		_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
