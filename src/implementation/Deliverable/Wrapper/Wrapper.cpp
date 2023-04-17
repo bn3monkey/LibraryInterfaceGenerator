@@ -117,6 +117,11 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	SourceStream ss;
 
 	{
+		PackageKotlinSourceStream(ss, _kotlin_package_name, {});
+	}
+
+
+	{
 		ss << "package " << _kotlin_package_name << ";\n\n";
 	}
 
