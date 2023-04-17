@@ -280,3 +280,52 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 	printf(result);
 	return;
 }
+
+TEST(KotlinSourceStream, CommentKotlinSourceStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	{
+		CommentKotlinSourceStream clazzComment{ ss };
+		clazzComment.addName("Monster");
+		clazzComment.addDescription("A class for units to attack and defend.\n"
+			"It can be inherited by various sub - monsters.");
+	}
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"/*\n"
+			" * Name : Monster\n"
+			" * Description :\n"
+			" * A class for units to attack and defend.\n"
+			" * It can be inherited by various sub - monsters.\n"
+			"*/\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+
+	{
+		CommentKotlinSourceStream methodComment{ ss };
+		methodComment.addBrief("attack other units");
+		methodComment.addParameter(true, "other", "another unit");
+		methodComment.addParameter(true, "damage", "the damage that another unit takes");
+		methodComment.addReturn("attack result");
+	}
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"/*\n"
+			" * \\brief : attack other units\n"
+			" * attack other units\n"
+			" * @param[in]  other  another unit\n"
+			" * @param[in]  damage  the damage that another unit takes\n"
+			" * @return : attack result\n"
+			"*/\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}
