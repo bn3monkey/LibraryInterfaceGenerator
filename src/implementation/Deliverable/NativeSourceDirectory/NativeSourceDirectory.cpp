@@ -706,30 +706,30 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnu
         }
     }
 }
-static MethodCXXSourceScopedStream::Parameter createParameter(const SymbolParameter& parameter)
+static ParameterNode createParameter(const SymbolParameter& parameter)
 {
     int io;
     if (parameter.type->isPrimitive())
     {
-        io = MethodCXXSourceScopedStream::Parameter::VALUE;
+        io = ParameterNode::VALUE;
     }
     else
     {
         if (parameter.io == SymbolParameter::IO::OUT)
         {
-            io = MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT;
+            io = ParameterNode::REFERENCE_OUT;
         }
         else
         {
-            io = MethodCXXSourceScopedStream::Parameter::REFERENCE_IN;
+            io = ParameterNode::REFERENCE_IN;
         }
     }
-    return MethodCXXSourceScopedStream::Parameter(io, parameter.type->toCppType(), parameter.name);
+    return ParameterNode(io, parameter.type->toCppType(), parameter.name);
 }
 
-static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(const SymbolMethod& object)
+static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
 {
-    std::vector<MethodCXXSourceScopedStream::Parameter> ret;
+    std::vector<ParameterNode> ret;
     for (auto& parameter : object.parameters)
     {
         ret.push_back(createParameter(*parameter));
@@ -843,8 +843,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
 
         MethodCXXSourceScopedStream method_scope{ ss, true, "", "", "void", {}, name,
             {
-                MethodCXXSourceScopedStream::Parameter(
-                    MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+                ParameterNode(
+                    ParameterNode::REFERENCE_IN,
                     object.type->toCppType(),
                     "value")
             }
@@ -884,8 +884,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
 
         MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", "void", {}, name,
             {
-                MethodCXXSourceScopedStream::Parameter(
-                    MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+                ParameterNode(
+                    ParameterNode::REFERENCE_IN,
                     object.type->toCppType(),
                     "value")
             }
@@ -925,8 +925,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
 
         MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", "void", {}, name,
             {
-                MethodCXXSourceScopedStream::Parameter(
-                    MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+                ParameterNode(
+                    ParameterNode::REFERENCE_IN,
                     object.type->toCppType(),
                     "value")
             }
@@ -986,8 +986,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     {
         MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, name,
             {
-                MethodCXXSourceScopedStream::Parameter(
-                    MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+                ParameterNode(
+                    ParameterNode::REFERENCE_IN,
                     object.type->toCppType(),
                     "value")
             }

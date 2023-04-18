@@ -1,5 +1,7 @@
 #include "Wrapper.hpp"
 
+/*
+
 #ifdef __linux__
 static char* delimeter = "/";
 #elif _WIN32
@@ -112,46 +114,222 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 	return ss;
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path)
+LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerator::Implementation::Wrapper::createKotlinWrapperContent(const SymbolPackage& symbolObject)
 {
 	SourceStream ss;
 
 	{
-		PackageKotlinSourceStream(ss, _kotlin_package_name, {});
+		PackageKotlinSourceStream package(ss, _kotlin_package_name, {});
 	}
 
-
+	
 	{
-		ss << "package " << _kotlin_package_name << ";\n\n";
-	}
-
-	{
-		
-
-		std::string classStart = "class " + _kotlin_wrapper_class_name;
-		DefineObject defineObject(ss, classStart, indent);
+		ClassKotlinSourceScopedStream wrapper_class{ ss, _kotlin_wrapper_class_name, {} };
 		{
-			std::string companionObject{ "companion object" };
-			DefineObject defineObject(ss, companionObject, indent);
-
+			CompanionObjectKotlinSourceScopedStream companion_object{ ss };
 			{
-				std::string init{ "init" };
-				DefineObject defineObject(ss, init, indent);
-
-				defineObject.addLine("System.loadLibrary(\"" + _kotlin_wrapper_class_name + "\")");
-
+				CompanionObjectKotlinSourceScopedStream::Init init{ ss };
+				init.loadLibrary(_kotlin_wrapper_class_name);
 			}
-
-			defineObject.addLine("@Volatile private var instance: " + _kotlin_wrapper_class_name + "? = null");
-			defineObject.addLine("@JvmStatic fun getInstance() : " + _kotlin_wrapper_class_name + "=");
-			defineObject.addLine("	instance ?: synchronized(this) { instance ?: " + _kotlin_wrapper_class_name + "().also { instance = it} }");
+			companion_object.addSingleTon(_kotlin_wrapper_class_name);
 		}
-		createWrapperPackageDeclaration(symbolObject, ss, indent);
+
+		createWrapperPackageDeclaration(ss, symbolObject);
 	}
+
 
 	return ss;
 }
 
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePackageDefinition(SourceStream& ss, const SymbolPackage& symbolObject)
+{
+	std::string package_name{ symbolObject.name };
+	std::transform(package_name.begin(), package_name.end(), package_name.begin(), ::tolower);
+
+	std::stringstream prefix_ss;
+	prefix_ss << "Java_com_" << symbolObject.author << "_" << package_name << "_" << _kotlin_wrapper_class_name << "_";
+	auto prefix = prefix_ss.str();
+
+	for (auto& mod : symbolObject.modules)
+	{
+		createNativeModuleDefinition(ss, prefix, *mod);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeModuleDefinition(SourceStream& ss, const std::string& prefix, const SymbolModule& mod)
+{
+	for (auto& global_method : mod.global_methods)
+	{
+		auto& method = global_method.first;
+		auto& method_count = global_method.second;
+
+		createNativeStaticMethodDefinition(ss, prefix, *method, method_count);
+	}
+
+	for (auto& inf : mod.interfaces)
+	{
+		createNativeClassDefinition(ss, prefix, *inf);
+	}
+	for (auto& clazz : mod.classes)
+	{
+		createNativeClassDefinition(ss, prefix, *clazz);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeClassDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz)
+{
+	for (auto& constructor : clazz.constructors)
+	{
+		auto& method = constructor.first;
+		auto& method_count = constructor.second;
+
+		createNativeConstructorDefinition(ss, prefix, clazz, *method, method_count);
+	}
+
+	createNativeDestructorDefinition(ss, prefix, clazz);
+	createNativeAddReleaserDefinition(ss, prefix, clazz);
+
+	auto& base_member_methods = clazz.getBaseMethods();
+	for (auto& base_member_method : base_member_methods)
+	{
+		auto& method = base_member_method.first;
+		auto& method_count = base_member_method.second;
+		createNativeClassMethodDefinition(ss, prefix, clazz, *method, method_count);
+	}
+
+	auto& member_methods = clazz.methods;
+	for (auto& member_method : member_methods)
+	{
+		auto& method = member_method.first;
+		auto& method_count = member_method.second;
+
+		createNativeClassMethodDefinition(ss, prefix, clazz, *method, method_count);
+	}
+
+	auto& base_properties = clazz.getBaseProperties();
+	for (auto& base_prop : base_properties)
+	{
+		createNativePropertyDefinition(ss, prefix, clazz, *base_prop);
+	}
+
+	auto& properties = clazz.properties;
+	for (auto& prop : properties)
+	{
+		createNativePropertyDefinition(ss, prefix, clazz, *prop);
+	}
+}
+
+using namespace LibraryInterfaceGenerator::Implementation;
+
+static ParameterNode createParameter(const SymbolParameter& parameter)
+{
+	int io;
+	if (parameter.type->isPrimitive())
+	{
+		io = ParameterNode::VALUE;
+	}
+	else
+	{
+		if (parameter.io == SymbolParameter::IO::OUT)
+		{
+			io = ParameterNode::REFERENCE_OUT;
+		}
+		else
+		{
+			io = ParameterNode::REFERENCE_IN;
+		}
+	}
+	return ParameterNode(io, parameter.type->toJNIType(), parameter.name);
+}
+
+static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& parameter : object.parameters)
+	{
+		ret.push_back(createParameter(*parameter));
+	}
+	return ret;
+}
+
+static std::vector<ParameterNode> createJNIParameter()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jlong", "thiz"));
+	return ret;
+}
+
+static std::vector<ParameterNode> createHandleParameter()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jlong", "handle"));
+	return ret;
+}
+
+static std::vector<ParameterNode> createParametersWithHandle(const SymbolMethod& object)
+{
+	auto ret = createHandleParameter();
+	auto parameters = createParameters(object);
+	ret.insert(ret.end(), parameters.begin(), parameters.end());
+	return ret;
+}
+
+static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty& obj)
+{
+	auto ret = createHandleParameter();
+	ret.push_back(
+
+		ParameterNode(
+			ParameterNode::REFERENCE_IN,
+			obj.type->toCppInterfaceType(),
+			"value")
+	);
+	return ret;
+}
+
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
+{
+	{
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			prefix,
+			"extern \"C\" JNIEXPORT",
+			"jlong",
+			{ createNativeWrapperScope(clazz) },
+			"",
+			createNativeMemberParameters(constructor)
+		};
+
+		for (auto& parameter : constructor.parameters)
+		{
+			createNativeInputParameterChanger(ss, *parameter);
+		}
+		callNativeConstructor(ss, clazz, constructor);
+		for (auto& parameter : constructor.parameters)
+		{
+			createNativeOutputParameterChanger(ss, *parameter);
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
+{
+	{
+		auto scopes = createInterfaceScope("", constructor);
+		ss << "return (jlong)";
+		for (auto& scope : scopes)
+		{
+			ss << scope << "::";
+		}
+
+	}
+}
+
+
+/*
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
 {
 	std::string packageName = symbolObject.name;
@@ -186,12 +364,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createModuleDefinition(
 			ss << line << "\n";
 		}
 	}
-	/*
+	
 	for (auto& inf : mod.interfaces)
 	{
 		createClassDefinition(prefix, *inf, ss);
 	}
-	*/
+	
 	for (auto& clazz : mod.classes)
 	{
 		createClassDefinition(prefix, *clazz, ss);
@@ -1400,12 +1578,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDecl
 		auto method_count = methodObject.second;
 		ss << indent << createWrapperStaticMethodDeclaration(*method, method_count) << "\n";
 	}
-	/*
-	for (auto& inf : mod.interfaces)
-	{
-		createWrapperClassDeclaration(*inf, ss, indent);
-	}
-	*/
+
+	// for (auto& inf : mod.interfaces)
+	// {
+	// 	createWrapperClassDeclaration(*inf, ss, indent);
+	// }
+
 	for (auto& clazz : mod.classes)
 	{
 		createWrapperClassDeclaration(*clazz, ss, indent);
@@ -1632,3 +1810,5 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperSco
 	}
 	return scope;
 }
+
+*/

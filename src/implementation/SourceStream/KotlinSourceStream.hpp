@@ -1,5 +1,5 @@
-#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_CXXSOURCESTREAM__)
-#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_CXXSOURCESTREAM__
+#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINSOURCESTREAM__)
+#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINSOURCESTREAM__
 
 #include "SourceStream.hpp"
 #include <vector>
@@ -98,22 +98,6 @@ namespace LibraryInterfaceGenerator
                 INTERNAL,
                 EXTERNAL,
             };
-            struct Parameter {
-                const static int REFERENCE_IN = 0;
-                const static int REFERENCE_OUT = 1;
-                const static int VALUE = 2;
-
-                int io;
-                std::string type;
-                std::string name;
-
-                Parameter(int io, const std::string& type, const std::string& name) :
-                    io(io),
-                    type(type),
-                    name(name)
-                {
-                }
-            };
 
             explicit MethodKotlinSourceScopedStream(
                 SourceStream& sourceStream, 
@@ -122,7 +106,7 @@ namespace LibraryInterfaceGenerator
                 const std::string& postfix,
                 const std::string& type,
                 const std::string& name, 
-                const std::vector<Parameter>& parameters = std::vector<Parameter>());
+                const std::vector<ParameterNode>& parameters = std::vector<ParameterNode>());
             virtual ~MethodKotlinSourceScopedStream();
 
             
@@ -130,6 +114,19 @@ namespace LibraryInterfaceGenerator
             SourceScopedStream* _stream{ nullptr };
         };
 
+        class CallKotlinSourceScopedStream
+        {
+        public:
+            explicit CallKotlinSourceScopedStream(
+                SourceStream& sourceStream,
+                const std::string& type,
+                const std::vector<std::string>& scopes,
+                const std::string name,
+                const std::vector<ParameterNode>& parameters = std::vector<ParameterNode>()
+            );
+            virtual ~CallKotlinSourceScopedStream();
+        private:
+        };
 
         class CommentKotlinSourceStream
         {

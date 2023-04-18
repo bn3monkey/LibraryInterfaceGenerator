@@ -262,7 +262,7 @@ LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCX
 	const std::string& type,
 	const std::vector<std::string>& scopes,
 	const std::string& name,
-	const std::vector<Parameter>& parameters)
+	const std::vector<ParameterNode>& parameters)
 {
 	if (prefix != "")
 	{
@@ -285,12 +285,12 @@ LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCX
 	{
 		for (auto& parameter : parameters)
 		{
-			if (parameter.io == Parameter::REFERENCE_IN)
+			if (parameter.io == ParameterNode::REFERENCE_IN)
 			{
 				sourceStream << "const ";
 			}
 			sourceStream << parameter.type;
-			if (parameter.io == Parameter::REFERENCE_IN || parameter.io == Parameter::REFERENCE_OUT)
+			if (parameter.io == ParameterNode::REFERENCE_IN || parameter.io == ParameterNode::REFERENCE_OUT)
 			{
 				sourceStream << "&";
 			}
@@ -379,4 +379,36 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentCXXSo
 		ret.push_back(line);
 	}
 	return ret;
+}
+
+LibraryInterfaceGenerator::Implementation::CallCXXSourceScopedStream::CallCXXSourceScopedStream(SourceStream& sourceStream, const std::string& type, const std::vector<std::string>& scopes, const std::string name, const std::vector<ParameterNode>& parameters)
+{
+	if (type != "")
+	{
+		sourceStream << "(" << type << ")";
+	}
+
+	if (!scopes.empty())
+	{
+		for (auto& scope : scopes)
+		{
+			sourceStream << scope;
+			sourceStream << "::";
+		}
+	}
+	sourceStream << name << "(";
+	if (!parameters.empty())
+	{
+		for (auto& parameter : parameters)
+		{
+			sourceStream << parameter.name << ", ";
+		}
+		sourceStream.pop(2);
+	}
+	sourceStream << ");";
+	sourceStream << "\n";
+}
+
+LibraryInterfaceGenerator::Implementation::CallCXXSourceScopedStream::~CallCXXSourceScopedStream()
+{
 }

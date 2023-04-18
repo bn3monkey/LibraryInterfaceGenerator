@@ -1,6 +1,8 @@
 #if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__)
 #define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__
 
+/*
+
 #include <string>
 #include <algorithm>
 
@@ -63,37 +65,35 @@ namespace LibraryInterfaceGenerator
             void createNativeModuleDefinition(SourceStream& ss, const std::string& prefix, const SymbolModule& mod);
             void createNativeClassDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz);
             
-            void createConstructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
-            void callConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor);
+            void createNativeConstructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
+            void callNativeConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor);
 
-            void createDestructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz);
-            void callDesturctor(SourceStream& ss, const SymbolClass& clazz);
+            void createNativeDestructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz);
+            void callNativeDesturctor(SourceStream& ss, const SymbolClass& clazz);
 
-            void createAddReleasedEfinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz);
-            void callAddReleaser(SourceStream& ss, const SymbolClass& clazz);
+            void createNativeAddReleaserDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz);
+            void callNativeAddReleaser(SourceStream& ss, const SymbolClass& clazz);
 
-            void createClassMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number);
-            void callClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createNativeClassMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void callNativeClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
 
-            void createStaticMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolMethod& object, int number);
-            void callStaticMethod(SourceStream& ss, const SymbolMethod& object);
+            void createNativeStaticMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolMethod& object, int number);
+            void callNativeStaticMethod(SourceStream& ss, const SymbolMethod& object);
 
-            void createParametersDefinition(SourceStream& ss, const SymbolMethod& object);
-            void createParameterDefinition(SourceStream& ss, const SymbolParameter& object);
+            void createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
+            void createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+            void createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
 
-            void createReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
-            void createInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
-            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+            void createNativePropertyName(SourceStream& ss, const SymbolProperty& object);
+            
+            void createNativePropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            void createNativePropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            void callNativePropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+            void callNativePropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+            void createNativePropertyDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object);
 
-            void createPropertyName(SourceStream& ss, const SymbolProperty& object);
-            void createPropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            void createPropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            void callPropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
-            void callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
-            void createPropertyDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object);
-
-            void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
-            void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
+            void createNativeInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
+            void createNativeOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
 
             void createChangerFunction(SourceStream& ss);
 
@@ -118,4 +118,7 @@ namespace LibraryInterfaceGenerator
         };
     }
 }
+
+*/
+
 #endif

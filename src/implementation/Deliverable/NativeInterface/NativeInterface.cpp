@@ -289,30 +289,30 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDefi
 }
 
 // Parameter Block ����
-static MethodCXXSourceScopedStream::Parameter createParameter(const SymbolParameter& parameter)
+static ParameterNode createParameter(const SymbolParameter& parameter)
 {
 	int io;
 	if (parameter.type->isPrimitive())
 	{
-		io = MethodCXXSourceScopedStream::Parameter::VALUE;
+		io = ParameterNode::VALUE;
 	}
 	else
 	{
 		if (parameter.io == SymbolParameter::IO::OUT)
 		{
-			io = MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT;
+			io = ParameterNode::REFERENCE_OUT;
 		}
 		else
 		{
-			io = MethodCXXSourceScopedStream::Parameter::REFERENCE_IN;
+			io = ParameterNode::REFERENCE_IN;
 		}
 	}
-	return MethodCXXSourceScopedStream::Parameter(io, parameter.type->toCppInterfaceType(), parameter.name);
+	return ParameterNode(io, parameter.type->toCppInterfaceType(), parameter.name);
 }
 
-static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(const SymbolMethod& object)
+static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
 {
-	std::vector<MethodCXXSourceScopedStream::Parameter> ret;
+	std::vector<ParameterNode> ret;
 	for (auto& parameter : object.parameters)
 	{
 		ret.push_back(createParameter(*parameter));
@@ -320,14 +320,14 @@ static std::vector<MethodCXXSourceScopedStream::Parameter> createParameters(cons
 	return ret;
 }
 
-static std::vector<MethodCXXSourceScopedStream::Parameter> createHandleParameter()
+static std::vector<ParameterNode> createHandleParameter()
 {
-	std::vector<MethodCXXSourceScopedStream::Parameter> ret;
-	ret.push_back(MethodCXXSourceScopedStream::Parameter(MethodCXXSourceScopedStream::Parameter::VALUE, "void*", "handle"));
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "void*", "handle"));
 	return ret;
 }
 
-static std::vector<MethodCXXSourceScopedStream::Parameter> createParametersWithHandle(const SymbolMethod& object)
+static std::vector<ParameterNode> createParametersWithHandle(const SymbolMethod& object)
 {
 	auto ret = createHandleParameter();
 	auto parameters = createParameters(object);
@@ -335,13 +335,13 @@ static std::vector<MethodCXXSourceScopedStream::Parameter> createParametersWithH
 	return ret;
 }
 
-static std::vector<MethodCXXSourceScopedStream::Parameter> createPropertyParameters(const SymbolProperty& obj)
+static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty& obj)
 {
 	auto ret = createHandleParameter();
 	ret.push_back(
 
-		MethodCXXSourceScopedStream::Parameter(
-			MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+		ParameterNode(
+			ParameterNode::REFERENCE_IN,
 			obj.type->toCppInterfaceType(),
 			"value")
 	);

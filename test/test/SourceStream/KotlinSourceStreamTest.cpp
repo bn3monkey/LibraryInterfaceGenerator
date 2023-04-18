@@ -168,18 +168,18 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			{
 				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PUBLIC, "", "", "Int", "func",
 					{
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Int",
 							"attack"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Float",
 							"defence"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+						ParameterNode {
+							ParameterNode::REFERENCE_OUT,
 							"String",
 							"sans"
 						},
@@ -190,18 +190,18 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			{
 				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PRIVATE, "", "", "Int", "funcPrivate",
 					{
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Int",
 							"attack"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Float",
 							"defence"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+						ParameterNode {
+							ParameterNode::REFERENCE_OUT,
 							"String",
 							"sans"
 						},
@@ -212,8 +212,8 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			{
 				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PROTECTED, "", "", "String", "baseFunction",
 					{
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::VALUE,
+						ParameterNode {
+							ParameterNode::VALUE,
 							"Int",
 							"baseParam"
 						}
@@ -224,13 +224,13 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			{
 				MethodKotlinSourceScopedStream internalFunction{ ss, MethodKotlinSourceScopedStream::Access::INTERNAL, "", "", "StringArray", "internalFunction",
 					{
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::VALUE,
+						ParameterNode {
+							ParameterNode::VALUE,
 							"Short",
 							"pickachu"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Int",
 							"raichu"
 						},
@@ -241,13 +241,13 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			{
 				MethodKotlinSourceScopedStream derivedFunction{ ss, MethodKotlinSourceScopedStream::Access::EXTERNAL, "override", "", "Array<Int>", "derivedFunction",
 					{
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_IN,
+						ParameterNode {
+							ParameterNode::REFERENCE_IN,
 							"Double",
 							"aa"
 						},
-						MethodKotlinSourceScopedStream::Parameter {
-							MethodKotlinSourceScopedStream::Parameter::REFERENCE_OUT,
+						ParameterNode {
+							ParameterNode::REFERENCE_OUT,
 							"Double",
 							"bb"
 						},
@@ -323,6 +323,44 @@ TEST(KotlinSourceStream, CommentKotlinSourceStream)
 			" * @param[in]  damage  the damage that another unit takes\n"
 			" * @return : attack result\n"
 			"*/\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}
+
+TEST(KotlinSourceStream, CallKotlinSourceScopedStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	CallKotlinSourceScopedStream methodA(ss,
+		"",
+		{ "Library", "A" },
+		"functionA",
+		{
+			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
+			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "double", "cc"}
+		}
+	);
+
+	CallKotlinSourceScopedStream methodb(ss,
+		"Int",
+		{ "Library", "B" },
+		"functionB",
+		{
+			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
+			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+		}
+	);
+
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"Library.A.functionA(aa, bb, cc)\n"
+			"Library.B.functionB(aa, bb) as Int\n"
 		);
 		printf(result);
 		ss.clear();

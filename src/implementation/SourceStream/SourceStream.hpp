@@ -98,6 +98,24 @@ namespace LibraryInterfaceGenerator
         private:
             SourceStream& _stream;
         };
+
+        struct ParameterNode
+        {
+            const static int REFERENCE_IN = 0;
+            const static int REFERENCE_OUT = 1;
+            const static int VALUE = 2;
+
+            int io;
+            std::string type;
+            std::string name;
+
+            ParameterNode(int io, const std::string& type, const std::string& name) :
+                io(io),
+                type(type),
+                name(name)
+            {
+            }
+        };
     }
 }
 

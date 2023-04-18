@@ -335,18 +335,18 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 			{},
 			"main",
 			{
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::VALUE,
+				ParameterNode {
+					ParameterNode::VALUE,
 					"int",
 					"argc"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+				ParameterNode {
+					ParameterNode::REFERENCE_IN,
 					"std::vector<std::string>",
 					"argv"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT,
+				ParameterNode {
+					ParameterNode::REFERENCE_OUT,
 					"int",
 					"result"
 				},
@@ -372,18 +372,18 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 			{},
 			"main",
 			{
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::VALUE,
+				ParameterNode {
+					ParameterNode::VALUE,
 					"int",
 					"argc"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+				ParameterNode {
+					ParameterNode::REFERENCE_IN,
 					"std::vector<std::string>",
 					"argv"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT,
+				ParameterNode {
+					ParameterNode::REFERENCE_OUT,
 					"int",
 					"result"
 				},
@@ -409,18 +409,18 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 			{"Library", "Global"},
 			"main",
 			{
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::VALUE,
+				ParameterNode {
+					ParameterNode::VALUE,
 					"int",
 					"argc"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_IN,
+				ParameterNode {
+					ParameterNode::REFERENCE_IN,
 					"std::vector<std::string>",
 					"argv"
 				},
-				MethodCXXSourceScopedStream::Parameter {
-					MethodCXXSourceScopedStream::Parameter::REFERENCE_OUT,
+				ParameterNode {
+					ParameterNode::REFERENCE_OUT,
 					"int",
 					"result"
 				},
@@ -483,6 +483,44 @@ TEST(CXXSourceStream, CommentCXXSourceStream)
 			" * @param[in]  damage  the damage that another unit takes\n"
 			" * @return : attack result\n"
 			"*/\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}
+
+TEST(CXXSourceStream, CallCXXSourceScopedStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	CallCXXSourceScopedStream methodA(ss, 
+		"",
+		{ "Library", "A" }, 
+		"functionA", 
+		{
+			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
+			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "double", "cc"}
+		}
+	);
+
+	CallCXXSourceScopedStream methodb(ss,
+		"jlong",
+		{ "Library", "B" },
+		"functionB",
+		{
+			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
+			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+		}
+	);
+
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"Library::A::functionA(aa, bb, cc);\n"
+			"(jlong)Library::B::functionB(aa, bb);\n"
 		);
 		printf(result);
 		ss.clear();

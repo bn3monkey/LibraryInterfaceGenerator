@@ -137,7 +137,7 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 	const std::string& postfix,
 	const std::string& type,
 	const std::string& name,
-	const std::vector<Parameter>& parameters) : _stream(nullptr)
+	const std::vector<ParameterNode>& parameters) : _stream(nullptr)
 {
 	std::string accessor{ "" };
 	switch (access)
@@ -240,4 +240,37 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentKotli
 		ret.push_back(line);
 	}
 	return ret;
+}
+
+LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::CallKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& type, const std::vector<std::string>& scopes, const std::string name, const std::vector<ParameterNode>& parameters)
+{	
+	if (!scopes.empty())
+	{
+		for (auto& scope : scopes)
+		{
+			sourceStream << scope;
+			sourceStream << ".";
+		}
+	}
+	sourceStream << name << "(";
+	if (!parameters.empty())
+	{
+		for (auto& parameter : parameters)
+		{
+			sourceStream << parameter.name << ", ";
+		}
+		sourceStream.pop(2);
+	}
+	sourceStream << ")";
+
+	if (type != "")
+	{
+		sourceStream << " as " << type;
+	}
+
+	sourceStream << "\n";
+}
+
+LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::~CallKotlinSourceScopedStream()
+{
 }
