@@ -1,7 +1,7 @@
 #if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__)
 #define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__
 
-/*
+
 
 #include <string>
 #include <algorithm>
@@ -15,6 +15,8 @@
 #include "../../SourceStream/KotlinSourceStream.hpp"
 #include "../NativeInterface/NativeInterface.hpp"
 #include "../../Environment.hpp"
+#include "../../Converter/CXXConverter.hpp"
+#include "../../Converter/KotlinConverter.hpp"
 #include "../../ExternalLibrary/KotlinWrapperConverter/KotlinWrapperConverter.h"
 
 namespace LibraryInterfaceGenerator 
@@ -48,6 +50,8 @@ namespace LibraryInterfaceGenerator
             }
 
         private:
+            constexpr static char* JNIEXPORT = "extern \"C\" JNIEXPORT";
+
             const NativeInterface& _infDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
@@ -80,14 +84,16 @@ namespace LibraryInterfaceGenerator
             void createNativeStaticMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolMethod& object, int number);
             void callNativeStaticMethod(SourceStream& ss, const SymbolMethod& object);
 
+            void createNativeCallbackChanger(SourceStream& ss);
+            void createNativeHandleChanger(SourceStream& ss);
             void createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
             void createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
             void createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
 
-            void createNativePropertyName(SourceStream& ss, const SymbolProperty& object);
+            std::string createNativePropertyName(const SymbolProperty& object);
             
-            void createNativePropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            void createNativePropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            void createNativePropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+            void createNativePropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void callNativePropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void callNativePropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void createNativePropertyDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object);
@@ -119,6 +125,6 @@ namespace LibraryInterfaceGenerator
     }
 }
 
-*/
+
 
 #endif

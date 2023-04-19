@@ -8,7 +8,7 @@
 std::mutex vm_mtx;
 JavaVM* g_vm {nullptr};
 
-inline std::function<void()> createReleaser(JNIEnv* env, jobject reference)
+inline std::function<void()> createNativeCallback(JNIEnv* env, jobject reference, jstring method_name)
 {
     {
         std::lock_guard<std::mutex> lock(vm_mtx);
@@ -19,7 +19,7 @@ inline std::function<void()> createReleaser(JNIEnv* env, jobject reference)
     }
 
     jobject globalRef = env->NewGlobalRef(reference);
-    std::function<void()> ret = [globalRef]() {
+    std::function<void()> ret = [globalRef, method_name]() {
         JNIEnv* env {nullptr};
         int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
         if (getEnvStat == JNI_EDETACHED) {
@@ -34,9 +34,9 @@ inline std::function<void()> createReleaser(JNIEnv* env, jobject reference)
         } 
 
         jclass clazz = env->GetObjectClass(globalRef);
-        jmethodID close = env->GetMethodID(clazz, "close", "()V");
-        env->CallVoidMethod(globalRef, close);
-        env->DeleteGlobalRef(globalRef);
+        const char* cmethod_name = env->GetStringUTFChars(method_name, nullptr);
+        jmethodID callback = env->GetMethodID(clazz, cmethod_name, "()V");
+        env->CallVoidMethod(globalRef, callback);
 
         if (getEnvStat == JNI_EDETACHED)
             g_vm->DetachCurrentThread();

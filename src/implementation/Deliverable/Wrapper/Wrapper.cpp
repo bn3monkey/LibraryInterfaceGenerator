@@ -1,7 +1,5 @@
 #include "Wrapper.hpp"
 
-/*
-
 #ifdef __linux__
 static char* delimeter = "/";
 #elif _WIN32
@@ -221,7 +219,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeClassDefini
 
 using namespace LibraryInterfaceGenerator::Implementation;
 
-static ParameterNode createParameter(const SymbolParameter& parameter)
+static ParameterNode createNativeParameter(const SymbolParameter& parameter)
 {
 	int io;
 	if (parameter.type->isPrimitive())
@@ -242,66 +240,135 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
 	return ParameterNode(io, parameter.type->toJNIType(), parameter.name);
 }
 
-static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
+static std::vector<ParameterNode> createNativeParameters(const SymbolMethod& object)
 {
 	std::vector<ParameterNode> ret;
 	for (auto& parameter : object.parameters)
 	{
-		ret.push_back(createParameter(*parameter));
+		ret.push_back(createNativeParameter(*parameter));
 	}
 	return ret;
 }
 
-static std::vector<ParameterNode> createJNIParameter()
+static std::vector<ParameterNode> createJNIParameters()
 {
 	std::vector<ParameterNode> ret;
 	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "jlong", "thiz"));
-	return ret;
-}
-
-static std::vector<ParameterNode> createHandleParameter()
-{
-	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "thiz"));
 	ret.push_back(ParameterNode(ParameterNode::VALUE, "jlong", "handle"));
 	return ret;
 }
 
-static std::vector<ParameterNode> createParametersWithHandle(const SymbolMethod& object)
+static std::vector<ParameterNode> createNativeMemberParameters(const SymbolMethod& object)
 {
-	auto ret = createHandleParameter();
-	auto parameters = createParameters(object);
+	auto ret = createJNIParameters();
+	auto parameters = createNativeParameters(object);
 	ret.insert(ret.end(), parameters.begin(), parameters.end());
 	return ret;
 }
 
-static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty& obj)
+static std::vector<ParameterNode> createJNIInputParameter()
 {
-	auto ret = createHandleParameter();
-	ret.push_back(
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(
+		ParameterNode::VALUE, "void*", "i_handle"
+	));
+	return ret;
+}
+static ParameterNode createNativeInputParameter(const SymbolParameter& parameter)
+{
+	int io;
+	if (parameter.type->isPrimitive())
+	{
+		io = ParameterNode::VALUE;
+	}
+	else
+	{
+		if (parameter.io == SymbolParameter::IO::OUT)
+		{
+			io = ParameterNode::REFERENCE_OUT;
+		}
+		else
+		{
+			io = ParameterNode::REFERENCE_IN;
+		}
+	}
+	return ParameterNode(io, parameter.type->toJNIType(), "i_" + parameter.name);
+}
+static std::vector<ParameterNode> createNativeInputParameters(const SymbolMethod& object)
+{
+	std::vector<ParameterNode> ret = createJNIInputParameter();
+	for (auto& parameter : object.parameters)
+	{
+		ret.push_back(createNativeInputParameter(*parameter));
+	}
+	return ret;
+}
 
+
+static std::vector<ParameterNode> createNativePropertyParameters(const SymbolProperty& obj)
+{
+	auto ret = createJNIParameters();
+	ret.push_back(
 		ParameterNode(
 			ParameterNode::REFERENCE_IN,
-			obj.type->toCppInterfaceType(),
+			obj.type->toJNIType(),
 			"value")
 	);
 	return ret;
 }
 
+static std::vector<ParameterNode> createNativeInputPropertyParameters(const SymbolProperty& obj)
+{
+	std::vector<ParameterNode> ret = createJNIInputParameter();
+	ret.push_back(
+		ParameterNode(
+			ParameterNode::VALUE,
+			obj.type->toCppInterfaceType(),
+			"i_value"
+		)
+	);
+	return ret;
+}
+
+static std::vector<ParameterNode> createNativeCallbackParameters()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "thiz"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "instance"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jstring", "method_name"));
+	return ret;
+}
+
+static std::vector<ParameterNode> createNativeInputCallbackParameters()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "void *", "callback"));
+	return ret;
+}
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
 {
 	{
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += "construct";
+		if (number != 0)
+			method_name += std::to_string(number);
+
 		MethodCXXSourceScopedStream method_scope{
 			ss,
 			false,
-			prefix,
-			"extern \"C\" JNIEXPORT",
-			"jlong",
-			{ createNativeWrapperScope(clazz) },
+			JNIEXPORT,
 			"",
+			"jlong",
+			{ },
+			method_name,
 			createNativeMemberParameters(constructor)
 		};
+
+		createNativeHandleChanger(ss);
 
 		for (auto& parameter : constructor.parameters)
 		{
@@ -318,424 +385,208 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructor
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
 	{
-		auto scopes = createInterfaceScope("", constructor);
-		ss << "return (jlong)";
-		for (auto& scope : scopes)
-		{
-			ss << scope << "::";
-		}
+		ss << "return ";
+		CallCXXSourceScopedStream call{
+			ss,
+			"jlong",
+			createInterfaceScope("", clazz),
+			constructor.name,
+			createNativeInputParameters(constructor)
+		};
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeDestructorDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz)
+{
+	{
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += "release";
+
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			"void",
+			{ },
+			method_name,
+			createJNIParameters()
+		};
+
+		createNativeHandleChanger(ss);
+
+		callNativeDesturctor(ss, clazz);
 
 	}
 }
 
-
-/*
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createPackageDefinition(const SymbolPackage& symbolObject, std::stringstream& ss)
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeDesturctor(SourceStream& ss, const SymbolClass& clazz)
 {
-	std::string packageName = symbolObject.name;
-	std::transform(packageName.begin(), packageName.end(), packageName.begin(), ::tolower);
-
-	std::string prefix = "Java_com_";
-	prefix += symbolObject.author;
-	prefix += "_";
-	prefix += packageName;
-	prefix += "_";
-	prefix += _kotlin_wrapper_class_name;
-	prefix += "_";
-
-	for (auto& mod : symbolObject.modules)
 	{
-		createModuleDefinition(prefix, *mod, ss);
-	}	
-	
-	return Result();
-}
-
-void LibraryInterfaceGenerator::Implementation::Wrapper::createModuleDefinition(const std::string& prefix, const SymbolModule& mod, std::stringstream& ss)
-{
-	for (auto& methodObject : mod.global_methods)
-	{
-		auto& method = methodObject.first;
-		auto& method_count = methodObject.second;
-
-		auto lines = createStaticMethodDefinition(prefix, *method, method_count);
-		for (auto& line : lines)
-		{
-			ss << line << "\n";
-		}
-	}
-	
-	for (auto& inf : mod.interfaces)
-	{
-		createClassDefinition(prefix, *inf, ss);
-	}
-	
-	for (auto& clazz : mod.classes)
-	{
-		createClassDefinition(prefix, *clazz, ss);
+		CallCXXSourceScopedStream call{
+			ss,
+			"",
+			createInterfaceScope("", clazz),
+			"release",
+			createJNIInputParameter()
+		};
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::Wrapper::createClassDefinition(const std::string& prefix, const SymbolClass& clazz, std::stringstream& ss)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeAddReleaserDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz)
 {
 	{
-		for (auto& constructorObject : clazz.constructors)
-		{
-			auto& method = constructorObject.first;
-			auto& method_count = constructorObject.second;
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += "addReleaser";
 
-			auto lines = createConstructorDefinition(prefix, clazz, *method, method_count);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			"void",
+			{},
+			method_name,
+			createJNIParameters()
+		};
 
-		{
-			auto lines = createDestructorDefinition(prefix, clazz);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
-
-		{
-			auto lines = createAddReleaserDefinition(prefix, clazz);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
-
-		auto& base_methods = clazz.getBaseMethods();
-		for (auto& methodObject : base_methods)
-		{
-			auto& method = methodObject.first;
-			auto method_count = methodObject.second;
-			auto lines = createClassMethodDefinition(prefix, clazz, *method, method_count);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
-
-		auto& methods = clazz.methods;
-		for (auto& methodObject : methods)
-		{
-			auto& method = methodObject.first;
-			auto method_count = methodObject.second;
-			auto lines = createClassMethodDefinition(prefix, clazz, *method, method_count);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
-
-		auto& base_properties = clazz.getBaseProperties();
-		for (auto& prop : base_properties)
-		{
-			auto lines = createPropertyDefinition(prefix, clazz, *prop);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
-
-		auto& properties = clazz.properties;
-		for (auto& prop : properties)
-		{
-			auto lines = createPropertyDefinition(prefix, clazz, *prop);
-			for (auto& line : lines)
-				ss << line << "\n";
-		}
+		createNativeCallbackChanger(ss);
+		callNativeAddReleaser(ss, clazz);
 	}
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createConstructorDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeAddReleaser(SourceStream& ss, const SymbolClass& clazz)
 {
-	std::vector<std::string> lines;
 	{
-		std::string line = "extern \"C\" JNIEXPORT jlong ";
-		line += prefix;
-		line += createScope(clazz);
-		line += "construct";
-		if (number > 0)
-		{
-			line += std::to_string(number);
-		}
-		line += "(JNIEnv * env, jobject thiz";
-		if (!constructor.parameters.empty())
-		{
-			line += ", ";
-			line += createParametersDefinition(constructor);
-		}
-		line += ")";
-		lines.push_back(line);
+		CallCXXSourceScopedStream call{
+			ss,
+			"",
+			createInterfaceScope("", clazz),
+			"addReleaser",
+			createNativeInputCallbackParameters()
+		};
 	}
-	lines.push_back("{");
-	{
-		std::string indent = "    ";
-		for (auto& parameter : constructor.parameters)
-		{
-			lines.push_back(indent + createInputParameterChanger(*parameter));
-		}
-		lines.push_back(indent + callConstructor(clazz, constructor));
-	}
-	lines.push_back("}");
-	return lines;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callConstructor(const SymbolClass& clazz, const SymbolMethod& constructor)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeClassMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
-	std::string line;
-	line += "return (jlong)";
-	line += createNativeScope(clazz);
-	line += "construct(";
-	if (!constructor.parameters.empty())
 	{
-		std::string parameters;
-		for (const auto& parameter : constructor.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		line += parameters;
-	}
-	line += ");";
-	return line;
-}
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += object.name;
+		if (number != 0)
+			method_name += std::to_string(number);
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createDestructorDefinition(const std::string& prefix, const SymbolClass& clazz)
-{
-	std::vector<std::string> lines;
-	{
-		std::string line = "extern \"C\" JNIEXPORT void ";
-		line += prefix;
-		line += createScope(clazz);
-		line += "release(JNIEnv* env, jobject thiz, jlong handle)";
-		lines.push_back(line);
-	}
-	lines.push_back("{");
-	{
-		std::string indent = "    ";
-		lines.push_back(indent + callDestructor(clazz));
-	}
-	lines.push_back("}");
-	return lines;
-}
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			object.type->toJNIType(),
+			{ },
+			method_name,
+			createNativeMemberParameters(object)
+		};
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callDestructor(const SymbolClass& clazz)
-{
-	std::string line;
-	line += createNativeScope(clazz);
-	line += "release((void *)handle);";
-	return line;
-}
+		createNativeHandleChanger(ss);
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createAddReleaserDefinition(const std::string& prefix, const SymbolClass& clazz)
-{
-	std::vector<std::string> lines;
-	{
-		std::string line = "extern \"C\" JNIEXPORT void ";
-		line += prefix;
-		line += createScope(clazz);
-		line += "addReleaser(JNIEnv* env, jobject thiz, jobject reference)";
-		lines.push_back(line);
-	}
-	lines.push_back("{");
-	{
-		std::string indent = "    ";
-		std::vector<std::string> codes = callAddReleaser(clazz);
-		for(auto& code : codes)
-			lines.push_back(indent + code);
-	}
-	lines.push_back("}");
-	return lines;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::callAddReleaser(const SymbolClass& clazz)
-{
-	std::vector<std::string> lines;
-	lines.push_back("auto ret = createReleaser(env, reference);");
-	{
-		std::string line = createNativeScope(clazz);
-		line += "addReleaser((void *)(&ret));";
-		lines.push_back(line);
-	}
-	return lines;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createClassMethodDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolMethod& object, int number)
-{
-	std::vector<std::string> lines;
-
-	{
-		std::string line = "extern \"C\" JNIEXPORT ";
-		line += object.type->toJNIType();
-		line += " ";
-		line += prefix;
-		line += createScope(clazz);
-		line += object.name;
-		if (number > 0)
-		{
-			line += std::to_string(number);
-		}
-		line += "(JNIEnv* env, jobject thiz, jlong handle";
-		if (!object.parameters.empty())
-		{
-			line += ", ";
-			line += createParametersDefinition(object);
-		}
-		line += ")";
-		lines.push_back(line);
-	}
-	lines.push_back("{");
-	{
-		std::string indent = "    ";
 		for (auto& parameter : object.parameters)
 		{
-			lines.push_back(indent + createInputParameterChanger(*parameter));
+			createNativeInputParameterChanger(ss, *parameter);
 		}
-		lines.push_back(indent + callClassMethod(clazz, object));
+		callNativeConstructor(ss, clazz, object);
 		for (auto& parameter : object.parameters)
 		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-				lines.push_back(indent + createOutputParameterChanger(*parameter));
+			createNativeOutputParameterChanger(ss, *parameter);
 		}
-		if (object.type->getTypeName() != SymbolType::Name::VOID)
-		{
-			lines.push_back(indent + createReturnValueChanger(object));
-			lines.push_back(indent + "return __ret;");
-		}
+		createNativeReturnValueChanger(ss, object);
 	}
-	lines.push_back("}");
-	return lines;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callClassMethod(const SymbolClass& clazz, const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object)
 {
-	std::string line;
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
+		ss << "auto __temp_ret = ";
 	{
-		line = "auto __temp_ret = ";
+		CallCXXSourceScopedStream call{
+			ss,
+			"",
+			createInterfaceScope(nullptr, clazz),
+			object.name,
+			createNativeInputParameters(object)
+		};
 	}
-	line += createNativeScope(clazz);
-	line += object.name;
-	line += "((void *)handle";
-	if (!object.parameters.empty())
-	{
-		line += ", ";
-		std::string parameters;
-		for (const auto& parameter : object.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		line += parameters;
-	}
-	line += ");";
-	return line;
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createStaticMethodDefinition(const std::string& prefix, const SymbolMethod& object, int number)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeStaticMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolMethod& object, int number)
 {
-	std::vector<std::string> lines;
+	{
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(object);
+		method_name += object.name;
+		if (number != 0)
+			method_name += std::to_string(number);
 
-	{
-		std::string line = "extern \"C\" JNIEXPORT ";
-		line += object.type->toJNIType();
-		line += " ";
-		line += prefix;
-		line += createScope(object);
-		line += object.name;
-		if (number > 0)
-		{
-			line += std::to_string(number);
-		}
-		line += "(JNIEnv* env, jobject thiz";
-		if (!object.parameters.empty())
-		{
-			line += ", ";
-			line += createParametersDefinition(object);
-		}
-		line += ")";
-		lines.push_back(line);
-	}
-	lines.push_back("{");
-	std::string indent = "    ";
-	{
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			object.type->toJNIType(),
+			{ },
+			method_name,
+			createNativeParameters(object)
+		};
+
+		createNativeHandleChanger(ss);
+
 		for (auto& parameter : object.parameters)
 		{
-			lines.push_back(indent + createInputParameterChanger(*parameter));
+			createNativeInputParameterChanger(ss, *parameter);
 		}
-		lines.push_back(indent + callStaticMethod(object));
+		callNativeStaticMethod(ss, object);
 		for (auto& parameter : object.parameters)
 		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-				lines.push_back(indent + createOutputParameterChanger(*parameter));
+			createNativeOutputParameterChanger(ss, *parameter);
 		}
-		if (object.type->getTypeName() != SymbolType::Name::VOID)
-		{
-			lines.push_back(indent + createReturnValueChanger(object));
-			lines.push_back(indent + "return __ret;");
-		}
+		createNativeReturnValueChanger(ss, object);
 	}
-	lines.push_back("}");
-	return lines;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callStaticMethod(const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeStaticMethod(SourceStream& ss, const SymbolMethod& object)
 {
-	std::string line;
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
+		ss << "auto __temp_ret = ";
 	{
-		line = "auto __temp_ret = ";
+		CallCXXSourceScopedStream call{
+			ss,
+			"",
+			createInterfaceScope(nullptr, object),
+			object.name,
+			createNativeInputParameters(object)
+		};
 	}
-	line += createNativeScope(object);
-	line += object.name;
-	line += "(";
-	if (!object.parameters.empty())
-	{
-		std::string parameters;
-		for (const auto& parameter : object.parameters)
-		{
-			parameters += "i_";
-			parameters += parameter->name;
-			parameters += ", ";
-		}
-		parameters.pop_back();
-		parameters.pop_back();
-		line += parameters;
-	}
-	line += ");";
-	return line;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createParametersDefinition(const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeCallbackChanger(SourceStream& ss)
 {
-	std::string ret;
-	if (!object.parameters.empty())
-	{
-		for (auto& parameter : object.parameters)
-		{
-			ret += createParameterDefinition(*parameter);
-			ret += ", ";
-		}
-		ret.pop_back();
-		ret.pop_back();
-	}
-	return ret;
+	ss << "auto temp = createNativeCallback(instance, method_name);n\n";
+	ss << "auto* callback = (void *)&temp;\n";
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createParameterDefinition(const SymbolParameter& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeHandleChanger(SourceStream& ss)
 {
-	std::string ret;
-	ret = object.type->toJNIType();
-	ret += " ";
-	ret += object.name;
-	return ret;
+	ss << "auto i_handle = (void *)handle;\n";
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createReturnValueChanger(const SymbolMethod& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
 {
-	std::string ret;
-
 	switch (object.type->getTypeName())
 	{
+	case SymbolType::Name::VOID:
+		return;
 	case SymbolType::Name::BOOL:
 	case SymbolType::Name::INT8:
 	case SymbolType::Name::INT16:
@@ -744,89 +595,83 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createReturnValu
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ret = "auto __ret = static_cast<";
-		ret += object.type->toJNIType();
-		ret += ">(__temp_ret);";
+		ss << "auto __ret = static_cast<" << object.type->toJNIType() << ">(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto __ret = (";
-		ret += object.type->toJNIType();
-		ret += ")__temp_ret;";
+		ss << "auto __ret = (" << object.type->toJNIType() << ")__temp_ret\n";
 		break;
 	case SymbolType::Name::STRING:
-		ret = "auto __ret = createWrapperString(env, __temp_ret);";
+		ss << "auto __ret = createWrapperString(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "auto __ret = createWrapperBooleanArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperBooleanArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "auto __ret = createWrapperInt8Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt8Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "auto __ret = createWrapperInt16Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt16Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "auto __ret = createWrapperInt32Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt32Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "auto __ret = createWrapperInt64Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt64Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "auto __ret = createWrapperFloatArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperFloatArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "auto __ret = createWrapperDoubleArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperDoubleArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "auto __ret = createWrapperStringArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperStringArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto __ret = createWrapperEnumArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperEnumArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto __ret = createWrapperObjectArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperObjectArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "auto __ret = createWrapperBooleanVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperBooleanVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "auto __ret = createWrapperInt8Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt8Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "auto __ret = createWrapperInt16Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt16Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "auto __ret = createWrapperInt32Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt32Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "auto __ret = createWrapperInt64Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt64Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "auto __ret = createWrapperFloatVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperFloatVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "auto __ret = createWrapperDoubleVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperDoubleVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "auto __ret = createWrapperStringVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperStringVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto __ret = createWrapperEnumVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperEnumVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto __ret = createWrapperObjectVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperObjectVector(env, __temp_ret);\n";
 		break;
 	}
-
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputParameterChanger(const SymbolParameter& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object)
 {
-	std::string ret;
-
 	switch (object.type->getTypeName())
 	{
+	case SymbolType::Name::VOID:
+		break;
 	case SymbolType::Name::BOOL:
 	case SymbolType::Name::INT8:
 	case SymbolType::Name::INT16:
@@ -835,179 +680,83 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputParam
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = static_cast<";
-		ret += object.type->toCppInterfaceType();
-		ret += ">(";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = static_cast<" << object.type->toCppInterfaceType() << ">(" << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = (const ";
-		ret += object.type->toCppInterfaceInnerType();
-		ret += ")";
-		ret += object.name;
-		ret += ";";
+		ss << "auto i_" << object.name << " = (const " <<  object.type->toCppInterfaceInnerType() <<  ")" <<  object.name <<  ";\n";
 		break;
 	case SymbolType::Name::STRING:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeString(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeString(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeBooleanArray(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeBooleanArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt8Array(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeInt8Array(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt16Array(env, ";
-		ret += object.name;
-		ret += ");"; break;
+		ss << "auto i_" << object.name << " = createNativeInt16Array(env, " << object.name << ");\n"; 
+		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt32Array(env, ";
-		ret += object.name;
-		ret += ");"; 
+		ss << "auto i_" << object.name << " = createNativeInt32Array(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt64Array(env, ";
-		ret += object.name;
-		ret += ");"; 
+		ss << "auto i_" << object.name << " = createNativeInt64Array(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeFloatArray(env, ";
-		ret += object.name;
-		ret += ");"; 
+		ss << "auto i_" << object.name << " = createNativeFloatArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeDoubleArray(env, ";
-		ret += object.name;
-		ret += ");"; 
+		ss << "auto i_" << object.name << " = createNativeDoubleArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeStringArray(env, ";
-		ret += object.name;
-		ret += ");"; 
+		ss << "auto i_" << object.name << " = createNativeStringArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeEnumArray(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeEnumArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeObjectArray(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeObjectArray(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeBooleanVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeBooleanVector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt8Vector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeInt8Vector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt16Vector(env, ";
-		ret += object.name;
-		ret += ");"; break;
+		ss << "auto i_" << object.name << " = createNativeInt16Vector(env, " << object.name << ");\n"; 
+		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt32Vector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeInt32Vector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeInt64Vector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeInt64Vector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeFloatVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeFloatVector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeDoubleVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeDoubleVector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeStringVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeStringVector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeEnumVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeEnumVector(env, " << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto i_";
-		ret += object.name;
-		ret += " = createNativeObjectVector(env, ";
-		ret += object.name;
-		ret += ");";
+		ss << "auto i_" << object.name << " = createNativeObjectVector(env, " << object.name << ");\n";
 		break;
 	}
-
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputParameterChanger(const SymbolParameter& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object)
 {
-	std::string ret;
-
 	switch (object.type->getTypeName())
 	{
+	case SymbolType::Name::VOID:
+		break;
 	case SymbolType::Name::BOOL:
 	case SymbolType::Name::INT8:
 	case SymbolType::Name::INT16:
@@ -1016,174 +765,78 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputPara
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ret += object.name;
-		ret += " = static_cast<";
-		ret += object.type->toJNIType();
-		ret += ">(i_";
-		ret += object.name;
-		ret += "); // NOT AVAILABLE";
+		ss << object.name << " = static_cast<" << object.type->toJNIType() << ">(i_" << object.name << "); // NOT AVAILABLE\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = object.name;
-		ret += " = (";
-		ret += object.type->toJNIType();
-		ret += ")i_";
-		ret += object.name;
-		ret += "; // NOT AVAILABLE";
+		ss << object.name << " = (" << object.type->toJNIType() << ")i_" << object.name << "; // NOT AVAILABLE\n";
 		break;
 	case SymbolType::Name::STRING:
-		ret = "auto ";
-		ret += object.name;
-		ret += " = createWrapperString(env, i_";
-		ret += object.name;
-		ret += "); // NOT AVAILABLE";
+		ss << "auto " << object.name << " = createWrapperString(env, i_" << object.name << "); // NOT AVAILABLE\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "copyBooleanArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyBooleanArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "copyInt8Array(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt8Array(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "copyInt16Array(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");"; 
+		ss << "copyInt16Array(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "copyInt32Array(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt32Array(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "copyInt64Array(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt64Array(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "copyFloatArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyFloatArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "copyDoubleArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyDoubleArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "copyStringArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyStringArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "copyEnumArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyEnumArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "copyObjectArray(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyObjectArray(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "copyBooleanVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyBooleanVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "copyInt8Vector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt8Vector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "copyInt16Vector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt16Vector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "copyInt32Vector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt32Vector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "copyInt64Vector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyInt64Vector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "copyFloatVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyFloatVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "copyDoubleVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyDoubleVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "copyStringVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyStringVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "copyEnumVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyEnumVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "copyObjectVector(env, i_";
-		ret += object.name;
-		ret += ",";
-		ret += object.name;
-		ret += ");";
+		ss << "copyObjectVector(env, i_" << object.name << "," << object.name << ");\n";
 		break;
 	}
-
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyName(const SymbolProperty& object)
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyName(const SymbolProperty& object)
 {
 	std::string propertyName = object.name;
 	char firstChar = propertyName[0];
@@ -1193,88 +846,95 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyNa
 	return propertyName;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertySetterDeclaration(const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
 {
-
-	std::string line = "extern \"C\" JNIEXPORT void ";
-	line += prefix;
-	line += scope;
-	line += "set";
-	line += propertyName;
-	line += "(JNIEnv* env, jobject thiz, jlong handle, ";
-	line += object.type->toJNIType();
-	line += " value)";
-	return line;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyGetterDeclaration(const std::string& prefix, const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
-{
-	std::string line = "extern \"C\" JNIEXPORT ";
-	line += object.type->toJNIType();
-	line += " ";
-	line += prefix;
-	line += scope;
-	line += "get";
-	line += propertyName;
-	line += "(JNIEnv* env, jobject thiz, jlong handle)";
-	return line;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callPropertySetter(const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::string line;
-	line += createNativeScope(clazz);
-	line += "set";
-	line += propertyName;
-	line += "((void *)handle, i_value);";
-	return line;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::callPropertyGetter(const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::string line;
-	line += "auto __temp_ret = ";
-	line += createNativeScope(clazz);
-	line += "get";
-	line += propertyName;
-	line += "((void *)handle);";
-	return line;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyDefinition(const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::vector<std::string> ret;
-	std::string indent = "    ";
-	std::string scope = createScope(clazz);
-	std::string propertyName = createPropertyName(object);
-
-	
-	ret.push_back(createPropertyGetterDeclaration(prefix, scope, propertyName, object));
-	ret.push_back("{");
 	{
-		ret.push_back(indent + callPropertyGetter(propertyName, clazz, object));
-	}
-	ret.push_back(indent + createOutputPropertyChanger(object));
-	ret.push_back(indent + "return __ret;");
-	ret.push_back("}");
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += "set";
+		method_name += propertyName;
 
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			object.type->toJNIType(),
+			{  },
+			method_name,
+			createNativePropertyParameters(object)
+		};
+
+		createNativeHandleChanger(ss);
+		createNativeInputPropertyChanger(ss, object);
+		callNativePropertySetter(ss, propertyName, clazz, object);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
+{
+	{
+		std::string method_name{ prefix };
+		method_name += createNativeWrapperScope(clazz);
+		method_name += "get";
+		method_name += propertyName;
+
+		MethodCXXSourceScopedStream method_scope{
+			ss,
+			false,
+			JNIEXPORT,
+			"",
+			object.type->toJNIType(),
+			{  },
+			method_name,
+			createNativePropertyParameters(object)
+		};
+
+		createNativeHandleChanger(ss);
+		callNativePropertySetter(ss, propertyName, clazz, object);
+		createNativeOutputPropertyChanger(ss, object);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativePropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
+{
+	{
+		CallCXXSourceScopedStream call(
+			ss,
+			"",
+			createInterfaceScope("", clazz),
+			"set" + propertyName,
+			createNativeInputCallbackParameters()
+		);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::callNativePropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
+{
+	{
+		ss << "auto __temp_ret = ";
+		CallCXXSourceScopedStream call(
+			ss,
+			"",
+			createInterfaceScope("", clazz),
+			"get" + propertyName,
+			createJNIInputParameter()
+		);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object)
+{
+	auto propertyName = createNativePropertyName(object);
+	createNativePropertyGetterDeclaration(ss, prefix, propertyName, clazz, object);
 	if (object.readonly == false)
 	{
-		ret.push_back(createPropertySetterDeclaration(prefix, scope, propertyName, object));
-		ret.push_back("{");
-		ret.push_back(indent + createInputPropertyChanger(object));
-		{
-			ret.push_back(indent + callPropertySetter(propertyName, clazz, object));
-		}
-		ret.push_back("}");
+		createNativePropertySetterDeclaration(ss, prefix, propertyName, clazz, object);
 	}
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputPropertyChanger(const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputPropertyChanger(SourceStream& ss, const SymbolProperty& object)
 {
-	std::string ret;
-
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::BOOL:
@@ -1285,88 +945,79 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createInputPrope
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ret = "auto i_value = static_cast<";
-		ret += object.type->toCppInterfaceType();
-		ret += ">(value);";
+		ss << "auto i_value = static_cast<" << object.type->toCppInterfaceType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto i_value = (const ";
-		ret += object.type->toCppInterfaceInnerType();
-		ret += ")value;";
+		ss << "auto i_value = (const " << object.type->toCppInterfaceInnerType() << ")value;\n";
 		break;
 	case SymbolType::Name::STRING:
-		ret = "auto i_value = createNativeString(env, value);";
+		ss << "auto i_value = createNativeString(env, value);\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "auto i_value = createNativeBooleanArray(env, value);";
+		ret = "auto i_value = createNativeBooleanArray(env, value);\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "auto i_value = createNativeInt8Array(env, value);";
+		ret = "auto i_value = createNativeInt8Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "auto i_value = createNativeInt16Array(env, value);";
+		ret = "auto i_value = createNativeInt16Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "auto i_value = createNativeInt32Array(env, value);";
+		ret = "auto i_value = createNativeInt32Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "auto i_value = createNativeInt64Array(env, value);";
+		ret = "auto i_value = createNativeInt64Array(env, value);\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "auto i_value = createNativeFloatArray(env, value);";
+		ret = "auto i_value = createNativeFloatArray(env, value);\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "auto i_value = createNativeDoubleArray(env, value);";
+		ret = "auto i_value = createNativeDoubleArray(env, value);\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "auto i_value = createNativeStringArray(env, value);";
+		ret = "auto i_value = createNativeStringArray(env, value);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto i_value = createNativeEnumArray(env, value);";
+		ret = "auto i_value = createNativeEnumArray(env, value);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto i_value = createNativeObjectArray(env, value);";
+		ret = "auto i_value = createNativeObjectArray(env, value);\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "auto i_value = createNativeBooleanVector(env, value);";
+		ret = "auto i_value = createNativeBooleanVector(env, value);\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "auto i_value = createNativeInt8Vector(env, value);";
+		ret = "auto i_value = createNativeInt8Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "auto i_value = createNativeInt16Vector(env, value);";
+		ret = "auto i_value = createNativeInt16Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "auto i_value = createNativeInt32Vector(env, value);";
+		ret = "auto i_value = createNativeInt32Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "auto i_value = createNativeInt64Vector(env, value);";
+		ret = "auto i_value = createNativeInt64Vector(env, value);\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "auto i_value = createNativeFloatVector(env, value);";
+		ret = "auto i_value = createNativeFloatVector(env, value);\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "auto i_value = createNativeDoubleVector(env, value);";
+		ret = "auto i_value = createNativeDoubleVector(env, value);\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "auto i_value = createNativeStringVector(env, value);";
+		ret = "auto i_value = createNativeStringVector(env, value);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto i_value = createNativeEnumVector(env, value);";
+		ret = "auto i_value = createNativeEnumVector(env, value);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto i_value = createNativeObjectVector(env, value);";
+		ret = "auto i_value = createNativeObjectVector(env, value);\n";
 		break;
 	}
-
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputPropertyChanger(const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object)
 {
-	// __temp_ret -> __ret
-	std::string ret;
-
 	switch (object.type->getTypeName())
 	{
 	case SymbolType::Name::BOOL:
@@ -1377,153 +1028,80 @@ std::string LibraryInterfaceGenerator::Implementation::Wrapper::createOutputProp
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ret = "auto __ret = static_cast<";
-		ret += object.type->toJNIType();
-		ret += ">(__temp_ret);";
+		ss << "auto __ret = static_cast<" << object.type->toJNIType() << ">(__temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ret = "auto __ret = (";
-		ret += object.type->toJNIType();
-		ret += ")__temp_ret;";
+		ss << "auto __ret = (" << object.type->toJNIType() << ")__temp_ret;\n";
 		break;
-	case SymbolType::Name::STRING :
-		ret = "auto __ret = createWrapperString(env, __temp_ret);";
+	case SymbolType::Name::STRING:
+		ss << "auto __ret = createWrapperString(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "auto __ret = createWrapperBooleanArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperBooleanArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "auto __ret = createWrapperInt8Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt8Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "auto __ret = createWrapperInt16Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt16Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "auto __ret = createWrapperInt32Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt32Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "auto __ret = createWrapperInt64Array(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt64Array(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "auto __ret = createWrapperFloatArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperFloatArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "auto __ret = createWrapperDoubleArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperDoubleArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "auto __ret = createWrapperStringArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperStringArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto __ret = createWrapperEnumArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperEnumArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto __ret = createWrapperObjectArray(env, __temp_ret);";
+		ss << "auto __ret = createWrapperObjectArray(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "auto __ret = createWrapperBooleanVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperBooleanVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "auto __ret = createWrapperInt8Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt8Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "auto __ret = createWrapperInt16Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt16Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "auto __ret = createWrapperInt32Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt32Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "auto __ret = createWrapperInt64Vector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperInt64Vector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "auto __ret = createWrapperFloatVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperFloatVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "auto __ret = createWrapperDoubleVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperDoubleVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "auto __ret = createWrapperStringVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperStringVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto __ret = createWrapperEnumVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperEnumVector(env, __temp_ret);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto __ret = createWrapperObjectVector(env, __temp_ret);";
+		ss << "auto __ret = createWrapperObjectVector(env, __temp_ret);\n";
 		break;
 	}
-
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createScope(const SymbolClass& clazz)
-{
-	std::string scope;
-	auto& moduleNames = clazz.parentModules;
-	auto& objectNames = clazz.parentObjects;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_1";
-	}
-	for (auto& objectName : objectNames)
-	{
-		scope += objectName;
-		scope += "_1";
-	}
-	scope += clazz.name;
-	scope += "_1";
-
-	return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createScope(const SymbolMethod& method)
-{
-	std::string scope;
-	auto& moduleNames = method.parentModules;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_1";
-	}
-	return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createNativeScope(const SymbolClass& clazz)
-{
-	std::string scope;
-	auto& moduleNames = clazz.parentModules;
-	auto& objectNames = clazz.parentObjects;
-	
-	for (size_t i=1;i<moduleNames.size();i++)
-	{
-		scope += moduleNames[i];
-		scope += "::";
-	}
-	for (auto& objectName : objectNames)
-	{
-		scope += objectName;
-		scope += "::";
-	}
-	scope += clazz.name;
-	scope += "::";
-
-	return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createNativeScope(const SymbolMethod& method)
-{
-	std::string scope;
-	auto& moduleNames = method.parentModules;
-	for (size_t i = 1; i < moduleNames.size(); i++)
-	{
-		scope += moduleNames[i];
-		scope += "::";
-	}
-	return scope;
+	ss << "return __ret;\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction(SourceStream& ss)
 {
-
 	// bool : bool <-> jboolean
 	// int8 : int8_t <-> jbyte
 	// int16 : int16_t <-> jshort
@@ -1531,7 +1109,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction(S
 	// int64 : int64_t <-> jlong
 	// float : float <-> jfloat
 	// double : double <-> jdouble
-	// string : std::string <-> jstring (�Լ� �ʿ�)
+	// string : std::string <-> jstring
 	// enum : int <-> jint
 	// object : void* <-> jlong
 	// 
@@ -1560,86 +1138,120 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction(S
 	ss << KotlinWrapperConverter;
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPackageDeclaration(const SymbolPackage& symbolObject, std::stringstream& ss, std::string indent)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPackageDeclaration(SourceStream& ss, const SymbolPackage& symbolObject)
 {
 	for (auto& mod : symbolObject.modules)
 	{
-		createWrapperModuleDeclaration(*mod, ss, indent);
+		createWrapperModuleDeclaration(ss, *mod);
 	}
-
-	return Result();
 }
 
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDeclaration(const SymbolModule& mod, std::stringstream& ss, std::string indent)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperModuleDeclaration(SourceStream& ss, const SymbolModule& mod)
 {
-	for (auto& methodObject : mod.global_methods)
+	for (auto& global_method : mod.global_methods)
 	{
-		auto& method = methodObject.first;
-		auto method_count = methodObject.second;
-		ss << indent << createWrapperStaticMethodDeclaration(*method, method_count) << "\n";
+		auto& method = global_method.first;
+		auto method_count = global_method.second;
+		createWrapperStaticMethodDeclaration(ss, *method, method_count);
 	}
-
-	// for (auto& inf : mod.interfaces)
-	// {
-	// 	createWrapperClassDeclaration(*inf, ss, indent);
-	// }
 
 	for (auto& clazz : mod.classes)
 	{
-		createWrapperClassDeclaration(*clazz, ss, indent);
+		createWrapperClassDeclaration(ss, *clazz);
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDeclaration(const SymbolClass& clazz, std::stringstream& ss, std::string indent)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+	for (auto& constructor : clazz.constructors)
 	{
-		for (auto& constructorObject : clazz.constructors)
-		{
-			auto& method = constructorObject.first;
-			auto method_count = constructorObject.second;
-			ss << indent << createWrapperConstructorDeclaration(clazz, *method, method_count) << "\n";
-		}
+		auto& method = constructor.first;
+		auto& method_count = constructor.second;
+		createWrapperConstructorDeclaration(ss, clazz, *method, method_count);
+	}
 
-		{
-			ss << indent << createWrapperDestructorDeclaration(clazz) << "\n";
-		}
-		{
-			ss << indent << createWrapperAddReleaserDeclaration(clazz) << "\n";
-		}
+	createWrapperDestructorDeclaration(ss, clazz);
+	createWrapperAddReleaserDeclaration(ss, clazz);
 
-		auto& base_methods = clazz.getBaseMethods();
-		for (auto& methodObject : base_methods)
-		{
-			auto& method = methodObject.first;
-			auto method_count = methodObject.second;
-			ss << indent << createWrapperClassMethodDeclaration(clazz, *method, method_count) << "\n";
-		}
+	auto& base_methods = clazz.getBaseMethods();
+	for (auto& base_method : base_methods)
+	{
+		auto& method = base_method.first;
+		auto method_count = base_method.second;
+		createWrapperClassMethodDeclaration(ss, clazz, *method, method_count);
+	}
 
-		auto& methods = clazz.methods;
-		for (auto& methodObject : methods)
-		{
-			auto& method = methodObject.first;
-			auto method_count = methodObject.second;
-			ss << indent << createWrapperClassMethodDeclaration(clazz, *method, method_count) << "\n";
-		}
+	auto& member_methods = clazz.methods;
+	for (auto& member_method : member_methods)
+	{
+		auto& method = member_method.first;
+		auto method_count = member_method.second;
+		createWrapperClassMethodDeclaration(ss, clazz, *method, method_count);
+	}
 
-		auto& base_properties = clazz.getBaseProperties();
-		for (auto& prop : base_properties)
-		{
-			auto lines = createWrapperPropertyDeclaration(clazz, *prop);
-			for (auto& line : lines)
-				ss << indent << line << "\n";
-		}
+	auto& base_properties = clazz.getBaseProperties();
+	for (auto& prop : base_properties)
+	{
+		createWrapperPropertyDeclaration(ss, clazz, *prop);
+	}
 
-		auto& properties = clazz.properties;
-		for (auto& prop : properties)
-		{
-			auto lines = createWrapperPropertyDeclaration(clazz, *prop);
-			for (auto& line : lines)
-				ss << indent << line << "\n";
+	auto& properties = clazz.properties;
+	for (auto& prop : properties)
+	{
+		createWrapperPropertyDeclaration(ss, clazz, *prop);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
+{
+	std::string ret = { "external fun " };
+	ret += createWrapperScope(clazz);
+	ret += "construct";
+	if (number > 0)
+	{
+		ret += std::to_string(number);
+	}
+	ret += "(";
+	if (!constructor.parameters.empty())
+	{
+		ret += createWrapperParametersDeclaration(constructor);
+	}
+	ret += ") : Long";
+	return ret;
+
+	{
+		std::string ret{ createKotlinWrapperScope(clazz) };
+
+		MethodKotlinSourceScopedStream call{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+
 		}
 	}
 }
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number)
+{
+}
+
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object, int number)
+{
+}
+
+
+
+/*
+
 
 std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor, int number)
 {
