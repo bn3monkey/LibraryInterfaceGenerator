@@ -76,7 +76,7 @@ void LibraryInterfaceGenerator::Implementation::CompanionObjectKotlinSourceScope
 {
 	*_stream << "@Volatile private var instance : " << class_name << " ? = null\n";
 	*_stream << "@JvmStatic fun getInstance() : " << class_name << " =\n";
-	*_stream << "	instance ? : synchronized(this) { instance ? : " << class_name << "().also{instance = it} }\n";
+	*_stream << "	instance ?: synchronized(this) { instance ?: " << class_name << "().also{instance = it} }\n";
 }
 
 LibraryInterfaceGenerator::Implementation::CompanionObjectKotlinSourceScopedStream::Init::Init(SourceStream& sourceStream)

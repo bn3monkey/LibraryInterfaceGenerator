@@ -1,8 +1,6 @@
 #if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__)
 #define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_WRAPPER__
 
-
-
 #include <string>
 #include <algorithm>
 
@@ -90,7 +88,7 @@ namespace LibraryInterfaceGenerator
             void createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
             void createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
 
-            std::string createNativePropertyName(const SymbolProperty& object);
+            std::string createPropertyName(const SymbolProperty& object);
             
             void createNativePropertySetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void createNativePropertyGetterDeclaration(SourceStream& ss, const std::string& prefix, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
@@ -114,17 +112,14 @@ namespace LibraryInterfaceGenerator
             void createWrapperClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
             void createWrapperStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object, int number);
 
-            void createWrapperParametersDeclaration(SourceStream& ss, const SymbolMethod& object);
-            void createWrapperParameterDeclaration(SourceStream& ss, const SymbolParameter& object);
-
-            void createWrapperPropertySetterDeclaration(SourceStream& ss, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
-            void createWrapperPropertyGetterDeclaration(SourceStream& ss, const std::string& scope, const std::string& propertyName, const SymbolProperty& object);
+            
+            void createWrapperPropertySetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& object);
+            void createWrapperPropertyGetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& object);
             void createWrapperPropertyDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
 
         };
     }
 }
-
 
 
 #endif

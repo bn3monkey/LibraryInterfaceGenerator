@@ -39,5 +39,5 @@ namespace LibraryInterfaceGenerator
 			return scope;
 		}
 	}
-
+}
 #endif

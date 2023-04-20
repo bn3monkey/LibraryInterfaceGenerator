@@ -92,7 +92,7 @@ TEST(KotlinSourceStream, CompanionObjectKotlinSourceScopedStream)
         "\t{\n"
         "\t\t@Volatile private var instance : Undyne ? = null\n"
         "\t\t@JvmStatic fun getInstance() : Undyne =\n"
-        "\t\t\tinstance ? : synchronized(this) { instance ? : Undyne().also{instance = it} }\n"
+        "\t\t\tinstance ?: synchronized(this) { instance ?: Undyne().also{instance = it} }\n"
         "\t\tinit\n"
         "\t\t{\n"
 		"\t\t\tSystem.loadLibrary(\"Attacking\")\n"

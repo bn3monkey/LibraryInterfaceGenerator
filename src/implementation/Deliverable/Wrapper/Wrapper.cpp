@@ -163,11 +163,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeModuleDefin
 
 		createNativeStaticMethodDefinition(ss, prefix, *method, method_count);
 	}
-
+	/*
 	for (auto& inf : mod.interfaces)
 	{
 		createNativeClassDefinition(ss, prefix, *inf);
 	}
+	*/
 	for (auto& clazz : mod.classes)
 	{
 		createNativeClassDefinition(ss, prefix, *clazz);
@@ -222,6 +223,7 @@ using namespace LibraryInterfaceGenerator::Implementation;
 static ParameterNode createNativeParameter(const SymbolParameter& parameter)
 {
 	int io;
+	/*
 	if (parameter.type->isPrimitive())
 	{
 		io = ParameterNode::VALUE;
@@ -234,9 +236,11 @@ static ParameterNode createNativeParameter(const SymbolParameter& parameter)
 		}
 		else
 		{
-			io = ParameterNode::REFERENCE_IN;
+			io = ParameterNode::VALUE;
 		}
 	}
+	*/
+	io = ParameterNode::VALUE;
 	return ParameterNode(io, parameter.type->toJNIType(), parameter.name);
 }
 
@@ -255,15 +259,69 @@ static std::vector<ParameterNode> createJNIParameters()
 	std::vector<ParameterNode> ret;
 	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
 	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "thiz"));
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "jlong", "handle"));
+	return ret;
+}
+
+static ParameterNode createNativeHandleParameters()
+{
+	return ParameterNode(ParameterNode::VALUE, "jlong", "handle");
+}
+
+static std::vector<ParameterNode> createNativeStaticParameters(const SymbolMethod& object)
+{
+	auto ret = createJNIParameters();
+	auto parameters = createNativeParameters(object);
+	ret.insert(ret.end(), parameters.begin(), parameters.end());
+	return ret;
+}
+
+static std::vector<ParameterNode> createNativeConstructorParameters(const SymbolMethod& object)
+{
+	return createNativeStaticParameters(object);
+}
+
+static std::vector<ParameterNode> createNativeDestructorParameters(const SymbolMethod& object)
+{
+	auto ret = createJNIParameters();
+	ret.push_back(createNativeHandleParameters());
 	return ret;
 }
 
 static std::vector<ParameterNode> createNativeMemberParameters(const SymbolMethod& object)
 {
 	auto ret = createJNIParameters();
+	ret.push_back(createNativeHandleParameters());
 	auto parameters = createNativeParameters(object);
 	ret.insert(ret.end(), parameters.begin(), parameters.end());
+	return ret;
+}
+
+static std::vector<ParameterNode> createNativeCallbackParameters()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "thiz"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "instance"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "jstring", "method_name"));
+	return ret;
+}
+
+static std::vector<ParameterNode> createNativePropertyGetterParameters(const SymbolProperty& obj)
+{
+	auto ret = createJNIParameters();
+	ret.push_back(createNativeHandleParameters());
+	return ret;
+}
+static std::vector<ParameterNode> createNativePropertySetterParameters(const SymbolProperty& obj)
+{
+	auto ret = createJNIParameters();
+	ret.push_back(createNativeHandleParameters());
+	ret.push_back(
+		ParameterNode(
+			ParameterNode::REFERENCE_IN,
+			obj.type->toJNIType(),
+			"value")
+	);
 	return ret;
 }
 
@@ -295,9 +353,11 @@ static ParameterNode createNativeInputParameter(const SymbolParameter& parameter
 	}
 	return ParameterNode(io, parameter.type->toJNIType(), "i_" + parameter.name);
 }
-static std::vector<ParameterNode> createNativeInputParameters(const SymbolMethod& object)
+
+
+static std::vector<ParameterNode> createNativeInputStaticParameters(const SymbolMethod& object)
 {
-	std::vector<ParameterNode> ret = createJNIInputParameter();
+	std::vector<ParameterNode> ret;
 	for (auto& parameter : object.parameters)
 	{
 		ret.push_back(createNativeInputParameter(*parameter));
@@ -305,18 +365,24 @@ static std::vector<ParameterNode> createNativeInputParameters(const SymbolMethod
 	return ret;
 }
 
-
-static std::vector<ParameterNode> createNativePropertyParameters(const SymbolProperty& obj)
+static std::vector<ParameterNode> createNativeInputConstructorParameters(const SymbolMethod& object)
 {
-	auto ret = createJNIParameters();
-	ret.push_back(
-		ParameterNode(
-			ParameterNode::REFERENCE_IN,
-			obj.type->toJNIType(),
-			"value")
-	);
+	return createNativeInputStaticParameters(object);
+}
+
+static std::vector<ParameterNode> createNativeInputDestructorParameters()
+{
+	return createJNIInputParameter();
+}
+
+static std::vector<ParameterNode> createNativeInputMemberParameters(const SymbolMethod& object)
+{
+	std::vector<ParameterNode> ret = createJNIInputParameter();
+	auto params = createNativeInputStaticParameters(object);
+	ret.insert(ret.end(), params.begin(), params.end());
 	return ret;
 }
+
 
 static std::vector<ParameterNode> createNativeInputPropertyParameters(const SymbolProperty& obj)
 {
@@ -331,15 +397,23 @@ static std::vector<ParameterNode> createNativeInputPropertyParameters(const Symb
 	return ret;
 }
 
-static std::vector<ParameterNode> createNativeCallbackParameters()
+static std::vector<ParameterNode> createNativeInputPropertyGetterParameters(const SymbolProperty& obj)
 {
-	std::vector<ParameterNode> ret;
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "JNIEnv*", "env"));
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "thiz"));
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "jobject", "instance"));
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "jstring", "method_name"));
+	std::vector<ParameterNode> ret = createJNIInputParameter();
 	return ret;
 }
+static std::vector<ParameterNode> createNativeInputPropertySetterParameters(const SymbolProperty& obj)
+{
+	std::vector<ParameterNode> ret = createJNIInputParameter();
+	ret.push_back(
+		ParameterNode(
+			ParameterNode::REFERENCE_IN,
+			obj.type->toJNIType(),
+			"i_value")
+	);
+	return ret;
+}
+
 
 static std::vector<ParameterNode> createNativeInputCallbackParameters()
 {
@@ -385,13 +459,14 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructor
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		ss << "return ";
 		CallCXXSourceScopedStream call{
 			ss,
 			"jlong",
-			createInterfaceScope("", clazz),
+			createInterfaceScope(root_namespace, clazz),
 			constructor.name,
-			createNativeInputParameters(constructor)
+			createNativeInputConstructorParameters(constructor)
 		};
 	}
 }
@@ -411,7 +486,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeDestructorD
 			"void",
 			{ },
 			method_name,
-			createJNIParameters()
+			
 		};
 
 		createNativeHandleChanger(ss);
@@ -424,12 +499,13 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeDestructorD
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeDesturctor(SourceStream& ss, const SymbolClass& clazz)
 {
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		CallCXXSourceScopedStream call{
 			ss,
 			"",
-			createInterfaceScope("", clazz),
+			createInterfaceScope(root_namespace, clazz),
 			"release",
-			createJNIInputParameter()
+			createNativeInputDestructorParameters()
 		};
 	}
 }
@@ -449,7 +525,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeAddReleaser
 			"void",
 			{},
 			method_name,
-			createJNIParameters()
+			createNativeCallbackParameters()
 		};
 
 		createNativeCallbackChanger(ss);
@@ -460,10 +536,12 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeAddReleaser
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeAddReleaser(SourceStream& ss, const SymbolClass& clazz)
 {
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
+
 		CallCXXSourceScopedStream call{
 			ss,
 			"",
-			createInterfaceScope("", clazz),
+			createInterfaceScope(root_namespace, clazz),
 			"addReleaser",
 			createNativeInputCallbackParameters()
 		};
@@ -496,7 +574,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeClassMethod
 		{
 			createNativeInputParameterChanger(ss, *parameter);
 		}
-		callNativeConstructor(ss, clazz, object);
+		callNativeClassMethod(ss, clazz, object);
 		for (auto& parameter : object.parameters)
 		{
 			createNativeOutputParameterChanger(ss, *parameter);
@@ -510,12 +588,13 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeClassMethod(S
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
 		ss << "auto __temp_ret = ";
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		CallCXXSourceScopedStream call{
 			ss,
 			"",
-			createInterfaceScope(nullptr, clazz),
+			createInterfaceScope(root_namespace, clazz),
 			object.name,
-			createNativeInputParameters(object)
+			createNativeInputMemberParameters(object)
 		};
 	}
 }
@@ -537,10 +616,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeStaticMetho
 			object.type->toJNIType(),
 			{ },
 			method_name,
-			createNativeParameters(object)
+			createNativeStaticParameters(object)
 		};
-
-		createNativeHandleChanger(ss);
 
 		for (auto& parameter : object.parameters)
 		{
@@ -560,19 +637,20 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeStaticMethod(
 	if (object.type->getTypeName() != SymbolType::Name::VOID)
 		ss << "auto __temp_ret = ";
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		CallCXXSourceScopedStream call{
 			ss,
 			"",
-			createInterfaceScope(nullptr, object),
+			createInterfaceScope(root_namespace, object),
 			object.name,
-			createNativeInputParameters(object)
+			createNativeInputStaticParameters(object)
 		};
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeCallbackChanger(SourceStream& ss)
 {
-	ss << "auto temp = createNativeCallback(instance, method_name);n\n";
+	ss << "auto temp = createNativeCallback(instance, method_name);\n";
 	ss << "auto* callback = (void *)&temp;\n";
 }
 
@@ -771,7 +849,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeOutputParam
 		ss << object.name << " = (" << object.type->toJNIType() << ")i_" << object.name << "; // NOT AVAILABLE\n";
 		break;
 	case SymbolType::Name::STRING:
-		ss << "auto " << object.name << " = createWrapperString(env, i_" << object.name << "); // NOT AVAILABLE\n";
+		ss << object.name << " = createWrapperString(env, i_" << object.name << "); // NOT AVAILABLE\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
 		ss << "copyBooleanArray(env, i_" << object.name << "," << object.name << ");\n";
@@ -836,7 +914,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeOutputParam
 	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyName(const SymbolProperty& object)
+std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyName(const SymbolProperty& object)
 {
 	std::string propertyName = object.name;
 	char firstChar = propertyName[0];
@@ -859,10 +937,10 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertySet
 			false,
 			JNIEXPORT,
 			"",
-			object.type->toJNIType(),
+			"void",
 			{  },
 			method_name,
-			createNativePropertyParameters(object)
+			createNativePropertySetterParameters(object)
 		};
 
 		createNativeHandleChanger(ss);
@@ -887,11 +965,11 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyGet
 			object.type->toJNIType(),
 			{  },
 			method_name,
-			createNativePropertyParameters(object)
+			createNativePropertyGetterParameters(object)
 		};
 
 		createNativeHandleChanger(ss);
-		callNativePropertySetter(ss, propertyName, clazz, object);
+		callNativePropertyGetter(ss, propertyName, clazz, object);
 		createNativeOutputPropertyChanger(ss, object);
 	}
 }
@@ -899,12 +977,13 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyGet
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativePropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
 {
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		CallCXXSourceScopedStream call(
 			ss,
 			"",
-			createInterfaceScope("", clazz),
+			createInterfaceScope(root_namespace, clazz),
 			"set" + propertyName,
-			createNativeInputCallbackParameters()
+			createNativeInputPropertySetterParameters(object)
 		);
 	}
 }
@@ -912,20 +991,21 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::callNativePropertySette
 void LibraryInterfaceGenerator::Implementation::Wrapper::callNativePropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
 {
 	{
+		auto root_namespace = _infDirectory.getRootNamespace();
 		ss << "auto __temp_ret = ";
 		CallCXXSourceScopedStream call(
 			ss,
 			"",
-			createInterfaceScope("", clazz),
+			createInterfaceScope(root_namespace, clazz),
 			"get" + propertyName,
-			createJNIInputParameter()
+			createNativeInputPropertyGetterParameters(object)
 		);
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePropertyDefinition(SourceStream& ss, const std::string& prefix, const SymbolClass& clazz, const SymbolProperty& object)
 {
-	auto propertyName = createNativePropertyName(object);
+	auto propertyName = createPropertyName(object);
 	createNativePropertyGetterDeclaration(ss, prefix, propertyName, clazz, object);
 	if (object.readonly == false)
 	{
@@ -954,64 +1034,64 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputProper
 		ss << "auto i_value = createNativeString(env, value);\n";
 		break;
 	case SymbolType::Name::BOOLARRAY:
-		ret = "auto i_value = createNativeBooleanArray(env, value);\n";
+		ss << "auto i_value = createNativeBooleanArray(env, value);\n";
 		break;
 	case SymbolType::Name::INT8ARRAY:
-		ret = "auto i_value = createNativeInt8Array(env, value);\n";
+		ss << "auto i_value = createNativeInt8Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT16ARRAY:
-		ret = "auto i_value = createNativeInt16Array(env, value);\n";
+		ss << "auto i_value = createNativeInt16Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT32ARRAY:
-		ret = "auto i_value = createNativeInt32Array(env, value);\n";
+		ss << "auto i_value = createNativeInt32Array(env, value);\n";
 		break;
 	case SymbolType::Name::INT64ARRAY:
-		ret = "auto i_value = createNativeInt64Array(env, value);\n";
+		ss << "auto i_value = createNativeInt64Array(env, value);\n";
 		break;
 	case SymbolType::Name::FLOATARRAY:
-		ret = "auto i_value = createNativeFloatArray(env, value);\n";
+		ss << "auto i_value = createNativeFloatArray(env, value);\n";
 		break;
 	case SymbolType::Name::DOUBLEARRAY:
-		ret = "auto i_value = createNativeDoubleArray(env, value);\n";
+		ss << "auto i_value = createNativeDoubleArray(env, value);\n";
 		break;
 	case SymbolType::Name::STRINGARRAY:
-		ret = "auto i_value = createNativeStringArray(env, value);\n";
+		ss << "auto i_value = createNativeStringArray(env, value);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ret = "auto i_value = createNativeEnumArray(env, value);\n";
+		ss << "auto i_value = createNativeEnumArray(env, value);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ret = "auto i_value = createNativeObjectArray(env, value);\n";
+		ss << "auto i_value = createNativeObjectArray(env, value);\n";
 		break;
 	case SymbolType::Name::BOOLVECTOR:
-		ret = "auto i_value = createNativeBooleanVector(env, value);\n";
+		ss << "auto i_value = createNativeBooleanVector(env, value);\n";
 		break;
 	case SymbolType::Name::INT8VECTOR:
-		ret = "auto i_value = createNativeInt8Vector(env, value);\n";
+		ss << "auto i_value = createNativeInt8Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT16VECTOR:
-		ret = "auto i_value = createNativeInt16Vector(env, value);\n";
+		ss << "auto i_value = createNativeInt16Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT32VECTOR:
-		ret = "auto i_value = createNativeInt32Vector(env, value);\n";
+		ss << "auto i_value = createNativeInt32Vector(env, value);\n";
 		break;
 	case SymbolType::Name::INT64VECTOR:
-		ret = "auto i_value = createNativeInt64Vector(env, value);\n";
+		ss << "auto i_value = createNativeInt64Vector(env, value);\n";
 		break;
 	case SymbolType::Name::FLOATVECTOR:
-		ret = "auto i_value = createNativeFloatVector(env, value);\n";
+		ss << "auto i_value = createNativeFloatVector(env, value);\n";
 		break;
 	case SymbolType::Name::DOUBLEVECTOR:
-		ret = "auto i_value = createNativeDoubleVector(env, value);\n";
+		ss << "auto i_value = createNativeDoubleVector(env, value);\n";
 		break;
 	case SymbolType::Name::STRINGVECTOR:
-		ret = "auto i_value = createNativeStringVector(env, value);\n";
+		ss << "auto i_value = createNativeStringVector(env, value);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ret = "auto i_value = createNativeEnumVector(env, value);\n";
+		ss << "auto i_value = createNativeEnumVector(env, value);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ret = "auto i_value = createNativeObjectVector(env, value);\n";
+		ss << "auto i_value = createNativeObjectVector(env, value);\n";
 		break;
 	}
 }
@@ -1202,225 +1282,216 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassDecla
 	}
 }
 
+static ParameterNode createWrapperParameter(const SymbolParameter& parameter)
+{
+	int io;
+	if (parameter.type->isPrimitive())
+	{
+		io = ParameterNode::VALUE;
+	}
+	else
+	{
+		if (parameter.io == SymbolParameter::IO::OUT)
+		{
+			io = ParameterNode::REFERENCE_OUT;
+		}
+		else
+		{
+			io = ParameterNode::REFERENCE_IN;
+		}
+	}
+	return ParameterNode(io, parameter.type->toKotlinWrapperType(), parameter.name);
+}
+
+static std::vector<ParameterNode> createWrapperParameters(const SymbolMethod& object)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& parameter : object.parameters)
+	{
+		ret.push_back(createWrapperParameter(*parameter));
+	}
+	return ret;
+}
+
+static std::vector<ParameterNode> createWrapperHandleParameters()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "Long", "handle"));
+	return ret;
+}
+
+static std::vector<ParameterNode> createWrapperMemberParameters(const SymbolMethod& object)
+{
+	auto ret = createWrapperHandleParameters();
+	auto parameters = createWrapperParameters(object);
+	ret.insert(ret.end(), parameters.begin(), parameters.end());
+	return ret;
+}
+
+static std::vector<ParameterNode> createWrapperPropertyParameters(const SymbolProperty& obj)
+{
+	auto ret = createWrapperHandleParameters();
+	ret.push_back(
+		ParameterNode( ParameterNode::REFERENCE_IN, obj.type->toKotlinWrapperType(), "value")
+	);
+	return ret;
+}
+
+static std::vector<ParameterNode> createWrapperCallbackParameters()
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "Any", "instance"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "String", "method_name"));
+	return ret;
+}
+
+
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
 {
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(clazz);
-	ret += "construct";
-	if (number > 0)
 	{
-		ret += std::to_string(number);
-	}
-	ret += "(";
-	if (!constructor.parameters.empty())
-	{
-		ret += createWrapperParametersDeclaration(constructor);
-	}
-	ret += ") : Long";
-	return ret;
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += "construct";
+		if (number > 0)
+		{
+			method_name += std::to_string(number);
+		}
 
-	{
-		std::string ret{ createKotlinWrapperScope(clazz) };
-
-		MethodKotlinSourceScopedStream call{
+		MethodKotlinSourceScopedStream method{
 			ss,
 			MethodKotlinSourceScopedStream::Access::EXTERNAL,
 			"",
 			"",
-
-		}
+			"Long",
+			method_name,
+			createWrapperParameters(constructor)
+		};
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDestructorDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += "release";
+
+		MethodKotlinSourceScopedStream method{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			"Long",
+			method_name,
+			createWrapperHandleParameters()
+		};
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
+	{
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += "addReleaser";
+
+		MethodKotlinSourceScopedStream method{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			"",
+			method_name,
+			createWrapperCallbackParameters()
+		};
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
+	{
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += object.name;
+		if (number > 0)
+		{
+			method_name += std::to_string(number);
+		}
+
+		MethodKotlinSourceScopedStream method{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			object.type->toKotlinWrapperType(),
+			method_name,
+			createWrapperMemberParameters(object)
+		};
+	}
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object, int number)
 {
-}
-
-
-
-/*
-
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructorDeclaration(const SymbolClass& clazz, const SymbolMethod& constructor, int number)
-{
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(clazz);
-	ret += "construct";
-	if (number > 0)
 	{
-		ret += std::to_string(number);
-	}
-	ret += "(";
-	if (!constructor.parameters.empty())
-	{
-		ret += createWrapperParametersDeclaration(constructor);
-	}
-	ret += ") : Long";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDestructorDeclaration(const SymbolClass& clazz)
-{
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(clazz);
-	ret += "release(handle : Long)";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperAddReleaserDeclaration(const SymbolClass& clazz)
-{
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(clazz);
-	ret += "addReleaser(reference : Any)";
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMethodDeclaration(const SymbolClass& clazz, const SymbolMethod& object, int number)
-{
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(clazz);
-	ret += object.name;
-	if (number > 0)
-	{
-		ret += std::to_string(number);
-	}
-	ret += "(handle : Long";
-	if (!object.parameters.empty())
-	{
-		ret += ", ";
-		ret += createWrapperParametersDeclaration(object);
-	}
-	ret += ") : ";
-	ret += object.type->toKotlinWrapperType();
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMethodDeclaration(const SymbolMethod& object, int number)
-{
-	std::string ret = { "external fun " };
-	ret += createWrapperScope(object);
-	ret += object.name;
-	if (number > 0)
-	{
-		ret += std::to_string(number);
-	}
-	ret += "(";
-	if (!object.parameters.empty())
-	{
-		ret += createWrapperParametersDeclaration(object);
-	}
-	ret += ") : ";
-	ret += object.type->toKotlinWrapperType();
-	return ret;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperParametersDeclaration(const SymbolMethod& object)
-{
-	std::string ret;
-	if (!object.parameters.empty())
-	{
-		for (auto& parameter : object.parameters)
+		std::string method_name{ createKotlinWrapperScope(object) };
+		method_name += object.name;
+		if (number > 0)
 		{
-			ret += createWrapperParameterDeclaration(*parameter);
-			ret += ", ";
+			method_name += std::to_string(number);
 		}
-		ret.pop_back();
-		ret.pop_back();
+
+		MethodKotlinSourceScopedStream method{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			object.type->toKotlinWrapperType(),
+			method_name,
+			createWrapperParameters(object)
+		};
 	}
-	return ret;
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperParameterDeclaration(const SymbolParameter& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertySetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& object)
 {
-	std::string ret = object.name;
-	ret += " : ";
-	ret += object.type->toKotlinWrapperType();
-	return ret;
+	{
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += "set";
+		method_name += property_name;
+
+		MethodKotlinSourceScopedStream method(
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			"",
+			method_name,
+			createWrapperPropertyParameters(object)
+		);
+	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertySetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyGetterDeclaration(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& object)
 {
-	std::string ret = { "external fun " };
-	ret += scope;
-	ret += "set";
-	ret += propertyName;
-	ret += "(handle : Long, value : ";
-	ret += object.type->toKotlinWrapperType();
-	ret += ")";
-	return ret;
+	{
+		std::string method_name{ createKotlinWrapperScope(clazz) };
+		method_name += "get";
+		method_name += property_name;
+
+		MethodKotlinSourceScopedStream method{
+			ss,
+			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			"",
+			"",
+			object.type->toKotlinWrapperType(),
+			method_name,
+			createWrapperHandleParameters()
+		};
+	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyGetterDeclaration(const std::string& scope, const std::string& propertyName, const SymbolProperty& object)
+void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object)
 {
-	std::string ret = { "external fun " };
-	ret += scope;
-	ret += "get";
-	ret += propertyName;
-	ret += "(handle : Long) : ";
-	ret += object.type->toKotlinWrapperType();
-	return ret;
-}
-
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyDeclaration(const SymbolClass& clazz, const SymbolProperty& object)
-{
-	std::vector<std::string> ret;
-
-	std::string scope = createWrapperScope(clazz);
-	std::string propertyName = createPropertyName(object);
-
-	ret.push_back(createWrapperPropertyGetterDeclaration(scope, propertyName, object));
-
+	auto propertyName = createPropertyName(object);
+	createWrapperPropertyGetterDeclaration(ss, propertyName, clazz, object);
 	if (object.readonly == false)
 	{
-		ret.push_back(createWrapperPropertySetterDeclaration(scope, propertyName, object));
+		createWrapperPropertySetterDeclaration(ss, propertyName, clazz, object);
 	}
-
-	return ret;
 }
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperScope(const SymbolClass& clazz)
-{
-	std::string scope;
-	auto& moduleNames = clazz.parentModules;
-	auto& objectNames = clazz.parentObjects;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_";
-	}
-	for (auto& objectName : objectNames)
-	{
-		scope += objectName;
-		scope += "_";
-	}
-	scope += clazz.name;
-	scope += "_";
-
-	return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperScope(const SymbolMethod& method)
-{
-	std::string scope;
-	auto& moduleNames = method.parentModules;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_";
-	}
-	return scope;
-}
-
-*/

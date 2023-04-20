@@ -1,5 +1,6 @@
-#ifndef __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
+#if !defined(__BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__)
 #define __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
+
 static constexpr char* KotlinWrapperConverter = 
 "#include <jni.h>\n"
 "#include <vector>\n"
@@ -1300,4 +1301,5 @@ static constexpr char* KotlinWrapperConverter =
 "    return true;\n"
 "}"
 "";
+
 #endif // __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
