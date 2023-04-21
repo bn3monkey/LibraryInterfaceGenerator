@@ -52,8 +52,11 @@ LibraryInterfaceGenerator::Implementation::SymbolEnum::SymbolEnum(
 			std::string name;
 			std::getline(ss, name, '/');
 
-			keys_to_values[key] = value;
-			keys_to_names[key] = name;
+			if (value != "")
+				keys_to_values[key] = value;
+
+			if (name != "")
+				keys_to_names[key] = name;
 		}
 	}
 

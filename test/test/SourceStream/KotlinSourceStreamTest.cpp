@@ -163,10 +163,23 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 	SourceStream ss;
 
 	{
+		InterfaceKotlinSourceScopedStream interfaceStream{ ss, "Monster" };
+		MethodKotlinSourceScopedStream func{ ss, true, KotlinAccess::PUBLIC, "", "", "String", "baseFunction",
+				{
+					ParameterNode {
+						ParameterNode::VALUE,
+						"Int",
+						"baseParam"
+					}
+				}
+		};
+	}
+
+	{
 		ClassKotlinSourceScopedStream classStream{ ss, "Undyne", {"monster", "guard"} };
 		{
 			{
-				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PUBLIC, "", "", "Int", "func",
+				MethodKotlinSourceScopedStream func{ ss, false, KotlinAccess::PUBLIC, "", "", "Int", "func",
 					{
 						ParameterNode {
 							ParameterNode::REFERENCE_IN,
@@ -188,7 +201,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			}
 
 			{
-				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PRIVATE, "", "", "Int", "funcPrivate",
+				MethodKotlinSourceScopedStream func{ ss, false, KotlinAccess::PRIVATE, "", "", "Int", "funcPrivate",
 					{
 						ParameterNode {
 							ParameterNode::REFERENCE_IN,
@@ -210,7 +223,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			}
 
 			{
-				MethodKotlinSourceScopedStream func{ ss, MethodKotlinSourceScopedStream::Access::PROTECTED, "", "", "String", "baseFunction",
+				MethodKotlinSourceScopedStream func{ ss, false, KotlinAccess::PROTECTED, "", "", "String", "baseFunction",
 					{
 						ParameterNode {
 							ParameterNode::VALUE,
@@ -222,7 +235,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			}
 
 			{
-				MethodKotlinSourceScopedStream internalFunction{ ss, MethodKotlinSourceScopedStream::Access::INTERNAL, "", "", "StringArray", "internalFunction",
+				MethodKotlinSourceScopedStream internalFunction{ ss, false, KotlinAccess::INTERNAL, "", "", "StringArray", "internalFunction",
 					{
 						ParameterNode {
 							ParameterNode::VALUE,
@@ -239,7 +252,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 			}
 
 			{
-				MethodKotlinSourceScopedStream derivedFunction{ ss, MethodKotlinSourceScopedStream::Access::EXTERNAL, "override", "", "Array<Int>", "derivedFunction",
+				MethodKotlinSourceScopedStream derivedFunction{ ss, false, KotlinAccess::EXTERNAL, "override", "", "Array<Int>", "derivedFunction",
 					{
 						ParameterNode {
 							ParameterNode::REFERENCE_IN,
@@ -259,6 +272,10 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 
 	const char* result = ss.str();
 	EXPECT_STREQ(result,
+		"interface Monster\n"
+		"{\n"
+		"	fun baseFunction(baseParam : Int) : String\n"
+		"}\n"
 		"class Undyne : monster, guard\n"
 		"{\n"
 		"	fun func(attack : Int, defence : Float, sans : String) : Int\n"
@@ -361,6 +378,79 @@ TEST(KotlinSourceStream, CallKotlinSourceScopedStream)
 		EXPECT_STREQ(result,
 			"Library.A.functionA(aa, bb, cc)\n"
 			"Library.B.functionB(aa, bb) as Int\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}
+
+TEST(KotlinSourceStream, PropertyKotlinSourceScopedStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	{
+		PropertyKotlinSourceScopedStream prop(ss, KotlinAccess::PUBLIC, "", "Int", "sans", true);
+		{
+			auto getter = prop.createGetter();
+			ss << "return _sans\n";
+		}
+	}
+
+	{
+		PropertyKotlinSourceScopedStream prop(ss, KotlinAccess::PRIVATE, "", "Float", "papyrus", false);
+		{
+			auto getter = prop.createGetter();
+			ss << "return _papyrus\n";
+		}
+		{
+			auto getter = prop.createSetter();
+			ss << "_papyrus = value\n";
+		}
+	}
+
+	{
+		PropertyKotlinSourceScopedStream prop(ss, KotlinAccess::PROTECTED, "override", "Float", "papyrus2", false);
+		{
+			auto getter = prop.createGetter();
+			ss << "return _papyrus\n";
+		}
+		{
+			auto getter = prop.createSetter();
+			ss << "_papyrus = value\n";
+		}
+	}
+
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"val sans : Int\n"
+			"	get()\n"
+			"	{\n"
+			"		return _sans\n"
+			"	}\n"
+			"\n"
+			"private var papyrus : Float\n"
+			"	get()\n"
+			"	{\n"
+			"		return _papyrus\n"
+			"	}\n"
+			"	set(value)\n"
+			"	{\n"
+			"		_papyrus = value\n"
+			"	}\n"
+			"\n"
+			"protected override var papyrus2 : Float\n"
+			"	get()\n"
+			"	{\n"
+			"		return _papyrus\n"
+			"	}\n"
+			"	set(value)\n"
+			"	{\n"
+			"		_papyrus = value\n"
+			"	}\n"
+			"\n"
 		);
 		printf(result);
 		ss.clear();

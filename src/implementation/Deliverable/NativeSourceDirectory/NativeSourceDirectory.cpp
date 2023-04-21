@@ -267,7 +267,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
         {
             NamespaceCXXSourceScopedStream namespace_scope{ ss, object.parentModules };
-            createComment(ss, object);
+            createCXXComment(ss, object);
 
             {
                 ClassCXXSourceScopedStream class_scope{ ss, false, object.name };
@@ -275,20 +275,20 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
                     AccessCXXSourceScopedStream public_scope{ ss, AccessCXXSourceScopedStream::Specifier::Public };
                     for (auto& enum_object : object.enums)
                     {
-                        createComment(ss, *enum_object);
+                        createCXXComment(ss, *enum_object);
                         createEnumDefinition(ss, *enum_object);
                     }
 
                     for (auto& property_object : object.properties)
                     {
-                        createComment(ss, *property_object);
+                        createCXXComment(ss, *property_object);
                         createInterfacePropertyDeclaration(ss, *property_object);
                     }
 
                     for (auto& method_object : object.methods)
                     {
                         auto& method = method_object.first;
-                        createComment(ss, *method);
+                        createCXXComment(ss, *method);
                         createInterfaceMethodDeclaration(ss,  *method);
                     }
                 }
@@ -393,7 +393,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
         {
             NamespaceCXXSourceScopedStream namespace_scope{ ss, object.parentModules };
-            createComment(ss, object);
+            createCXXComment(ss, object);
 
             {
                 ClassCXXSourceScopedStream class_scope{ ss, false, object.name, base_classes_names };
@@ -402,14 +402,14 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
                     AccessCXXSourceScopedStream public_scope{ ss, AccessCXXSourceScopedStream::Specifier::Public };
                     for (auto& enum_object : enums)
                     {
-                        createComment(ss, *enum_object);
+                        createCXXComment(ss, *enum_object);
                         createEnumDefinition(ss, *enum_object);
                     }
 
                     for (auto& constructor_object : constructors)
                     {
                         auto& constructor = constructor_object.first;
-                        createComment(ss, *constructor);
+                        createCXXComment(ss, *constructor);
                         createConstructorDeclaration(ss, object, *constructor);
                     }
 
@@ -417,13 +417,13 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
                     for (auto& property_object : properties)
                     {
-                        createComment(ss, *property_object);
+                        createCXXComment(ss, *property_object);
                         createClassPropertyDeclaration(ss, *property_object);
                     }
 
                     for (auto& base_property_object : base_properties)
                     {
-                        createComment(ss, *base_property_object);
+                        createCXXComment(ss, *base_property_object);
                         createDerivedPropertyDeclaration(ss, *base_property_object);
                     }
 
@@ -431,14 +431,14 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
                     for (auto& method_object : methods)
                     {
                         auto& method = method_object.first;
-                        createComment(ss, *method);
+                        createCXXComment(ss, *method);
                         createClassMethodDeclaration(ss, *method);
                     }
 
                     for (auto& base_method_object : base_methods)
                     {
                         auto& method = base_method_object.first;
-                        createComment(ss, *method);
+                        createCXXComment(ss, *method);
                         createDerivedMethodDeclaration(ss, *method);
                     }
 
@@ -546,7 +546,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
         {
             NamespaceCXXSourceScopedStream namespace_scope{ ss, object.parentModules };
-            createComment(ss, object);
+            createCXXComment(ss, object);
             createEnumDefinition(ss, object);
         }
     }
@@ -581,7 +581,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
             for (auto& method_object : object.global_methods)
             {
                 auto& method = method_object.first;
-                createComment(ss, object);
+                createCXXComment(ss, object);
                 createStaticMethodDeclaration(ss, *method);
             }
         }
@@ -627,7 +627,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
     {
         HeaderGuardCXXSourceScopedStream headerguard_scope{ ss, {}, package.name };
-        createComment(ss, package);
+        createCXXComment(ss, package);
 
         for (auto& include_file : include_files)
         {

@@ -1358,7 +1358,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConstructo
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			"Long",
@@ -1376,7 +1377,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDestructor
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			"Long",
@@ -1394,7 +1396,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperAddRelease
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			"",
@@ -1416,7 +1419,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMetho
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			object.type->toKotlinWrapperType(),
@@ -1438,7 +1442,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMeth
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			object.type->toKotlinWrapperType(),
@@ -1457,7 +1462,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertySe
 
 		MethodKotlinSourceScopedStream method(
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			"",
@@ -1476,7 +1482,8 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyGe
 
 		MethodKotlinSourceScopedStream method{
 			ss,
-			MethodKotlinSourceScopedStream::Access::EXTERNAL,
+			false,
+			KotlinAccess::EXTERNAL,
 			"",
 			"",
 			object.type->toKotlinWrapperType(),

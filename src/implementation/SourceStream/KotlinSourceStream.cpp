@@ -132,7 +132,8 @@ void LibraryInterfaceGenerator::Implementation::AdvancedEnumKotlinSourceScopedSt
 
 LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::MethodKotlinSourceScopedStream(
 	SourceStream& sourceStream,
-	Access access,
+	bool isDeclaration,
+	KotlinAccess access,
 	const std::string& prefix,
 	const std::string& postfix,
 	const std::string& type,
@@ -142,18 +143,18 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 	std::string accessor{ "" };
 	switch (access)
 	{
-	case Access::PUBLIC: accessor = "";
+	case KotlinAccess::PUBLIC: accessor = "";
 		break;
-	case Access::PROTECTED:
+	case KotlinAccess::PROTECTED:
 		accessor = "protected";
 		break;
-	case Access::PRIVATE:
+	case KotlinAccess::PRIVATE:
 		accessor = "private";
 		break;
-	case Access::INTERNAL:
+	case KotlinAccess::INTERNAL:
 		accessor = "internal";
 		break;
-	case Access::EXTERNAL:
+	case KotlinAccess::EXTERNAL:
 		accessor = "external";
 		break;
 	}
@@ -179,7 +180,10 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 
 	sourceStream << "\n";
 
-	if (access != Access::EXTERNAL)
+	if (isDeclaration)
+		return;
+
+	if (access != KotlinAccess::EXTERNAL)
 		_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
 }
 
@@ -273,4 +277,103 @@ LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::CallKot
 
 LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::~CallKotlinSourceScopedStream()
 {
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::PropertyKotlinSourceScopedStream(SourceStream& sourceStream, 
+	KotlinAccess access,
+	const std::string& prefix, const std::string& type, const std::string& name, bool is_readonly)
+{
+	std::string accessor{ "" };
+	switch (access)
+	{
+	case KotlinAccess::PUBLIC: accessor = "";
+		break;
+	case KotlinAccess::PROTECTED:
+		accessor = "protected";
+		break;
+	case KotlinAccess::PRIVATE:
+		accessor = "private";
+		break;
+	case KotlinAccess::INTERNAL:
+		accessor = "internal";
+		break;
+	case KotlinAccess::EXTERNAL:
+		accessor = "external";
+		break;
+	}
+	if (accessor != "")
+		sourceStream << accessor << " ";
+	if (prefix != "")
+		sourceStream << prefix << " ";
+
+	sourceStream << (is_readonly ? "val " : "var ") << name << " : " << type;
+	_stream = new SourceScopedStream(sourceStream, CodeStyle::None);
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::~PropertyKotlinSourceScopedStream()
+{
+	if (_stream)
+		delete _stream;
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Getter LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::createGetter()
+{
+	return Getter(_stream->stream());
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Setter LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::createSetter()
+{
+	return Setter(_stream->stream());
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Getter::Getter(SourceStream& ss)
+{
+	ss << "get()\n";
+	_stream = new SourceScopedStream(ss, CodeStyle::Kotlin);
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Getter::Getter(Getter&& other)
+{
+	_stream = other._stream;
+	other._stream = nullptr;
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Getter::~Getter()
+{
+	if (_stream)
+	{
+		delete _stream;
+	}
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Setter::Setter(SourceStream& ss)
+{
+	ss << "set(value)\n";
+	_stream = new SourceScopedStream(ss, CodeStyle::Kotlin);
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Setter::Setter(Setter&& other)
+{
+	_stream = other._stream;
+	other._stream = nullptr;
+}
+
+LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Setter::~Setter()
+{
+	if (_stream)
+	{
+		delete _stream;
+	}
+}
+
+LibraryInterfaceGenerator::Implementation::InterfaceKotlinSourceScopedStream::InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name)
+{
+	sourceStream << "interface " << name << "\n";
+	_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
+}
+
+LibraryInterfaceGenerator::Implementation::InterfaceKotlinSourceScopedStream::~InterfaceKotlinSourceScopedStream()
+{
+	if (_stream)
+		delete _stream;
 }

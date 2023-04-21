@@ -1,5 +1,8 @@
 #include "SourceDirectory.hpp"
 
+using namespace LibraryInterfaceGenerator::Implementation;
+using namespace LibraryInterfaceGenerator::Implementation::Definition;
+
 #ifdef __linux__
 static char* delimeter = "/";
 #elif _WIN32
@@ -98,14 +101,9 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	header_path += delimeter;
 	header_path += object.name;
 	header_path += ".kt";
-
-	Result result;
-	std::string content;
-	result = createInterfaceFileContent(object, content);
-	if (!result)
-		return result;
-
-	result = FileSystem::createFile(header_path, content);
+	
+	auto content = createInterfaceFileContent(object);
+	auto result = FileSystem::createFile(header_path, content.str());
 	if (!result)
 		return result;
 
@@ -119,13 +117,8 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	header_path += object.name;
 	header_path += ".kt";
 
-	Result result;
-	std::string content;
-	result = createClassFileContent(object, content);
-	if (!result)
-		return result;
-
-	result = FileSystem::createFile(header_path, content);
+	auto content = createClassFileContent(object);
+	auto result = FileSystem::createFile(header_path, content.str());
 	if (!result)
 		return result;
 
@@ -138,14 +131,9 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	header_path += delimeter;
 	header_path += object.name;
 	header_path += ".kt";
-
-	Result result;
-	std::string content;
-	result = createEnumFileContent(object, content);
-	if (!result)
-		return result;
-
-	result = FileSystem::createFile(header_path, content);
+		
+	auto content = createEnumFileContent(object);
+	auto result = FileSystem::createFile(header_path, content.str());
 	if (!result)
 		return result;
 
@@ -159,453 +147,499 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	header_path += object.name;
 	header_path += ".kt";
 
-	Result result;
-	std::string content;
-	result = createMethodFileContent(object, content);
-	if (!result)
-		return result;
-
-	result = FileSystem::createFile(header_path, content);
+	auto content = createMethodFileContent(object);
+	auto result = FileSystem::createFile(header_path, content.str());
 	if (!result)
 		return result;
 
 	return Result();
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterfaceFileContent(const SymbolClass& object, std::string& content)
+SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterfaceFileContent(const SymbolClass& object)
 {
-	std::stringstream ss;
-	std::string indent;
+	SourceStream ss;
 
 	{
-		ss << "package " << _wrapperDirectory.getKotlinPackageName();
-		for (size_t i = 1; i < object.parentModules.size(); i++)
-			ss << "." << object.parentModules[i];
-		ss << "\n";
-
-		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-		//ss << "import java.lang.AutoCloseable\n";
-		addForwardDeclaration(ss, indent, object);
-
-		ss << "interface " << object.name << "\n";
-		ss << "{\n";
-		{
-			indent += "\t";
-			ss << indent << "fun getNativeHandle() : Long\n";
-			/*
-			for (auto& constructor : object.constructors)
-			{
-				{
-					Comment comment{ ss, indent };
-					comment.add(*constructor);
-				}
-				auto lines = createConstructorDefinition(object, *constructor);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			{
-				for (const auto& line : handleCode)
-					ss << indent << line << "\n";
-			}
-
-			{
-				auto lines = createDestructorDefinition(object);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-			*/
-
-			for (auto& methodObject : object.methods)
-			{
-				auto method = methodObject.first;
-				auto method_count = methodObject.second;
-				{
-					Comment comment{ ss, indent };
-					comment.add(*method);
-				}
-				auto lines = createInterfaceMethodDefinition(object, *method);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			for (auto& prop : object.properties)
-			{
-				{
-					Comment comment{ ss, indent };
-					comment.add(*prop);
-				}
-				auto lines = createInterfacePropertyDefinition(object, *prop);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			indent.pop_back();
-		}
-		ss << "}";
+		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
 	}
-	content = ss.str();
-
-	return Result();
-}
-
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassFileContent(const SymbolClass& object, std::string& content)
-{
-	std::stringstream ss;
-	std::string indent;
+	{
+		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+		createForwardDeclaration(ss, object);
+	}
 
 	{
-		ss << "package " << _wrapperDirectory.getKotlinPackageName();
-		for (size_t i = 1; i < object.parentModules.size(); i++)
-			ss << "." << object.parentModules[i];
-		ss << "\n";
+		createKotlinComment(ss, object);
+		InterfaceKotlinSourceScopedStream interfaze(ss, object.name);
+		
+		for (auto& member_method : object.methods)
+		{
+			auto method = member_method.first;
+			auto method_count = member_method.second;
 
-		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-		ss << "import java.lang.AutoCloseable\n";
-		addForwardDeclaration(ss, indent, object);
+			{
+				createKotlinComment(ss, *method);
+				createInterfaceMethodDefinition(ss, object, *method);
+			}
+		}
 
-		ss << "class " << object.name << " : AutoCloseable";
+		for (auto& prop : object.properties)
+		{
+			{
+				createKotlinComment(ss, *prop);
+				createInterfacePropertyDefinition(ss, object, *prop);
+			}
+		}
 
+	}
+
+	return ss;
+}
+
+SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassFileContent(const SymbolClass& object)
+{
+	SourceStream ss;
+
+	{
+		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
+	}
+	{
+		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+		ImportKotlinSourceStream autoClosableImport(ss, "", { "java", "lang", "AutoCloseable" });
+		createForwardDeclaration(ss, object);
+	}
+		
+
+	{
+		createKotlinComment(ss, object);
+		
+		std::vector<std::string> base_classes = { "AutoClosable" };
 		for (auto& base : object.bases)
 		{
-			if (auto & pBase = base.lock())
+			if (auto& pBase = base.lock())
 			{
-				ss << ", " << pBase->name;
+				base_classes.push_back(pBase->name);
 			}
-		}
+		}		
+		ClassKotlinSourceScopedStream clazz(ss, object.name, base_classes);
 
-		ss << "\n";
-		ss << "{\n";
+		createNativeHandle(ss, true);
+
+		for (auto& constructor : object.constructors)
 		{
-			indent += "\t";
-			for (auto& constructorObject : object.constructors)
+			auto method = constructor.first;
+			auto method_number = constructor.second;
 			{
-				auto& constructor = constructorObject.first;
-				auto method_count = constructorObject.second;
-				{
-					Comment comment{ ss, indent };
-					comment.add(*constructor);
-				}
-				auto lines = createConstructorDefinition(object, *constructor, method_count);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
+				createKotlinComment(ss, *method);
+				createConstructorDefinition(ss, object, *method, method_number);
 			}
-
-			{
-				auto lines = createDestructorDefinition(object);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			auto baseMethods = object.getBaseMethods();
-			for (auto& methodObject : baseMethods)
-			{
-				auto& method = methodObject.first;
-				auto method_count = methodObject.second;
-				{
-					Comment comment{ ss, indent };
-					comment.add(*method);
-				}
-				auto lines = createDerivedMethodDefinition(object, *method, method_count);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-
-			for (auto& methodObject : object.methods)
-			{
-				auto& method = methodObject.first;
-				auto method_count = methodObject.second;
-				{
-					Comment comment{ ss, indent };
-					comment.add(*method);
-				}
-				auto lines = createClassMethodDefinition(object, *method, method_count);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			auto baseProperties = object.getBaseProperties();
-			for (auto& prop : baseProperties)
-			{
-				{
-					Comment comment{ ss, indent };
-					comment.add(*prop);
-				}
-				auto lines = createDerivedPropertyDefinition(object, *prop);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			for (auto& prop : object.properties)
-			{
-				{
-					Comment comment{ ss, indent };
-					comment.add(*prop);
-				}
-				auto lines = createClassPropertyDefinition(object, *prop);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-
-			indent.pop_back();
 		}
-		ss << "}";
-	}
-	content = ss.str();
 
-	return Result();
+		createDestructorDefinition(ss, object);
+		
+		auto base_methods = object.getBaseMethods();
+		for (auto& base_method : base_methods)
+		{
+			auto& method = base_method.first;
+			auto& method_number = base_method.second;
+
+			{
+				createKotlinComment(ss, *method);
+				createDerivedMethodDefinition(ss, object, *method, method_number);
+			}
+		}
+
+		for (auto& member_method : object.methods)
+		{
+			auto& method = member_method.first;
+			auto& method_number = member_method.second;
+
+			{
+				createKotlinComment(ss, *method);
+				createClassMethodDefinition(ss, object, *method, method_number);
+			}
+		}
+
+		auto base_properties = object.getBaseProperties();
+		for (auto& base_prop : base_properties)
+		{
+			createKotlinComment(ss, *base_prop);
+			createDerivedPropertyDefinition(ss, object, *base_prop);
+		}
+
+		for (auto& prop : object.properties)
+		{
+			createKotlinComment(ss, *prop);
+			createClassPropertyDefinition(ss, object, *prop);
+		}
+	}
+
+	return ss;
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumFileContent(const SymbolEnum& object, std::string& content)
+SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumFileContent(const SymbolEnum& object)
 {
-	std::stringstream ss;
-	std::string indent;
+	SourceStream ss;
 
 	{
-		ss << "package " << _wrapperDirectory.getKotlinPackageName();
-		for (size_t i = 1; i < object.parentModules.size(); i++)
-			ss << "." << object.parentModules[i];
-		ss << "\n";
-
-		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-
-
-		{
-			{
-				Comment comment{ ss, indent };
-				comment.add(object);
-			}
-
-			auto lines = createEnumDefinition(object);
-			for (auto& line : lines)
-			{
-				ss << indent << line << "\n";
-			}
-		}
+		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
 	}
-	content = ss.str();
+	{
+		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+	}
+	{
+		createKotlinComment(ss, object);
+		createEnumDefinition(ss, object);
+	}
 
-	return Result();
+	return ss;
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::SourceDirectory::createMethodFileContent(const SymbolModule& object, std::string& content)
+SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createMethodFileContent(const SymbolModule& object)
 {
-	std::stringstream ss;
-	std::string indent;
+	SourceStream ss;
 
 	{
-		ss << "package " << _wrapperDirectory.getKotlinPackageName();
-		for (size_t i = 1; i < object.moduleNames.size(); i++)
-			ss << "." << object.moduleNames[i];
-		ss << "\n";
-
-		ss << "import " << _wrapperDirectory.getKotlinPackageName() << "." << _wrapperDirectory.getKotlinWrapperClassName() << "\n";
-		addForwardDeclaration(ss, indent, object);
-
-		{
-			for (auto& methodObject : object.global_methods)
-			{
-				auto& method = methodObject.first;
-				auto method_count = methodObject.second;
-				{
-					Comment comment{ ss, indent };
-					comment.add(*method);
-				}
-				auto lines = createStaticMethodDefinition(*method, method_count);
-				for (auto& line : lines)
-				{
-					ss << indent << line << "\n";
-				}
-			}
-		}
+		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.moduleNames);
 	}
-	content = ss.str();
+	{
+		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+		createForwardDeclaration(ss, object);
+	}
 
-	return Result();
+	for (auto& global_method : object.global_methods)
+	{
+		auto& method = global_method.first;
+		auto& method_count = global_method.second;
+
+		createStaticMethodDefinition(ss, *method, method_count);
+	}
+
+	return ss;
 }
 
-void LibraryInterfaceGenerator::Implementation::SourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object)
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createForwardDeclaration(SourceStream& ss, const SymbolClass& object)
 {
 	{
-		auto baseObjects = object.bases;
-		for (auto& wbaseObject : baseObjects)
+		auto base_classes = object.bases;
+		for (auto& wbase_class : base_classes)
 		{
-			if (auto baseObject = wbaseObject.lock())
+			if (auto& pbase_class = wbase_class.lock())
 			{
-				std::string objectPath;
-				auto& parentModules = baseObject->parentModules;
-				for (size_t i = 1; i < parentModules.size(); i++)
+				std::vector<std::string> paths;
 				{
-					objectPath += ".";
-					objectPath += parentModules[i];
+					auto& parent_modules = pbase_class->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
 				}
-				auto& parentObjects = baseObject->parentObjects;
-				for (auto& objectName : parentObjects)
 				{
-					objectPath += ".";
-					objectPath += objectName;
+					auto& parent_objects = pbase_class->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
 				}
-				objectPath += ".";
-				objectPath += baseObject->name;
+				paths.push_back(pbase_class->name);
 
-				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
 			}
 		}
 	}
 	{
-		auto classObjects = object.collectAllClassReference();
-		for (auto& wClassObject : classObjects)
+		auto used_classes = object.collectAllClassReference();
+		for (auto& wclass : used_classes)
 		{
-			if (auto classObject = wClassObject.lock())
+			if (auto& pclass = wclass.lock())
 			{
-				auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
-				std::string objectPath;
-				auto& parentModules = clazz->parentModules;
-				for (size_t i = 1; i < parentModules.size(); i++)
+				auto clazz = std::dynamic_pointer_cast<SymbolClass>(pclass);
+				std::vector<std::string> paths;
 				{
-					objectPath += ".";
-					objectPath += parentModules[i];
+					auto& parent_modules = clazz->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
 				}
-				auto& parentObjects = clazz->parentObjects;
-				for (auto& objectName : parentObjects)
 				{
-					objectPath += ".";
-					objectPath += objectName;
+					auto& parent_objects = clazz->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
 				}
-				objectPath += ".";
-				objectPath += clazz->name;
+				paths.push_back(clazz->name);
 
-				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
 			}
 		}
 	}
-
 	{
-		auto enumObjects = object.collectAllEnumReference();
-		for (auto& wEnumObject : enumObjects)
+		auto used_enums = object.collectAllEnumReference();
+		for (auto& wenum : used_enums)
 		{
-			if (auto enumObject = wEnumObject.lock())
+			if (auto& penum = wenum.lock())
 			{
-				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
-				std::string objectPath;
-				auto& parentModules = enumm->parentModules;
-				for (size_t i = 1; i < parentModules.size(); i++)
+				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(penum);
+				std::vector<std::string> paths;
 				{
-					objectPath += ".";
-					objectPath += parentModules[i];
+					auto& parent_modules = enumm->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
 				}
-				auto& parentObjects = enumm->parentObjects;
-				for (auto& objectName : parentObjects)
 				{
-					objectPath += ".";
-					objectPath += objectName;
+					auto& parent_objects = enumm->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
 				}
-				objectPath += ".";
-				objectPath += enumm->name;
+				paths.push_back(enumm->name);
 
-				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
 			}
 		}
 	}
 	ss << "\n";
 }
 
-void LibraryInterfaceGenerator::Implementation::SourceDirectory::addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object)
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createForwardDeclaration(SourceStream& ss, const SymbolModule& object)
 {
 	{
-		auto classObjects = object.collectAllClassReference();
-		for (auto& wClassObject : classObjects)
+		auto used_classes = object.collectAllClassReference();
+		for (auto& wclass : used_classes)
 		{
-			if (auto classObject = wClassObject.lock())
+			if (auto& pclass = wclass.lock())
 			{
-				auto clazz = std::dynamic_pointer_cast<SymbolClass>(classObject);
-				std::string objectPath;
-				auto& parentModules = clazz->parentModules;
-				for (size_t i = 1; i < parentModules.size(); i++)
+				auto clazz = std::dynamic_pointer_cast<SymbolClass>(pclass);
+				std::vector<std::string> paths;
 				{
-					objectPath += ".";
-					objectPath += parentModules[i];
+					auto& parent_modules = clazz->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
 				}
-				auto& parentObjects = clazz->parentObjects;
-				for (auto& objectName : parentObjects)
 				{
-					objectPath += ".";
-					objectPath += objectName;
+					auto& parent_objects = clazz->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
 				}
-				objectPath += ".";
-				objectPath += clazz->name;
+				paths.push_back(clazz->name);
 
-				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
 			}
 		}
 	}
-
 	{
-		auto enumObjects = object.collectAllEnumReference();
-		for (auto& wEnumObject : enumObjects)
+		auto used_enums = object.collectAllEnumReference();
+		for (auto& wenum : used_enums)
 		{
-			if (auto enumObject = wEnumObject.lock())
+			if (auto& penum = wenum.lock())
 			{
-				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enumObject);
-				std::string objectPath;
-				auto& parentModules = enumm->parentModules;
-				for (size_t i = 1; i < parentModules.size(); i++)
+				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(penum);
+				std::vector<std::string> paths;
 				{
-					objectPath += ".";
-					objectPath += parentModules[i];
+					auto& parent_modules = enumm->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
 				}
-				auto& parentObjects = enumm->parentObjects;
-				for (auto& objectName : parentObjects)
 				{
-					objectPath += ".";
-					objectPath += objectName;
+					auto& parent_objects = enumm->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
 				}
-				objectPath += ".";
-				objectPath += enumm->name;
+				paths.push_back(enumm->name);
 
-				ss << "import " << _wrapperDirectory.getKotlinPackageName() << objectPath << ";\n";
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
 			}
 		}
 	}
 	ss << "\n";
 }
 
-std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefinition(const SymbolEnum& object)
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefinition(SourceStream& ss, const SymbolEnum& object)
 {
-	std::vector<std::string> ret;
-	{
-		ret.push_back("enum class " + object.name + "(val value : Int)");
-		ret.push_back("{");
-		for (auto& pair : object.values)
+	if (object.keys_to_names.empty())
+	{	
+		EnumKotlinSourceScopedStream s{
+			ss, object.name
+		};
+		for (auto& element : object.keys_to_values)
 		{
-			ret.push_back("\t" + pair.first + "( " + pair.second + "),");
+			auto key = element.first;
+			auto value = element.second;
+
+			s.addElement(key, value);
 		}
-		ret.push_back("}");
+	}
+	else
+	{
+		AdvancedEnumKotlinSourceScopedStream s{
+			ss, object.name
+		};
+		for (auto& element : object.keys_to_values)
+		{
+			auto key = element.first;
+			auto value = element.second;
+			auto name = object.keys_to_names.at(key);
+
+			s.addElement(key, value, name);
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createNativeHandle(SourceStream& ss)
+{
+	{
+		ss << "private var _nativeHandle : Long = 0\n";
+		PropertyKotlinSourceScopedStream nativeHandle{
+			ss,
+			KotlinAccess::INTERNAL,
+			"",
+			"Long",
+			"nativeHandle",
+			true
+		};
+		{
+			auto getter = nativeHandle.createGetter();
+			ss << "return _nativeHandle\n";
+		}
+	}
+}
+
+static ParameterNode createParameter(const SymbolParameter& parameter)
+{
+	int io;
+	if (parameter.type->isPrimitive())
+	{
+		io = ParameterNode::VALUE;
+	}
+	else
+	{
+		if (parameter.io == SymbolParameter::IO::OUT)
+		{
+			io = ParameterNode::REFERENCE_OUT;
+		}
+		else
+		{
+			io = ParameterNode::REFERENCE_IN;
+		}
+	}
+	return ParameterNode(io, parameter.type->toKotlinType(), parameter.name);
+}
+static std::vector<ParameterNode> createParameters(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& param : method.parameters)
+	{
+		ret.push_back(createParameter(*param));
 	}
 	return ret;
 }
+static ParameterNode createHandleParameter()
+{
+	return ParameterNode(ParameterNode::VALUE, "Long", "handle");
+}
 
+static ParameterNode createInputHandleParameter()
+{
+	return ParameterNode(ParameterNode::VALUE, "Long", "_nativeHandle");
+}
+static std::vector<ParameterNode> createInputConstructorParameter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret = createInputStaticParamter(method);
+	return ret;
+}
+static std::vector<ParameterNode> createInputDestructorParameter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(createInputHandleParameter());
+	return ret;
+}
+static std::vector<ParameterNode> createInputAddReleaserParameter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& param : method.parameters)
+	{
+		ret.push_back(ParameterNode(ParameterNode::VALUE, "", "this"));
+		ret.push_back(ParameterNode(ParameterNode::VALUE, "", "\"close\""));
+	}
+	return ret;
+}
+static std::vector<ParameterNode> createInputStaticParamter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& param : method.parameters)
+	{
+		std::string method_name = "i_" + method.name;
+		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), method_name));
+	}
+	return ret;
+}
+static std::vector<ParameterNode> createInputMemberParamter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(createInputHandleParameter());
+	auto params = createInputStaticParamter(method);
+	ret.insert(ret.end(), params.begin(), params.end());
+	return ret;
+}
+static std::vector<ParameterNode> createInputPropertyParameter(const SymbolProperty& method)
+{
+	std::vector<ParameterNode> ret;
+	ret.push_back(createInputHandleParameter());
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "", "i_value"));
+	return ret;
+}
+
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number)
+{
+	{
+		MethodKotlinSourceScopedStream method{
+			ss,
+			false,
+			KotlinAccess::PUBLIC,
+			"",
+			"",
+			"",
+			"constructor",
+			createParameters(constructor)
+		};
+
+		for (auto& parameter : constructor.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
+
+		callConstructor(ss, clazz, constructor, number);
+
+		ss << "require(_nativeHandle != 0L)\n";
+
+		callAddReleaser(ss, clazz);
+
+		/*
+		std::string wrapper_constructor = _wrapperDirectory.getKotlinWrapperClassName();
+		wrapper_constructor += ".getInsance().";
+		wrapper_constructor += createKotlinWrapperScope(clazz);
+		wrapper_constructor += "construct";
+
+		ss << "_nativeHandle = ";
+		*/
+	}
+
+	{
+		MethodKotlinSourceScopedStream method{
+			ss,
+			false,
+			KotlinAccess::INTERNAL,
+			"",
+			"",
+			"",
+			"constructor",
+			{createHandleParameter()}
+		};
+
+		ss << "_nativeHandle = handle\n";
+		ss << "require(_nativeHandle != 0L)\n";
+		callAddReleaser(ss, clazz);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz)
+{
+}
+
+/*
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
@@ -1329,36 +1363,4 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::SourceDirect
 	lines[0] = "override " + lines[0];
 	return lines;
 }
-
-std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createWrapperScope(const SymbolClass& clazz)
-{
-	std::string scope;
-	auto& moduleNames = clazz.parentModules;
-	auto& objectNames = clazz.parentObjects;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_";
-	}
-	for (auto& objectName : objectNames)
-	{
-		scope += objectName;
-		scope += "_";
-	}
-	scope += clazz.name;
-	scope += "_";
-
-	return scope;
-}
-
-std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createWrapperScope(const SymbolMethod& method)
-{
-	std::string scope;
-	auto& moduleNames = method.parentModules;
-	for (auto& moduleName : moduleNames)
-	{
-		scope += moduleName;
-		scope += "_";
-	}
-	return scope;
-}
+*/

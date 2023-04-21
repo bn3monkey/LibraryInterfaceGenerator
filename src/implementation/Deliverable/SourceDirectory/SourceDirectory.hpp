@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include "../FileSystem/FileSystem.hpp"
-#include "../Result/Result.hpp"
-#include "../SymbolTable/SymbolTable.hpp"
-#include "../Auxiliary/Definition.hpp"
-#include "../Auxiliary/StringHelper.hpp"
+#include "../../FileSystem/FileSystem.hpp"
+#include "../../Result/Result.hpp"
+#include "../../SymbolTable/SymbolTable.hpp"
+#include "../../Auxiliary/Definition.hpp"
+#include "../../Auxiliary/StringHelper.hpp"
 #include "../Wrapper/Wrapper.hpp"
-#include "../Environment.hpp"
+#include "../../Environment.hpp"
 
 #include <algorithm>
 #include <set>
@@ -47,32 +47,63 @@ namespace LibraryInterfaceGenerator
 
             // 1. Module Directory 제작
             Result createModule(const SymbolModule& object, std::string& parent_path);
+
             Result createInterfaceFile(const SymbolClass& object, std::string& parent_path);
             Result createClassFile(const SymbolClass& object, std::string& parent_path);
             Result createEnumFile(const SymbolEnum& object, std::string& parent_path);
             Result createMethodFile(const SymbolModule& object, std::string& parent_path);
             
             // 2. Interface 전문 제작
-            Result createInterfaceFileContent(const SymbolClass& object, std::string& content);
+            SourceStream createInterfaceFileContent(const SymbolClass& object);
 
             // 3. Class 전문 제작
-            Result createClassFileContent(const SymbolClass& object, std::string& content);
+            SourceStream createClassFileContent(const SymbolClass& object);
 
             // 4. Enum 전문 제작
-            Result createEnumFileContent(const SymbolEnum& object, std::string& content);
+            SourceStream createEnumFileContent(const SymbolEnum& object);
 
             // 5. Method 전문 제작
-            Result createMethodFileContent(const SymbolModule& object, std::string& content);
+            SourceStream createMethodFileContent(const SymbolModule& object);
 
             // 7. Code Block 제작
-            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
-            void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
+            void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
+            void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
 
             // Enum Block 생성
-            std::vector<std::string> createEnumDefinition(const SymbolEnum& object);
+            void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
 
             // Method Block 생성
+            void createNativeHandle(SourceStream& ss);
+            void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
+            void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
 
+            void createInterfaceMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
+            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void createDerivedMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object, int number);
+
+            void callConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void callDestructor(SourceStream& ss, const SymbolClass& clazz);
+            void callAddReleaser(SourceStream& ss, const SymbolClass& clazz);
+            void callClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void callStaticMethod(SourceStream& ss, const SymbolMethod& object, int number);
+
+            void createReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
+            void createInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+
+            void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
+            void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
+
+            std::string createPropertyName(const SymbolProperty& object);
+            void callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+            void callPropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
+
+            void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
+            void createClassPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
+            void createDerivedPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
+
+            /*
             std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
 
@@ -107,7 +138,7 @@ namespace LibraryInterfaceGenerator
 
             std::string createWrapperScope(const SymbolClass& clazz);
             std::string createWrapperScope(const SymbolMethod& method);
-
+            */
         };
     }
 }

@@ -31,7 +31,16 @@ namespace LibraryInterfaceGenerator
             SourceStream& _stream;
         };
 
-        
+        class InterfaceKotlinSourceScopedStream
+        {
+        public:
+            explicit InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name);
+            virtual ~InterfaceKotlinSourceScopedStream();
+
+        private:
+            SourceScopedStream* _stream{ nullptr };
+        };
+
         class ClassKotlinSourceScopedStream
         {
         public:
@@ -87,21 +96,22 @@ namespace LibraryInterfaceGenerator
 
         };
 
+        enum class KotlinAccess {
+            PUBLIC,
+            PROTECTED,
+            PRIVATE,
+            INTERNAL,
+            EXTERNAL,
+        };
 
         class MethodKotlinSourceScopedStream
         {
         public:
-            enum class Access {
-                PUBLIC,
-                PROTECTED,
-                PRIVATE,
-                INTERNAL,
-                EXTERNAL,
-            };
 
             explicit MethodKotlinSourceScopedStream(
-                SourceStream& sourceStream, 
-                Access access, 
+                SourceStream& sourceStream,
+                bool isDeclaration,
+                KotlinAccess access,
                 const std::string& prefix,
                 const std::string& postfix,
                 const std::string& type,
@@ -126,6 +136,44 @@ namespace LibraryInterfaceGenerator
             );
             virtual ~CallKotlinSourceScopedStream();
         private:
+        };
+
+        class PropertyKotlinSourceScopedStream
+        {
+        public:
+            class Getter {
+            public:
+                Getter(Getter&& other);
+                ~Getter();
+            private:
+                explicit Getter(SourceStream& ss);
+                SourceScopedStream* _stream{ nullptr };
+                friend class PropertyKotlinSourceScopedStream;
+            };
+            class Setter {
+            public:
+                Setter(Setter&& other);
+                ~Setter();
+            private:
+                explicit Setter(SourceStream& ss);
+                SourceScopedStream* _stream{ nullptr };
+                friend class PropertyKotlinSourceScopedStream;
+            };
+
+            explicit PropertyKotlinSourceScopedStream(
+                SourceStream& sourceStream,
+                KotlinAccess access,
+                const std::string& prefix,
+                const std::string& type,
+                const std::string& name,
+                bool is_readonly
+            );
+            virtual ~PropertyKotlinSourceScopedStream();
+
+            Getter createGetter();
+            Setter createSetter();
+
+            SourceScopedStream* _stream{ nullptr };
         };
 
         class CommentKotlinSourceStream

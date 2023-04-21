@@ -123,7 +123,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 
 			for (auto& module_ : obj.modules)
 			{
-				createComment(ss, obj);
+				createCXXComment(ss, obj);
 				createModuleDeclaration(ss, *module_);
 			}
 		}
@@ -138,19 +138,19 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createModuleDec
 		for (auto& methodObject : obj.global_methods)
 		{
 			auto& method = methodObject.first;
-			createComment(ss, *method);
+			createCXXComment(ss, *method);
 			createStaticMethodDeclaration(ss, *method);
 		}
 
 		for (auto& clazz : obj.classes)
 		{
-			createComment(ss, *clazz);
+			createCXXComment(ss, *clazz);
 			createClassDeclaration(ss, *clazz);
 		}
 
 		for (auto& subModule : obj.submodules)
 		{
-			createComment(ss, *subModule);
+			createCXXComment(ss, *subModule);
 			createModuleDeclaration(ss, *subModule);
 		}
 	}
@@ -176,13 +176,13 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		auto base_props = clazz.getBaseProperties();
 		for (auto& base_prop : base_props)
 		{
-			createComment(ss, *base_prop);
+			createCXXComment(ss, *base_prop);
 			createPropertyDeclaration(ss, *base_prop);
 		}
 
 		for (auto& prop : clazz.properties)
 		{
-			createComment(ss, *prop);
+			createCXXComment(ss, *prop);
 			createPropertyDeclaration(ss, *prop);
 		}
 
@@ -190,14 +190,14 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 		for (auto& baseMethodObject : base_methods)
 		{
 			auto base_method = baseMethodObject.first;
-			createComment(ss, *base_method);
+			createCXXComment(ss, *base_method);
 			createClassMethodDeclaration(ss, clazz, *base_method);
 		}
 
 		for (auto& methodObject : clazz.methods)
 		{
 			auto method = methodObject.first;
-			createComment(ss, *method);
+			createCXXComment(ss, *method);
 			createClassMethodDeclaration(ss, clazz, *method);
 		}
 	}

@@ -118,6 +118,8 @@ LibraryInterfaceGenerator::Implementation::SourceScopedStream::SourceScopedStrea
 
 	if (_scopeStart != nullptr)
 		ss << _scopeStart << "\n";
+	else
+		ss << "\n";
 
 	ss.addIndent();
 }
@@ -140,6 +142,8 @@ LibraryInterfaceGenerator::Implementation::SourceScopedStream::~SourceScopedStre
 	{
 		_stream << _scopeEnd << "\n";
 	}
+	else
+		_stream << "\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::SourceScopedStream::pop(size_t end_string_size)

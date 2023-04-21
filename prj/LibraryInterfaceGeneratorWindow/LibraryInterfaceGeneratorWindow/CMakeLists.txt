@@ -81,6 +81,11 @@ file(GLOB_RECURSE implementation_files
 	${implementation_dir}/Deliverable/Wrapper/*.cpp
 	${implementation_dir}/Deliverable/Wrapper/*.c
 
+	${implementation_dir}/Deliverable/SourceDirectory/*.h
+	${implementation_dir}/Deliverable/SourceDirectory/*.hpp
+	${implementation_dir}/Deliverable/SourceDirectory/*.c
+	${implementation_dir}/Deliverable/SourceDirectory/*.cpp
+
 	${implementation_dir}/Auxiliary/*.h
 	${implementation_dir}/Auxiliary/*.hpp
 	${implementation_dir}/Auxiliary/*.cpp
@@ -165,6 +170,11 @@ file(GLOB_RECURSE source_files_for_test
 	${implementation_dir}/Deliverable/Wrapper/*.hpp
 	${implementation_dir}/Deliverable/Wrapper/*.cpp
 	${implementation_dir}/Deliverable/Wrapper/*.c
+	
+	${implementation_dir}/Deliverable/SourceDirectory/*.h
+	${implementation_dir}/Deliverable/SourceDirectory/*.hpp
+	${implementation_dir}/Deliverable/SourceDirectory/*.c
+	${implementation_dir}/Deliverable/SourceDirectory/*.cpp
 
 	${implementation_dir}/Auxiliary/*.h
 	${implementation_dir}/Auxiliary/*.hpp

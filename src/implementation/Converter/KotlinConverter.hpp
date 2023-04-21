@@ -7,6 +7,57 @@ namespace LibraryInterfaceGenerator
 {
 	namespace Implementation
 	{
+        inline void createKotlinComment(SourceStream& ss, const SymbolPackage& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addName(object.name);
+                comment.addDescription(object.description);
+            }
+        }
+        inline void createKotlinComment(SourceStream& ss, const SymbolModule& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addName(object.name);
+                comment.addDescription(object.description);
+            }
+        }
+        inline void createKotlinComment(SourceStream& ss, const SymbolClass& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addBrief(object.description);
+            }
+        }
+        inline void createKotlinComment(SourceStream& ss, const SymbolEnum& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addBrief(object.description);
+            }
+        }
+        inline void createKotlinComment(SourceStream& ss, const SymbolMethod& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addBrief(object.description);
+                for (auto& parameter : object.parameters)
+                {
+                    comment.addParameter((parameter->io == SymbolParameter::IO::IN ? true : false), parameter->name, parameter->name);
+                }
+                comment.addReturn(object.return_description);
+            }
+        }
+        inline void createKotlinComment(SourceStream& ss, const SymbolProperty& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addName(object.name);
+                comment.addBrief(object.description);
+            }
+        }
+
 		inline std::string createKotlinWrapperScope(const SymbolClass& clazz)
 		{
 			std::string scope;
