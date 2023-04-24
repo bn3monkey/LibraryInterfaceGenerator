@@ -15,7 +15,7 @@
 #include "../../Environment.hpp"
 #include "../../Converter/CXXConverter.hpp"
 #include "../../Converter/KotlinConverter.hpp"
-#include "../../ExternalLibrary/KotlinWrapperConverter/KotlinWrapperConverter.h"
+#include "../../ExternalLibrary/KotlinWrapperConverter/KotlinWrapperConverter_cpp.h"
 
 namespace LibraryInterfaceGenerator 
 {

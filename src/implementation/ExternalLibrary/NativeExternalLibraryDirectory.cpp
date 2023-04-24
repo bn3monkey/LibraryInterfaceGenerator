@@ -1,7 +1,9 @@
 #include "NativeExternalLibraryDirectory.hpp"
 
-#include "Log/Log.h"
-#include "MemoryPool/MemoryPool.h"
+#include "Log/Log_cpp.h"
+#include "Log/Log_hpp.h"
+#include "MemoryPool/MemoryPool_cpp.h"
+#include "MemoryPool/MemoryPool_hpp.h"
 
 #ifdef __linux__
 static char* delimeter = "/";
@@ -67,14 +69,14 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	{
 	case ExternalTool::Log :
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "Log", Log_header, Log_src);
+			auto ret = createExternalToolInternal(_lib_dir_path, "Log", LOG_HPP, LOG_CPP);
 			if (!ret)
 				return ret;
 			}
 		break;
 	case ExternalTool::MemoryPool:
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", MemoryPool_header, MemoryPool_src);
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", MEMORYPOOL_HPP, MEMORYPOOL_CPP);
 			if (!ret)
 				return ret;
 		}

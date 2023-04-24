@@ -1,6 +1,6 @@
 ﻿#include "NativeInterface.hpp"
 #include "../../Converter/CXXConverter.hpp"
-#include "../../ExternalLibrary/NativeInterfaceConverter/NativeInterfaceConverter.h"
+#include "../../ExternalLibrary/NativeInterfaceConverter/NativeInterfaceConverter_cpp.h"
 
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
@@ -841,7 +841,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPro
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
 {
-	return NativeInterfaceConverter;
+	return NATIVEINTERFACECONVERTER_CPP;
 }
 
 

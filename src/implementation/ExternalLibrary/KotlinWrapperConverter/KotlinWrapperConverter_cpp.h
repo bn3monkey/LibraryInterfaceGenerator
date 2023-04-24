@@ -1,7 +1,6 @@
-#if !defined(__BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__)
-#define __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
-
-static constexpr char* KotlinWrapperConverter = 
+#if !defined(__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER_CPP__)
+#define __BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER_CPP__
+static constexpr char* KOTLINWRAPPERCONVERTER_CPP = 
 "#include <jni.h>\n"
 "#include <vector>\n"
 "#include <string>\n"
@@ -47,6 +46,7 @@ static constexpr char* KotlinWrapperConverter =
 "    };\n"
 "    return ret;\n"
 "}\n"
+"\n"
 "\n"
 "inline jstring createWrapperString(JNIEnv* env, const std::string& value)\n"
 "{\n"
@@ -1299,7 +1299,5 @@ static constexpr char* KotlinWrapperConverter =
 "        env->DeleteLocalRef(jelement);\n"
 "    }\n"
 "    return true;\n"
-"}"
-"";
-
-#endif // __BN3MONKEY_LIBRARYINTERFACEGENERATOR_KotlinWrapperConverter__
+"}\n";
+#endif //__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINWRAPPERCONVERTER_CPP__

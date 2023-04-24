@@ -103,43 +103,6 @@ namespace LibraryInterfaceGenerator
             void callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void callPropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
 
-           
-            /*
-            std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
-            std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
-
-            std::vector<std::string> createInterfaceMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object);
-            std::vector<std::string> createClassMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
-            std::vector<std::string> createDerivedMethodDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
-            std::vector<std::string> createStaticMethodDefinition(const SymbolMethod& object, int number);
-
-            std::string callClassMethod(const SymbolClass& clazz, const SymbolMethod& object, int number);
-            std::string callStaticMethod(const SymbolMethod& object, int number);
-
-            std::string createReturnValueChanger(const SymbolMethod& object);
-            std::string createInputParameterChanger(const SymbolParameter& object);
-            std::string createOutputParameterChanger(const SymbolParameter& object);
-            
-            // Parameter Block 持失
-            std::string createParametersDefinition(const SymbolMethod& object);
-            std::string createParameterDefinition(const SymbolParameter& object);
-
-            // Property Block 持失
-
-            std::string createInputPropertyChanger(const SymbolProperty& object);
-            std::string createOutputPropertyChanger(const SymbolProperty& object);
-
-            std::string createPropertyName(const SymbolProperty& object);
-            std::vector<std::string> createPropertySetterDefinition(const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
-            std::vector<std::string> createPropertyGetterDefinition(const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
-
-            std::vector<std::string> createInterfacePropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
-            std::vector<std::string> createClassPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
-            std::vector<std::string> createDerivedPropertyDefinition(const SymbolClass& clazz, const SymbolProperty& object);
-
-            std::string createWrapperScope(const SymbolClass& clazz);
-            std::string createWrapperScope(const SymbolMethod& method);
-            */
         };
     }
 }

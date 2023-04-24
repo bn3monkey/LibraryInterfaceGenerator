@@ -42,11 +42,50 @@ file(GLOB_RECURSE include_files
 message("include_files = ${include_files}")
 
 
-# file(GLOB_RECURSE implementation_files
-#	${implementation_dir}/*.h
-#	${implementation_dir}/*.hpp
-#	${implementation_dir}/*.cpp
-#	${implementation_dir}/*.c)
+macro(importExternalLibrary library_path)
+	get_filename_component(library_filename "${library_path}" NAME)
+	message("library file name : ${library_filename}")
+	get_filename_component(library_dirpath "${library_path}" DIRECTORY)
+	message("library directory path : ${library_dirpath}")
+	
+	string(TOUPPER "${library_filename}" variable_name)
+	string(REPLACE "." "_" variable_name "${variable_name}")
+	string(REPLACE "CXX" "CPP" variable_name "${variable_name}")
+	string(REPLACE "HXX" "HPP" variable_name "${variable_name}")
+	message("variable name : ${variable_name}")
+
+	set(header_guard "__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_${variable_name}__")
+	message("header guard : ${header_guard}")
+
+	file(READ "${library_path}" library_content)
+	string(REPLACE "\"" "\\\"" processed_library_content "${library_content}")
+	string(REPLACE "\n" "\\n\"\n\"" processed_library_content "${processed_library_content}")
+	set(processed_library_content "\"${processed_library_content}\\n\"")
+
+	set(output_library_content
+		"#if !defined(${header_guard})\n#define ${header_guard}\nstatic constexpr char* ${variable_name} = \n${processed_library_content};\n#endif //${header_guard}\n"
+	)
+
+	set(output_library_filename "${library_filename}")
+	string(REPLACE "." "_" output_library_filename "${output_library_filename}")
+	string(REPLACE "cxx" "cpp" output_library_filename "${output_library_filename}")
+	string(REPLACE "hxx" "hpp" output_library_filename "${output_library_filename}")
+	set(output_library_filename "${output_library_filename}.h")
+	message("output library filename : ${output_library_filename}")
+
+	set(output_library_filepath "${library_dirpath}/${output_library_filename}")
+	file(WRITE "${output_library_filepath}" "${output_library_content}")
+
+endmacro()
+
+file(GLOB_RECURSE external_library_files
+	${implementation_dir}/*.hxx
+	${implementation_dir}/*.cxx
+)
+
+foreach(external_library_file ${external_library_files})
+	importExternalLibrary(${external_library_file})
+endforeach()
 
 file(GLOB_RECURSE implementation_files
 	${implementation_dir}/SourceStream/*.h
@@ -123,7 +162,11 @@ set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD_REQUIR
 # TODO: 필요한 경우 테스트를 추가하고 대상을 설치합니다.
 
 
+
+
 enable_testing()
+
+
 
 file(GLOB_RECURSE test_files
 	${test_source_dir}/*.hpp
@@ -131,6 +174,7 @@ file(GLOB_RECURSE test_files
 	${test_source_dir}/*.cpp
 	${test_source_dir}/*.c
 )
+
 
 # add_executable(LibraryInerfaceGeneratorTest 
 #	${include_files}

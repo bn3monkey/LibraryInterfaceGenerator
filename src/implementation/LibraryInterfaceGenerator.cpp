@@ -3,8 +3,8 @@
 #include "ExternalLibrary/NativeExternalLibraryDirectory.hpp"
 #include "Deliverable/NativeSourceDirectory/NativeSourceDirectory.hpp"
 #include "Deliverable/NativeInterface/NativeInterface.hpp"
-// #include "Deliverable/Wrapper/Wrapper.hpp"
-// #include "Deliverable/SourceDirectory/SourceDirectory.hpp"
+#include "Deliverable/Wrapper/Wrapper.hpp"
+#include "Deliverable/SourceDirectory/SourceDirectory.hpp"
 #include "FileSystem/FileSystem.hpp"
 
 LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(const std::string& root_dir_path)
@@ -61,7 +61,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	/*
+	
 	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeInterface, symbolTable, root_dir_path };
 	result = wrapper.make();
 	if (!result)
@@ -77,7 +77,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		printf("%s", result.toString().c_str());
 		return Error(Error::Code::FAIL, result.toString());
 	}
-	*/
+	
 
 	return Error(Error::Code::SUCCESS);
 }
