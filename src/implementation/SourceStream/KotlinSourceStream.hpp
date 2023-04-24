@@ -131,7 +131,7 @@ namespace LibraryInterfaceGenerator
                 SourceStream& sourceStream,
                 const std::string& type,
                 const std::vector<std::string>& scopes,
-                const std::string name,
+                const std::string& name,
                 const std::vector<ParameterNode>& parameters = std::vector<ParameterNode>()
             );
             virtual ~CallKotlinSourceScopedStream();

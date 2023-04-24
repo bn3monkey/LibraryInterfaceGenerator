@@ -178,6 +178,9 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 	if (type != "")
 		sourceStream << " : " << type;
 
+	if (postfix != "")
+		sourceStream << " " << postfix;
+
 	sourceStream << "\n";
 
 	if (isDeclaration)
@@ -246,7 +249,7 @@ std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentKotli
 	return ret;
 }
 
-LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::CallKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& type, const std::vector<std::string>& scopes, const std::string name, const std::vector<ParameterNode>& parameters)
+LibraryInterfaceGenerator::Implementation::CallKotlinSourceScopedStream::CallKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& type, const std::vector<std::string>& scopes, const std::string& name, const std::vector<ParameterNode>& parameters)
 {	
 	if (!scopes.empty())
 	{

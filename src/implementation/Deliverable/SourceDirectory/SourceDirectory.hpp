@@ -73,13 +73,14 @@ namespace LibraryInterfaceGenerator
             void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
 
             // Method Block »ý¼º
+            std::string createMethodName(const SymbolClass& clazz, const std::string& method_name, int number);
+            std::string createMethodName(const SymbolMethod& method, const std::string& method_name, int number);
             void createNativeHandle(SourceStream& ss);
             void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
 
             void createInterfaceMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object);
-            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
-            void createDerivedMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
+            void createClassMethodDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number, bool is_overrided);
             void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object, int number);
 
             void callConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
@@ -96,13 +97,13 @@ namespace LibraryInterfaceGenerator
             void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
 
             std::string createPropertyName(const SymbolProperty& object);
+            void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
+            void createClassPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object, bool is_overrided);
+
             void callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void callPropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
 
-            void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
-            void createClassPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
-            void createDerivedPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
-
+           
             /*
             std::vector<std::string> createConstructorDefinition(const SymbolClass& clazz, const SymbolMethod& object, int number);
             std::vector<std::string> createDestructorDefinition(const SymbolClass& clazz);
