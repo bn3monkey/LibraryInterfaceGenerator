@@ -1,99 +1,161 @@
-#ifndef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-#define __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
+#ifndef __BN3MONKEY_MEMORY_POOL__
+#define __BN3MONKEY_MEMORY_POOL__
 
-#include <cstdint>
-#include <mutex>
-#include "../Log/Log.hpp"
 #include <memory>
-#include <functional>
+#include <list>
 #include <vector>
+#include <deque>
+#include <queue>
+#include <unordered_map>
+#include <string>
 
-class MemoryPool
+#include "MemoryPoolImpl.hpp"
+
+#include "Tag.hpp"
+
+namespace Bn3Monkey
 {
-public:
-    static bool initialize(size_t _block_num);
-    static void release();
-    static bool isInitialized();
-    static void* alloc(size_t object_size, size_t n);
-    static void dealloc(void* cptr, size_t object_size, size_t n);
-    static void addReleaser(const std::function<void()>& releaser);
+	class Bn3MemoryPool
+	{
+	public:
+
+        static inline bool initialize(std::initializer_list<size_t> sizes)
+        {
+			return _impl.initialize(sizes);
+        }
+
+		static inline void release()
+		{
+			_impl.release();
+		}
+
+		template<class Type, class... Args>
+        static inline Type* construct(const Bn3Tag& tag , Args... args)
+		{
+			return _impl.construct<Type>(tag, std::forward<Args>(args)...);
+		}
 
 
-    template<class T, class... Args>
-    static T* allocate(size_t n, Args... args)
-    {
-       using value_type = T;
-		if (!isInitialized())
+        template<class Type>
+        static inline bool destroy(Type* ptr)
+		{
+			return _impl.destroy<Type>(ptr);
+		}
+
+		template<class Type>
+		static inline Type* allocate(const Bn3Tag& tag, size_t size)
+		{
+			return _impl.allocate<Type>(tag, size);
+		}
+
+
+		// In the case of a reference cast to the base class, you must call this method after casting it back to the derived class.
+        template<class Type>
+        static inline bool deallocate(Type* reference, size_t size)
+		{
+			return _impl.deallocate<Type>(reference, size);
+		}
+
+		class Analyzer
+		{
+		public:
+			std::string analyzeAll() {
+				return _impl.analyzeAll();
+			}
+			
+			std::string analyzePool(size_t i) {
+				return _impl.analyzePool(i);
+			}
+		};
+
+	private:
+		static Bn3MemoryBlockPools<BLOCK_SIZE_POOL_LENGTH> _impl;
+	};
+
+	template<class Type, class... Args>
+	inline std::shared_ptr<Type> makeSharedFromMemoryPool(const Bn3Tag& tag, Args... args) {
+		auto* raw = Bn3MemoryPool::construct<Type>(tag, std::forward<Args>(args)...);
+		if (!raw)
+		{
 			return nullptr;
-       T* ret = reinterpret_cast<T*>(MemoryPool::alloc(sizeof(T), n));
-       new(ret) T(args...);
-       return ret;
-    }
-    template<class T>
-    static T* allocate(size_t n = 1)
-    {
-        using value_type = T;
-		if (!isInitialized())
-			return nullptr;
-        T* ret = reinterpret_cast<T*>(MemoryPool::alloc(sizeof(T), n));
-        new(ret) T();
-        return ret;
-    }
-    template<class T>
-    static void deallocate(T* ptr, size_t n = 1)
-    {
-		if (!isInitialized())
-			return;
-        using value_type = T;
-        ptr->~T();
-        MemoryPool::dealloc(ptr, sizeof(T), n);
-    }
+		}
+		auto ret = std::shared_ptr<Type>(raw, [&](Type* ptr) {
+			Bn3MemoryPool::destroy(ptr);
+			});
+		return ret;
+	}
 
-#ifdef _DEBUG
-    static int8_t* getPool();
-    static int32_t* getDirty();
-    static int8_t* getRearFreedMemoryPtr();
-#endif
-};
+	template<class Type>
+	class Bn3Allocator : public std::allocator<Type>
+	{
+	public:
+		using value_type = Type;
+		using pointer = Type*;
+		using const_pointer = const Type*;
+		using reference = Type&;
+		using const_reference = const Type&;
+		using size_type = size_t;
+		using difference_type = std::ptrdiff_t;
+		using propagate_on_container_move_assignment = std::true_type;
 
-template<class T>
-struct MemoryAllocator  /* : public std::allocator<T> */
-{
-    using value_type = T;
-    using pointer = T*;
-    using const_pointer = const T*;
-    using reference = T&;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using propagate_on_container_move_assignment = std::true_type;
-    MemoryAllocator() noexcept {};
-    ~MemoryAllocator() noexcept {};
-    template<class U> MemoryAllocator(const MemoryAllocator<U>& e) noexcept
-    {
-    }
-    pointer allocate(size_type n, const void* hint = 0)
-    {
-        return MemoryPool::allocate<value_type>(n);
-    }
-    void deallocate(pointer ptr, size_type n)
-    {
-        MemoryPool::deallocate<value_type>(ptr, n);
-    }
-    template<typename U>
-    struct rebind {
-        using other =  MemoryAllocator<U>;
-    };
-};
-template <class T, class U>
-constexpr bool operator== (const MemoryAllocator<T>&, const MemoryAllocator<U>&) noexcept
-{
-    return true;
+		Bn3Allocator() = default;
+		Bn3Allocator(const Bn3Tag& tag)
+		{
+			_tag = tag;
+		}
+
+		template <typename U>
+		Bn3Allocator(const Bn3Allocator<U>& other) noexcept : _tag(other._tag) {}
+
+		~Bn3Allocator() noexcept {}
+
+		template <class U>
+		struct rebind { 
+			using other = Bn3Allocator<U> ;
+		};
+
+		pointer allocate(size_type n, const void* hint = 0)
+		{
+			return Bn3MemoryPool::allocate<value_type>(_tag, n);
+		}
+		void deallocate(pointer ptr, size_type n) noexcept {
+			Bn3MemoryPool::deallocate<value_type>(ptr, n);
+		}
+
+		template<class... Args>
+		void construct(pointer ptr, Args&&... values)
+		{
+			new (ptr) value_type(std::forward<Args>(values)...);
+		}
+		void destroy(pointer ptr)
+		{
+			ptr->~value_type();
+		}
+
+		Bn3Tag _tag;
+	};
+
+	class Bn3Container
+	{
+	public:
+		using string = std::basic_string<char, std::char_traits<char>, Bn3Allocator<char>>;
+
+		template<class Type>
+		using list = std::list<Type, Bn3Allocator<Type>>;
+
+		template<class Type>
+		using deque = std::deque<Type, Bn3Allocator<Type>>;
+
+		template<class Type>
+		using vector = std::vector<Type, Bn3Allocator<Type>>;
+
+		template<class Type>
+		using queue = std::queue<Type, std::deque<Type, Bn3Allocator<Type>>>;
+
+		template<class Key, class Value>
+		using map = std::unordered_map<Key, Value, std::hash<Key>, std::equal_to<Key>, Bn3Allocator<std::pair<const Key, Value>>>;
+	};
+
 }
-template <class T, class U>
-constexpr bool operator!= (const MemoryAllocator<T>&, const MemoryAllocator<U>&) noexcept
-{
-    return false;
-}
-
 
 #endif

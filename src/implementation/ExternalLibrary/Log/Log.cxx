@@ -1,5 +1,7 @@
 #include "Log.hpp"
 
+using namespace Bn3Monkey;
+
 class LogStream
 {
 public :
@@ -44,28 +46,28 @@ private:
 static LogStream logStream;
 
 #if defined _WIN32 //WINDOWS
-const int Log::PRIO_VERBOSE = 0;
-const int Log::PRIO_DEBUG = 1;
-const int Log::PRIO_INFO = 2;
-const int Log::PRIO_WARN = 3;
-const int Log::PRIO_ERROR = 4;
+const int Bn3Monkey::Log::PRIO_VERBOSE = 0;
+const int Bn3Monkey::Log::PRIO_DEBUG = 1;
+const int Bn3Monkey::Log::PRIO_INFO = 2;
+const int Bn3Monkey::Log::PRIO_WARN = 3;
+const int Bn3Monkey::Log::PRIO_ERROR = 4;
 #elif defined __ANDROID__ //ANDROID
-const int Log::PRIO_VERBOSE = ANDROID_LOG_VERBOSE;
-const int Log::PRIO_DEBUG = ANDROID_LOG_DEBUG;
-const int Log::PRIO_INFO = ANDROID_LOG_INFO;
-const int Log::PRIO_WARN = ANDROID_LOG_WARN;
-const int Log::PRIO_ERROR = ANDROID_LOG_ERROR;
+const int Bn3Monkey::Log::PRIO_VERBOSE = ANDROID_LOG_VERBOSE;
+const int Bn3Monkey::Log::PRIO_DEBUG = ANDROID_LOG_DEBUG;
+const int Bn3Monkey::Log::PRIO_INFO = ANDROID_LOG_INFO;
+const int Bn3Monkey::Log::PRIO_WARN = ANDROID_LOG_WARN;
+const int Bn3Monkey::Log::PRIO_ERROR = ANDROID_LOG_ERROR;
 #elif (defined __linux__) && !(defined __ANDROID__) // LINUX
-const int Log::PRIO_VERBOSE = 0;
-const int Log::PRIO_DEBUG = 1;
-const int Log::PRIO_INFO = 2;
-const int Log::PRIO_WARN = 3;
-const int Log::PRIO_ERROR = 4;
+const int Bn3Monkey::Log::PRIO_VERBOSE = 0;
+const int Bn3Monkey::Log::PRIO_DEBUG = 1;
+const int Bn3Monkey::Log::PRIO_INFO = 2;
+const int Bn3Monkey::Log::PRIO_WARN = 3;
+const int Bn3Monkey::Log::PRIO_ERROR = 4;
 #endif
 
+std::mutex console_mtx;
 
-
-void Log::print(int priority, const char* tag, const char* format, va_list args)
+void Bn3Monkey::Log::print(int priority, const char* tag, const char* format, va_list args)
 {
     char formatted[Log::SIZE_FORMATTED_CONTENT] = { 0 };
     size_t formatted_size =
@@ -74,6 +76,7 @@ void Log::print(int priority, const char* tag, const char* format, va_list args)
 #elif defined __ANDROID__
         vsprintf(formatted, format, args);
 #elif (defined __linux__) && !(defined __ANDROID__)
+        vsprintf(formatted, format, args);
 #endif
 
 #if defined __ANDROID__
@@ -92,19 +95,22 @@ void Log::print(int priority, const char* tag, const char* format, va_list args)
 
 #if defined _WIN32
     OutputDebugStringA(buffer);
-    printf(buffer);
 #endif
+    {
+        std::lock_guard<std::mutex> lock(console_mtx);
+        printf(buffer);
+    }
 
     logStream.read(buffer);
 }
 
-int32_t Log::exportLog(char* data)
+int32_t Bn3Monkey::Log::exportLog(char* data)
 {
     int32_t ret = logStream.write(data);
     return ret;
 }
 
-size_t Log::setDate(char(&buffer)[Log::MAX_LINE])
+size_t Bn3Monkey::Log::setDate(char(&buffer)[Log::MAX_LINE])
 {
     time_t now = time(0);
     struct tm tstruct;
@@ -123,7 +129,7 @@ size_t Log::setDate(char(&buffer)[Log::MAX_LINE])
     return SIZE_FORMATTED_DATE;
 }
 
-size_t Log::setPriority(char* buffer, int priority)
+size_t Bn3Monkey::Log::setPriority(char* buffer, int priority)
 {
     const char* priority_str = "[?] | ";
     switch (priority)
@@ -149,7 +155,7 @@ size_t Log::setPriority(char* buffer, int priority)
     return SIZE_FORMATTED_PRIORITY;
 }
 
-size_t Log::setTag(char* buffer, const char* tag)
+size_t Bn3Monkey::Log::setTag(char* buffer, const char* tag)
 {
     buffer[0] = '{';
     size_t tag_size = strlen(tag);

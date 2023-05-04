@@ -650,7 +650,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeStaticMethod(
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeCallbackChanger(SourceStream& ss)
 {
-	ss << "auto temp = createNativeCallback(instance, method_name);\n";
+	ss << "auto temp = createNativeCallback(env, instance, method_name);\n";
 	ss << "auto* callback = (void *)&temp;\n";
 }
 

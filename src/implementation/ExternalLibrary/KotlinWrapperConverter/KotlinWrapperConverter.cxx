@@ -19,7 +19,27 @@ inline std::function<void()> createNativeCallback(JNIEnv* env, jobject reference
     }
 
     jobject globalRef = env->NewGlobalRef(reference);
-    std::function<void()> ret = [globalRef, method_name]() {
+    
+	struct MethodName
+	{
+		char buffer[256] {0};
+		MethodName(const char* name) {
+			size_t len = strlen(name);
+			memcpy(buffer, name, len);
+		}
+		MethodName(const MethodName& other)
+		{
+			memcpy(buffer, other.buffer, 256);
+		}
+		MethodName(MethodName&& other)
+		{
+			memcpy(buffer, other.buffer, 256);
+		}
+	};
+	const char* cmethod_name = env->GetStringUTFChars(method_name, nullptr);
+	MethodName name {cmethod_name};
+
+    std::function<void()> ret = [globalRef, name]() {
         JNIEnv* env {nullptr};
         int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
         if (getEnvStat == JNI_EDETACHED) {
@@ -34,8 +54,7 @@ inline std::function<void()> createNativeCallback(JNIEnv* env, jobject reference
         } 
 
         jclass clazz = env->GetObjectClass(globalRef);
-        const char* cmethod_name = env->GetStringUTFChars(method_name, nullptr);
-        jmethodID callback = env->GetMethodID(clazz, cmethod_name, "()V");
+        jmethodID callback = env->GetMethodID(clazz, name.buffer, "()V");
         env->CallVoidMethod(globalRef, callback);
 
         if (getEnvStat == JNI_EDETACHED)

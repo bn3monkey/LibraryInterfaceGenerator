@@ -1,38 +1,60 @@
 #include <memory>
 #include <vector>
+#include <functional>
+#include <string>
+
+#ifdef __BN3MONKEY_MEMORY_POOL__
+static Bn3Monkey::Bn3Container::vector<std::function<void()>> releasers { Bn3Monkey::Bn3Allocator<std::function<void()>>(Bn3Monkey::Bn3Tag("releasers")) };
+static int shared_ptr_num = 1;
+static int raw_ptr_num = 1;
+#endif
+
+void initializeNativeInterface()
+{
+#ifdef __BN3MONKEY_MEMORY_POOL__
+	Bn3Monkey::Bn3MemoryPool::initialize({128, 128, 128, 128, 4, 4, 4, 4, 4});
+	releasers.reserve(128);
+#else
+
+#endif
+}
+
+void releaseNativeInterface()
+{
+#ifdef __BN3MONKEY_MEMORY_POOL__
+	Bn3Monkey::Bn3MemoryPool::release();
+	for (auto& releaser : releasers)
+		releaser();
+	releasers.reset();
+#else
+
+#endif
+}
 
 template<class T, class ...Args>
 inline void* createReference(Args... args)
 {
-#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
-    *ret = std::shared_ptr<T>(MemoryPool::allocate<T>(1, args...), [](T* p) {
-        MemoryPool::deallocate<T>(p);
+#ifdef __BN3MONKEY_MEMORY_POOL__
+	char ptr_tag[256]{0};
+	sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
+	char raw_tag[256]{0};
+	sprintf(raw_tag, "raw_%d", raw_ptr_num++);
+
+    auto* ret = Bn3Monkey::Bn3MemoryPool::construct<std::shared_ptr<T>>(Bn3Monkey::Bn3Tag(ptr_tag));
+    *ret = std::shared_ptr<T>(Bn3Monkey::Bn3MemoryPool::construct<T>(Bn3Monkey::Bn3Tag(raw_tag), args...), [](T* p) {
+        Bn3Monkey::Bn3MemoryPool::destroy<T>(p);
     });
 #else
     auto* ret = new std::shared_ptr<T>(new T(args...));
 #endif
     return ret;
 }
-template<class T>
-inline void* createReference()
-{
-#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
-    Log::D(__FUNCTION__, "ret address : %p", ret);
-    *ret = std::shared_ptr<T>(MemoryPool::allocate<T>(), [](T* p) {
-        MemoryPool::deallocate<T>(p);
-    });
-#else
-    auto* ret = new std::shared_ptr<T>();
-#endif
-    return ret;
-}
+
 template<class T>
 inline void releaseReference(void* cptr)
 {
-#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-    MemoryPool::deallocate(reinterpret_cast<std::shared_ptr<T>*>(cptr));
+#ifdef __BN3MONKEY_MEMORY_POOL__
+    Bn3Monkey::Bn3MemoryPool::destroy(reinterpret_cast<std::shared_ptr<T>*>(cptr));
 #else
     delete reinterpret_cast<std::shared_ptr<T>*>(cptr);
 #endif
@@ -47,7 +69,10 @@ template<class T>
 inline std::shared_ptr<T>* cloneReference(const std::shared_ptr<T>& cptr)
 {
 #ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-    auto* ret = MemoryPool::allocate<std::shared_ptr<T>>();
+	char ptr_tag[256]{0};
+	sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
+
+    auto* ret = Bn3Monkey::Bn3MemoryPool::construct<std::shared_ptr<T>>(Bn3Monkey::Bn3Tag(ptr_tag));
     *ret = cptr;
 #else
     auto* ret = new shared_ptr<T>(cptr);
@@ -57,7 +82,9 @@ inline std::shared_ptr<T>* cloneReference(const std::shared_ptr<T>& cptr)
 inline void addReferenceReleaser(void* releaser)
 {
 	auto* param = reinterpret_cast<std::function<void()>*>(releaser);
-	MemoryPool::addReleaser(*param);
+#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
+	releasers.push_back(*param);
+#endif
 }
 
 

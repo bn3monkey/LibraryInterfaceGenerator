@@ -4,6 +4,8 @@
 #include "Log/Log_hpp.h"
 #include "MemoryPool/MemoryPool_cpp.h"
 #include "MemoryPool/MemoryPool_hpp.h"
+#include "MemoryPool/MemoryPoolImpl_hpp.h"
+#include "MemoryPool/Tag_hpp.h"
 
 #ifdef __linux__
 static char* delimeter = "/";
@@ -24,36 +26,25 @@ LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory::Nativ
 	_lib_dir_path += _lib_dir_name;
 }
 
-static LibraryInterfaceGenerator::Implementation::Result createExternalToolInternal
-(const std::string& lib_dir_path, std::string toolName, const char* header_content, const char* cpp_content)
+static LibraryInterfaceGenerator::Implementation::Result createExternalToolDirectory(const std::string& lib_dir_path, const std::string& tool_name)
 {
 	std::string dir_path = lib_dir_path;
 	dir_path += delimeter;
-	dir_path += toolName;
-	{
-		auto ret = LibraryInterfaceGenerator::Implementation::FileSystem::createDirectory(dir_path);
-		if (!ret)
-			return ret;
-	}
-	std::string header_path = dir_path;
-	header_path += delimeter;
-	header_path += toolName;
-	header_path += ".hpp";
+	dir_path += tool_name;
+	auto ret = LibraryInterfaceGenerator::Implementation::FileSystem::createDirectory(dir_path);
+	return ret;
+}
 
-	{
-		auto ret = LibraryInterfaceGenerator::Implementation::FileSystem::createFile(header_path, header_content);
-		if (!ret)
-			return ret;
-	}
-	std::string cpp_path = dir_path;
-	cpp_path += delimeter;
-	cpp_path += toolName;
-	cpp_path += ".cpp";
-	{
-		auto ret = LibraryInterfaceGenerator::Implementation::FileSystem::createFile(cpp_path, cpp_content);
-		if (!ret)
-			return ret;
-	}
+static LibraryInterfaceGenerator::Implementation::Result createExternalToolInternal
+(const std::string& lib_dir_path, const std::string& tool_name, const char* file_name, const char* content)
+{
+	std::string path = lib_dir_path;
+	path += delimeter;
+	path += tool_name;
+	path += delimeter;
+	path += file_name;
+
+	auto ret = LibraryInterfaceGenerator::Implementation::FileSystem::createFile(path, content);
 	return LibraryInterfaceGenerator::Implementation::Result();
 }
 
@@ -69,14 +60,44 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	{
 	case ExternalTool::Log :
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "Log", LOG_HPP, LOG_CPP);
+			auto ret = createExternalToolDirectory(_lib_dir_path, "Log");
 			if (!ret)
 				return ret;
-			}
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "Log", "Log.hpp", LOG_HPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "Log", "Log.cpp", LOG_CPP);
+			if (!ret)
+				return ret;
+		}
 		break;
 	case ExternalTool::MemoryPool:
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", MEMORYPOOL_HPP, MEMORYPOOL_CPP);
+			auto ret = createExternalToolDirectory(_lib_dir_path, "MemoryPool");
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", "MemoryPool.hpp", MEMORYPOOL_HPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", "MemoryPool.cpp", MEMORYPOOL_CPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", "MemoryPoolImpl.hpp", MEMORYPOOLIMPL_HPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", "Tag.hpp", TAG_HPP);
 			if (!ret)
 				return ret;
 		}
