@@ -38,12 +38,15 @@ namespace LibraryInterfaceGenerator
                 static const char* Method = "method";
                 static const char* Parameter = "parameter";
 
+                static const char* Callback = "callback";
+
                 inline bool isLibraryItem(const std::string& order) {
                     return !strcmp(order.c_str(), Package) || 
                         !strcmp(order.c_str(), Module) ||
                         !strcmp(order.c_str(), Enum) || 
                         !strcmp(order.c_str(), Class) || 
-                        !strcmp(order.c_str(), Interface);
+                        !strcmp(order.c_str(), Interface) || 
+                        !strcmp(order.c_str(), Callback);
                 }
                 inline bool isLibraryFunction(const std::string& order) {
                     !strcmp(order.c_str(), Property) || 

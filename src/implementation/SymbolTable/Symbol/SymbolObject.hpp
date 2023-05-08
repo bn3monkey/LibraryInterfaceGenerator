@@ -56,7 +56,7 @@ namespace LibraryInterfaceGenerator
         using ObjectReferenceSet = ReferenceSet;
 
 
-        class HasReference // Global Method & Interface & Class
+        class HasReference // Global Method & Interface & Class & Callback
         {
         public:
             inline const EnumReferenceSet& getEnumReferences() { return _enum_references;  }
