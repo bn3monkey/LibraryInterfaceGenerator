@@ -927,6 +927,114 @@
                         "STARTED/4",
                         "DEPARTED/5"
                     ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "Laterality",
+                    "description" : "Laterality of (possibly paired) body part",
+                    "values" : [
+                        "UNDEFINED/0/X",
+                        "RIGHT/1/R",
+                        "LEFT/2/L",
+                        "UNPAIRED/3/U",
+                        "BOTH_LEFT_AND_RIGHT/4/B"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionSpatialFormat",
+                    "description" : "The spatial organization of the data within the region.\n Doppler mode correspond to SPECTRAL",
+                    "values" : [
+                        "NONE/0",
+                        "2D/1",
+                        "M_MODE/2",
+                        "SPECTRAL/3",
+                        "WAVE_FORM/4",
+                        "GRAPHICS/5"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionDataType",
+                    "description" : "The spatial organization of the data within the region.\n Doppler mode correspond to SPECTRAL",
+                    "values" : [
+                        "NONE/0",
+                        "TISSUE/1",
+                        "COLOR_FLOW/2",
+                        "PW_SPECTRAL_DOPPLER/3",
+                        "CW_SPECTRAL_DOPPLER/4",
+                        "DOPPLER_MEAN_TRACE/5",
+                        "DOPPLER_MODE_TRACE/6",
+                        "DOPPLER_MAX_TRACE/7",
+                        "VOLUMN_TRACE/8",
+                        "ECG_TRACE/10",
+                        "PULSE_TRACE/11",
+                        "PHONOCARDIOGRAM_TRACE/12",
+                        "GRAY_BAR/13",
+                        "COLOR_BAR/14",
+                        "INTEGRATED_BACKSCATTER/15",
+                        "AREA_TRACE/16",
+                        "D_AREA_PER_DT/17",
+                        "OTHER_PHYSIOLOGICAL_INPUT/18"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionFlagPriority",
+                    "description" : "the relative priority of the pixel component calibration specified by an US Region in the case where the US Region intersects with other US Regions.",
+                    "values" : [
+                        "HIGH/0",
+                        "LOW/1"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionFlagProtection",
+                    "description" : "Ultrasound systems should set this to 1 if the image is scaled automatically by the ultrasound system. If the image is frame-grabbed and scaling is not available then it should be set to 0.",
+                    "values" : [
+                        "NOT_PROTECTED/0",
+                        "PROTECTED/1"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionFlagDopplerScale",
+                    "description" : "Valid for PW and CW regions only. Indicates which type of Doppler scale is used",
+                    "values" : [
+                        "VELOCITY/0",
+                        "FREQUENCY/1"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionFlagScrollingRegion",
+                    "description" : "Valid for PW and CW regions only. Indicates which type of Doppler scale is used",
+                    "values" : [
+                        "UNSPECIFIED/0",
+                        "SCROLLING/1",
+                        "SWEEPING/2",
+                        "SWEEPING_THEN_SCROLLING/3"
+                    ]
+                },
+                {
+                    "order" : "enum",
+                    "name" : "RegionUnitDirection",
+                    "description" : "The physical units of the dimensions of the region.",
+                    "values" : [
+                        "NONE/0",
+                        "PERCENT/1",
+                        "DB/2",
+                        "CM/3",
+                        "SECONDS/4",
+                        "HERTZ/5",
+                        "DB_PER_SECONDS/6",
+                        "CM_PER_SECONDS/7",
+                        "CM_SQUARE/8",
+                        "CM_SQUARE_PER_SECONDS/9",
+                        "CM_CUBIC/10",
+                        "CM_CUBIC_PER_SECONDS/11",
+                        "DEGREES/12"
+                    ]
                 }
             ]
         },
@@ -1393,9 +1501,9 @@
                         {
                             "order" : "property",
                             "type" : "string",
-                            "readonly" : false,
+                            "readonly" : true,
                             "name" : "modality",
-                            "description" : "modality of a physician\nDefault value is \"US\""
+                            "description" : "modality of a physician\nvalue must be \"US\""
                         },
                         {
                             "order" : "property",
@@ -1424,6 +1532,13 @@
                             "readonly" : false,
                             "name" : "number",
                             "description" : "series number"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/Laterality",
+                            "readonly" : false,
+                            "name" : "laterality",
+                            "description" : "The laterality of the entire image of this series.\nIf this value is L or R, all laterality of the image becomes invalid.\nHowever, if this value is any other value, all images inherit the image laterality from this value or refer to the laterality of the image itself."
                         },
                         {
                             "order" : "property",
@@ -1468,9 +1583,9 @@
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/PerformedProcedureStep",
                             "readonly" : false,
-                            "name" : "PerformedProcedureStep",
+                            "name" : "performedProcedureStep",
                             "description" : "Performed Procedure STep"
-                        }                        
+                        },                        
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/Study",
@@ -1501,6 +1616,13 @@
                                     "description" : "ultrasound Image that are hold by this series"                                    
                                 }
                             ]
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/IE/Equipment",
+                            "description" : "This module specifies the Attributes that identify and describe the piece of equipment that produced a Series of Composite Instances.",
+                            "name" : "equipment",
+                            "readonly" : false
                         }
                     ]
                 },
@@ -1523,14 +1645,115 @@
                             "readonly" : false,
                             "name" : "modelName",
                             "description" : "Manufacturer's model name of the equipment.\nDefault value is \"SC1\""
-                        },
-                        {
-                            "order" : "property",
-                            "type" : "string",
-                            "readonly" : false,
-                            "name" : "protocolName",
-                            "description" : "Protocol name of the equipment.\nDefault value is \"FCU\""
                         }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "UltrasoundRegion",
+                    "base" : [],
+                    "description" : "The US Region Calibration Module has been introduced into the ultrasound IOD to provide access to the full range of data that may be present in a single US image.",
+                    "childs" : [
+                        
+                            {
+                                "order" : "property",
+                                "name" : "format",
+                                "readonly" : false,
+                                "description" : "spatial format",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionSpatialFormat"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "dataType",
+                                "readonly" : false,
+                                "description" : "data type",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionDataType"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "priority",
+                                "readonly" : false,
+                                "description" : "priority",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionFlagPriority"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "protection",
+                                "readonly" : false,
+                                "description" : "protection",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionFlagProtection"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "dopplerScale",
+                                "readonly" : false,
+                                "description" : "doppler scale",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionFlagDopplerScale"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "scrollingRegion",
+                                "readonly" : false,
+                                "description" : "scrolling region",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionFlagScrollingRegion"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "minX",
+                                "readonly" : false,
+                                "description" : "region of start x",
+                                "type" : "uint32"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "minY",
+                                "readonly" : false,
+                                "description" : "region of start y",
+                                "type" : "uint32"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "maxX",
+                                "readonly" : false,
+                                "description" : "region of end x",
+                                "type" : "uint32"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "maxY",
+                                "readonly" : false,
+                                "description" : "region of end y",
+                                "type" : "uint32"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "unitsXDirection",
+                                "readonly" : false,
+                                "description" : "The physical units of the dimensions of the region.",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionUnitDirection"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "unitsYDirection",
+                                "readonly" : false,
+                                "description" : "The physical units of the dimensions of the region.",
+                                "type" : "HsnUltrasoundDICOM/Type/RegionUnitDirection"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "deltaX",
+                                "readonly" : false,
+                                "description" : "The physical value increments per positive X pixel increment.",
+                                "type" : "double"
+                            },
+                            {
+                                "order" : "property",
+                                "name" : "deltaY",
+                                "readonly" : false,
+                                "description" : "The physical value increments per positive Y pixel increment.",
+                                "type" : "double"
+                            }
+                        
                     ]
                 },
                 {
@@ -1589,6 +1812,34 @@
                         },
                         {
                             "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/Laterality",
+                            "description" : "the laterality of the image.\nIf the series holding this image has laterality, this value becomes invalid.",
+                            "readonly" : "false",
+                            "name" : "laterality"  
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "HsnUltrasoundDICOM/Type/HsnDate",
+                            "description" : "The date the image pixel data creation started.",
+                            "readonly" : "false",
+                            "name" : "date"
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "int32",
+                            "readonly" : false,
+                            "name" : "number",
+                            "description" : "A number that identifies this image."
+                        },
+                        {
+                            "order" : "property",
+                            "type" : "string",
+                            "readonly" : false,
+                            "name" : "orientation",
+                            "description" : "Patient direction of the rows and columns of the image"
+                        },
+                        {
+                            "order" : "property",
                             "type" : "string",
                             "readonly" : false,
                             "name" : "instanceUID",
@@ -1596,10 +1847,10 @@
                         },
                         {
                             "order" : "property",
-                            "type" : "string",
+                            "type" : "bool",
                             "readonly" : false,
                             "name" : "burnedInAnnotation",
-                            "description" : "burned in annotation.\nDefault value is \"YES\""
+                            "description" : "burned in annotation.\ntrue means \"YES\" and false means \"NO\"\nDefault value is \"YES\""
                         },
                         {
                             "order" : "property",
