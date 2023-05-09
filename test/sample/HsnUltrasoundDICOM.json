@@ -1300,7 +1300,7 @@
                             "description" : "Institution-generated description or classification of the Procedure Step that was performed."
                         }
                     ]
-                }
+                },
                 {
                     "order" : "class",
                     "name" : "ScheduledProcedureStep",
