@@ -175,6 +175,12 @@
                             "description" : "Time-out for DIMSE messages.\nDefault value is unlimited",
                             "readonly" : false,
                             "type" : "int32"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "tls",
+                            "description" : "whether Transport layer transmission is enable or not.\nDefault value is \"false\"",
+                            "type" : "bool"
                         }
                     ]
                 },
