@@ -156,6 +156,12 @@ namespace LibraryInterfaceGenerator
             std::vector<std::string> tokenize(const std::string& description);
         };
         
+        class CallbackCXXSourceStream
+        {
+        public:
+            explicit CallbackCXXSourceStream(SourceStream& sourceStream, const std::string& name, const std::string& ret_type, const std::vector<std::string>& param_types);
+            virtual ~CallbackCXXSourceStream() {}
+        };
     }
 }
 

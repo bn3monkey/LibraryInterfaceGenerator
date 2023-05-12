@@ -58,6 +58,17 @@ namespace LibraryInterfaceGenerator
                 comment.addBrief(object.description);
             }
         }
+        inline void createCXXComment(SourceStream& ss, const SymbolCallback& object)
+        {
+            {
+                CommentCXXSourceStream comment{ ss };
+                comment.addBrief(object.description);
+                for (auto& parameter : object.parameters)
+                {
+                    comment.addParameter((parameter->io == SymbolParameter::IO::IN ? true : false), parameter->name, parameter->name);
+                }
+            }
+        }
 
         inline std::string createRelativeHeaderPath(const SymbolModule& self)
         {

@@ -412,3 +412,15 @@ LibraryInterfaceGenerator::Implementation::CallCXXSourceScopedStream::CallCXXSou
 LibraryInterfaceGenerator::Implementation::CallCXXSourceScopedStream::~CallCXXSourceScopedStream()
 {
 }
+
+
+LibraryInterfaceGenerator::Implementation::CallbackCXXSourceStream::CallbackCXXSourceStream(SourceStream& sourceStream, const std::string& name, const std::string& ret_type, const std::vector<std::string>& param_types)
+{
+	sourceStream << "using " << name << " = std::function<" << ret_type << "(";
+	for (auto& param_type : param_types)
+	{
+		sourceStream << param_type << ", ";
+	}
+	sourceStream.pop(2);
+	sourceStream << ")>;\n";
+}

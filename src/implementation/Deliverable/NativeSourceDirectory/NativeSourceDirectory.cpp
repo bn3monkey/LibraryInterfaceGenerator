@@ -252,6 +252,25 @@ Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createI
     return Result();
 }
 
+Result LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCallbackFile(const SymbolCallback& object, std::string& parent_include_path)
+{
+    std::string header_path{ parent_include_path };
+    header_path += delimeter;
+    header_path += object.name;
+    header_path += ".hpp";
+
+    Result result;
+
+    auto ss = createCallbackFileContent(object);
+    auto header_content = ss.str();
+
+    result = FileSystem::createFile(header_path, header_content);
+    if (!result)
+        return result;
+
+    return Result();
+}
+
 SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfaceFileContent(const SymbolClass& object)
 {
     SourceStream ss;
@@ -302,48 +321,48 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createClassHeaderFileContent(const SymbolClass& object)
 {
     /*
-    // Çì´õ :
+    // ï¿½ï¿½ï¿½ :
 
 
-    // ½Éº¼ Å×ÀÌºí ±â´É
-    // 1. Æ¯Á¤ Å¬·¡½ºÀÇ ³×ÀÓ ½ºÆäÀÌ½ºÇ® ºÒ·¯¿À±â
-    // 2. enum, class, interfaceÀÇ »ó´ëÀû Çì´õÆÄÀÏ ºÒ·¯¿À±â <- ¾È¿¡ ³ÖÀÚ..
+    // ï¿½Éºï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½
+    // 1. Æ¯ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½Ç® ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½
+    // 2. enum, class, interfaceï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ <- ï¿½È¿ï¿½ ï¿½ï¿½ï¿½ï¿½..
 
-    // 1. Àü¿ª ÀüÃ³¸®
-    // 1.1. Áßº¹ Æ÷ÇÔ ¹æÁö Ç® »ý¼º
-    // 1.2. °øÅë Çì´õ¸¦ Çì´õ Ç®¿¡ ³Ö±â. (¸Þ¸ð¸®Ç® Åä±Û ÅëÇØ °­Á¦ Æ÷ÇÔ), ¸Þ¸ð¸®, ½ºÆ®¸µ ¹«Á¶°Ç Æ÷ÇÔ
-    // 1.3. ³×ÀÓ ½ºÆäÀÌ½º Ç® »ý¼º (½Éº¼Å×ÀÌºí¿¡¼­ °¡Áö°í ¿Í¾ßÇÒµí)
+    // 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã³ï¿½ï¿½
+    // 1.1. ï¿½ßºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ç® ï¿½ï¿½ï¿½ï¿½
+    // 1.2. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½Ö±ï¿½. (ï¿½Þ¸ï¿½Ç® ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½), ï¿½Þ¸ï¿½, ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // 1.3. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ Ç® ï¿½ï¿½ï¿½ï¿½ (ï¿½Éºï¿½ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Í¾ï¿½ï¿½Òµï¿½)
 
-    // 2.Å¬·¡½º ÀüÃ³¸®
-    // 2.1 Å¬·¡½º ÀÌ¸§ °¡Á®¿À±â
-    // 2.2 º£ÀÌ½º ÀÎÅÍÆäÀÌ½º ¹× Å¬·¡½º¿¡¼­ ÇÊ¿äÇÑ °Å ½×±â
-    // 2.2.1 º£ÀÌ½º ÀÎÅÍÆäÀÌ½º ¹× Å¬·¡½º ÆÄÀÏ °æ·Î¸¦ Çì´õÇ®¿¡ Ãß°¡
-    // 2.2.2 º£ÀÌ½º¿¡ ÀÖ´Â ÇÁ·ÎÆÛÆ¼ ºÒ·¯¼­ º£ÀÌ½º ÇÁ·ÎÆÛÆ¼ Ç®¿¡ ³Ö±â
-    // 2.2.3 º£ÀÌ½º¿¡ ÀÖ´Â ¸Þ¼Òµå ºÒ·¯¼­ º£ÀÌ½º ¸Þ¼Òµå Ç®¿¡ ³Ö±â
-    // 2.2.3.1 º£ÀÌ½º¿¡ ÀÖ´Â ¸Þ¼ÒµåÀÇ ÆÄ¶ó¹ÌÅÍ, ÇÁ·ÎÆÛÆ¼¿¡¼­
-    //         enum, class, interface Å¸ÀÔÀÌ ÀÖÀ¸¸é ÇØ´ç Å¸ÀÔÀÇ À§Ä¡¸¦ Çì´õÇ®¿¡ ³Ö±â
-    // 2.3 º»ÀÎÀÇ ¸Þ¼Òµå ÇÁ·ÎÆÛÆ¼ ºÒ·¯¼­ ÇÁ·ÎÆÛÆ¼ Ç®¿¡ ³Ö±â
-    // 2.3.1 ÇÁ·ÎÆÛÆ¼ÀÇ Å¸ÀÔÀÌ Å¬·¡½º, ÀÎÅÍÆäÀÌ½º, enumÀÌ¸é Çì´õ Ç®¿¡ À§Ä¡ ³Ö±â
-    // 2.4 ¸Þ¼Òµå Ç®¿¡ »ý¼ºÀÚ°¡ µû·Î ¾øÀ¸¸é ±âº» »ý¼ºÀÚ ³Ö±â
+    // 2.Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã³ï¿½ï¿½
+    // 2.1 Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    // 2.2 ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½×±ï¿½
+    // 2.2.1 ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½Ç®ï¿½ï¿½ ï¿½ß°ï¿½
+    // 2.2.2 ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½Ò·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ Ç®ï¿½ï¿½ ï¿½Ö±ï¿½
+    // 2.2.3 ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Þ¼Òµï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½Þ¼Òµï¿½ Ç®ï¿½ï¿½ ï¿½Ö±ï¿½
+    // 2.2.3.1 ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Þ¼Òµï¿½ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½ï¿½
+    //         enum, class, interface Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Ç®ï¿½ï¿½ ï¿½Ö±ï¿½
+    // 2.3 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼Òµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½Ò·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ Ç®ï¿½ï¿½ ï¿½Ö±ï¿½
+    // 2.3.1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½, enumï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ Ç®ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½Ö±ï¿½
+    // 2.4 ï¿½Þ¼Òµï¿½ Ç®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½
     // 2.4.1
-    // 2.4 base ÇÁ·ÎÆÛÆ¼ Ç®°ú  private data »ý¼ºÇØ¼­ ½×±â
-    // 2.5 enum Ç®¿¡ ³Ö±â
+    // 2.4 base ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ Ç®ï¿½ï¿½  private data ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½×±ï¿½
+    // 2.5 enum Ç®ï¿½ï¿½ ï¿½Ö±ï¿½
 
-    // 3. ¾²±â
-    // 3.1 Áßº¹ Æ÷ÇÔ ¹æÁö ¿­±â
-    //  3.2 Çì´õ Ç® ³Ö±â
-    //   3.3 ³×ÀÓ½ºÆäÀÌ½º ¿­±â
-    //    3.4 Å¬·¡½º ÀÌ¸§, º£ÀÌ½º Å¬·¡½º ¹× ÀÎÅÍÆäÀÌ½º ³Ö°í ¿­±â
-    //     3.5 »ý¼ºÀÚ, ¼Ò¸êÀÚ ³Ö±â
-    //     3.6 º£ÀÌ½º ÇÁ·ÎÆÛÆ¼ ÇÔ¼ö ³Ö±â
-    //     3.7 ÇÁ·ÎÆÛÆ¼ ³Ö±â
-    //     3.7 º£ÀÌ½º ¸Þ¼Òµå ³Ö±â
-    //     3.8 ¸Þ¼Òµå ³Ö±â
-    //     3.9 private¿¡ ÇÁ·ÎÆÛÆ¼ µ¥ÀÌÅÍ ³Ö±â
-    //    3.4 Å¬·¡½º ´Ý±â
-    //   3.3 ³×ÀÓ½ºÆäÀÌ½º ´Ý±â
-    //  3.2 Çì´õ Ç® ´Ý±â
-    // 3.1 Áßº¹ Æ÷ÇÔ ¹æÁö ´Ý±â
+    // 3. ï¿½ï¿½ï¿½ï¿½
+    // 3.1 ï¿½ßºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //  3.2 ï¿½ï¿½ï¿½ Ç® ï¿½Ö±ï¿½
+    //   3.3 ï¿½ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //    3.4 Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½, ï¿½ï¿½ï¿½Ì½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //     3.5 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Ò¸ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½
+    //     3.6 ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½Ô¼ï¿½ ï¿½Ö±ï¿½
+    //     3.7 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½Ö±ï¿½
+    //     3.7 ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½Þ¼Òµï¿½ ï¿½Ö±ï¿½
+    //     3.8 ï¿½Þ¼Òµï¿½ ï¿½Ö±ï¿½
+    //     3.9 privateï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½
+    //    3.4 Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½Ý±ï¿½
+    //   3.3 ï¿½ï¿½ï¿½Ó½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½Ý±ï¿½
+    //  3.2 ï¿½ï¿½ï¿½ Ç® ï¿½Ý±ï¿½
+    // 3.1 ï¿½ßºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ý±ï¿½
 
 */
     SourceStream ss;
@@ -696,6 +715,39 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createFor
     }
 }
 
+SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCallbackFileContent(const SymbolCallback& callback)
+{
+    SourceStream ss;
+
+    {
+        HeaderGuardCXXSourceScopedStream headerguard_scope{ ss, callback.parentModules, callback.name };
+
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "cstdint" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "vector" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "string" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "memory" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
+
+        {
+            NamespaceCXXSourceScopedStream namespace_scope{ ss, callback.parentModules };
+            createCXXComment(ss, callback);
+            createCallbackDefinition(ss, callback);
+        }
+    }
+
+    return ss;
+}
+
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnumDefinition(SourceStream& ss, const SymbolEnum& object)
 {
     {
@@ -706,6 +758,12 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnu
         }
     }
 }
+
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCallbackDefinition(SourceStream&ss, const SymbolCallback& callback)
+{
+
+}
+
 static ParameterNode createParameter(const SymbolParameter& parameter)
 {
     int io;

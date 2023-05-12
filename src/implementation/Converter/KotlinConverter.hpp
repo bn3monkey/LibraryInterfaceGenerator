@@ -57,6 +57,17 @@ namespace LibraryInterfaceGenerator
                 comment.addBrief(object.description);
             }
         }
+        inline void createKotlinComment(SourceStream& ss, const SymbolCallback& object)
+        {
+            {
+                CommentKotlinSourceStream comment{ ss };
+                comment.addBrief(object.description);
+                for (auto& parameter : object.parameters)
+                {
+                    comment.addParameter((parameter->io == SymbolParameter::IO::IN ? true : false), parameter->name, parameter->name);
+                }
+            }
+        }
 
 		inline std::string createKotlinWrapperScope(const SymbolClass& clazz)
 		{
@@ -89,6 +100,8 @@ namespace LibraryInterfaceGenerator
 			}
 			return scope;
 		}
+
+       
 	}
 }
 #endif

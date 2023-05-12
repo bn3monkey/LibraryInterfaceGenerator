@@ -91,6 +91,7 @@ namespace LibraryInterfaceGenerator
             Result createEnumFile(const SymbolEnum& object, std::string& parent_include_path);
             Result createMethodFile(const SymbolModule& object, std::string& parent_include_path, std::string& parent_src_path);
             Result createIncludeFile(const SymbolPackage& package, std::string& parent_include_path);
+            Result createCallbackFile(const SymbolCallback& object, std::string& parent_include_path);
 
             // 2. Interface 전문 제작
             SourceStream createInterfaceFileContent(const SymbolClass& object);
@@ -109,17 +110,16 @@ namespace LibraryInterfaceGenerator
             // 6. 전체 파일의 include file
             SourceStream createIncludeFileContent(const SymbolPackage& package, const std::vector<std::string>& include_files);
 
-            // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolClass& object);
-            // void addForwardDeclaration(std::stringstream& ss, std::string& indent, const SymbolModule& object);
-
             void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
 
+            SourceStream createCallbackFileContent(const SymbolCallback& callback);
 
             // 7. Code Block 제작
             
             // Enum Block 생성
             void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
+            void createCallbackDefinition(SourceStream&ss, const SymbolCallback& callback);
 
             // Method Block 생성
             void createStaticMethodDeclaration(SourceStream& ss, const SymbolMethod& object);

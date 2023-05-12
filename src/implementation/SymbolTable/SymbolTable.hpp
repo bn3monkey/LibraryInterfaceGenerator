@@ -12,6 +12,7 @@
 #include "Symbol/SymbolParameter.hpp"
 #include "Symbol/SymbolProperty.hpp"
 #include "Symbol/SymbolMethod.hpp"
+#include "Symbol/SymbolCallback.hpp"
 
 #include "../Auxiliary/Definition.hpp"
 

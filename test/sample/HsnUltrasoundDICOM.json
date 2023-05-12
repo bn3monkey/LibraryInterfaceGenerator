@@ -180,7 +180,8 @@
                             "order" : "property",
                             "name" : "tls",
                             "description" : "whether Transport layer transmission is enable or not.\nDefault value is \"false\"",
-                            "type" : "bool"
+                            "type" : "bool",
+                            "readonly" : false
                         }
                     ]
                 },
