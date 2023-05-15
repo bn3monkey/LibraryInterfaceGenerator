@@ -6,6 +6,7 @@ LibraryInterfaceGenerator::Implementation::SymbolPackage::SymbolPackage(
 	const nlohmann::json& object,
 	SymbolObjectTable& objectTable, 
 	SymbolEnumTable& enumTable, 
+	SymbolCallbackTable& callbackTable,
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes)
 {
 	_result = Result(Result::Code::SUCCESS);
@@ -64,7 +65,7 @@ LibraryInterfaceGenerator::Implementation::SymbolPackage::SymbolPackage(
 			{
 				std::vector<std::string> paths = { name };
 
-				auto tempModule = std::make_shared<SymbolModule>( child, paths, objectTable, enumTable, hasTypes );
+				auto tempModule = std::make_shared<SymbolModule>( child, paths, objectTable, enumTable, callbackTable, hasTypes );
 				_result = tempModule->toResult();
 				if (!_result)
 					return;

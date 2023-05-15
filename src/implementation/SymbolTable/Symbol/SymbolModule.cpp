@@ -6,7 +6,8 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 	const nlohmann::json& object, 
 	std::vector<std::string>& parentModules,
 	SymbolObjectTable& objectTable, 
-	SymbolEnumTable& enumTable, 
+	SymbolEnumTable& enumTable,
+	SymbolCallbackTable& callbackTable,
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes)
 {
 	std::unordered_map<std::string, int> method_name_map;
@@ -145,7 +146,8 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 					moduleNames,
 					hasTypes,
 					_object_references,
-					_enum_references
+					_enum_references,
+					_callback_references
 				);
 
 				_result = tempMethod->toResult();
@@ -176,6 +178,7 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 					moduleNames,
 					objectTable,
 					enumTable,
+					callbackTable,
 					hasTypes
 					);
 
@@ -184,6 +187,21 @@ LibraryInterfaceGenerator::Implementation::SymbolModule::SymbolModule(
 					return;
 
 				submodules.push_back(tempModule);
+			}
+			else if (order == Order::Callback)
+			{
+				auto tempCallback = std::make_shared<SymbolCallback>(
+					child,
+					moduleNames,
+					hasTypes
+					);
+				_result = tempCallback->toResult();
+				if (!_result)
+					return;
+
+				callbacks.push_back(tempCallback);
+				hasTypes.push_back(tempCallback);
+				addCallbackTable(callbackTable, tempCallback);
 			}
 			else
 			{
@@ -208,6 +226,16 @@ std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObjec
 {
 	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
 	for (auto& reference : _enum_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolModule::collectAllCallbackReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _callback_references)
 	{
 		ret.push_back(reference);
 	}
@@ -246,4 +274,16 @@ void LibraryInterfaceGenerator::Implementation::SymbolModule::addObjectTable(Sym
 	}
 	key += value->name;
 	objectTable[key] = value;
+}
+
+void LibraryInterfaceGenerator::Implementation::SymbolModule::addCallbackTable(SymbolCallbackTable& callbackTable, std::shared_ptr<SymbolCallback>& value)
+{
+	std::string key{ "" };
+	for (auto& moduleName : value->parentModules)
+	{
+		key += moduleName;
+		key += "/";
+	}
+	key += value->name;
+	callbackTable[key] = value;
 }

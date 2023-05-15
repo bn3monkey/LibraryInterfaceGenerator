@@ -7,11 +7,12 @@ LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 	const std::vector<std::string>& module_paths, 
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes,
 	ObjectReferenceSet& parentObjectReferenceSet,
-	EnumReferenceSet& parentEnumReferenceSet) : parentModules(module_paths)
+	EnumReferenceSet& parentEnumReferenceSet,
+	CallbackReferenceSet& parentCallbackReferenceSet) : parentModules(module_paths)
 {
 	_result = Result(Result::Code::SUCCESS);
 
-	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet);
+	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet, &parentCallbackReferenceSet);
 	
 
 	{
@@ -80,7 +81,8 @@ LibraryInterfaceGenerator::Implementation::SymbolMethod::SymbolMethod(
 				auto tempParameter = std::make_shared<SymbolParameter>(
 					child,
 					parentObjectReferenceSet,
-					parentEnumReferenceSet
+					parentEnumReferenceSet,
+					parentCallbackReferenceSet
 					);
 				_result = tempParameter->toResult();
 				if (!_result)

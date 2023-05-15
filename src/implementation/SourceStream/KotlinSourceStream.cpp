@@ -221,7 +221,7 @@ void LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::addDe
 }
 void LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::addBrief(const std::string& brief)
 {
-	_stream << " * \\brief : " << brief << "\n";
+	_stream << " * \\brief :\n";
 	auto descriptions = tokenize(brief);
 	for (auto& line : descriptions)
 	{
@@ -379,4 +379,15 @@ LibraryInterfaceGenerator::Implementation::InterfaceKotlinSourceScopedStream::~I
 {
 	if (_stream)
 		delete _stream;
+}
+
+LibraryInterfaceGenerator::Implementation::CallbackKotlinSourceStream::CallbackKotlinSourceStream(SourceStream& sourceStream, const std::string& name, const std::string& ret_type, const std::vector<std::string>& param_types)
+{	
+	sourceStream << "typealias " << name << " = (";
+	for (auto& param_type : param_types)
+	{
+		sourceStream << param_type << ", ";
+	}
+	sourceStream.pop(2);
+	sourceStream << ") -> " << ret_type << "\n";
 }

@@ -4,15 +4,11 @@ using namespace LibraryInterfaceGenerator::Implementation::Definition;
 
 LibraryInterfaceGenerator::Implementation::SymbolCallback::SymbolCallback(const nlohmann::json& object,
                 const std::vector<std::string>& module_paths,
-                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes,
-                ObjectReferenceSet& parentObjectReferenceSet,
-                EnumReferenceSet& parentEnumReferenceSet
+                std::vector<std::weak_ptr<HasSymbolType>>& hasTypes
                 ) : parentModules(module_paths)
 {
     _result = Result(Result::Code::SUCCESS);
-
-	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet);
-	
+		
 
 	{
 		auto iter = object.find(Field::Name);
@@ -69,8 +65,9 @@ LibraryInterfaceGenerator::Implementation::SymbolCallback::SymbolCallback(const 
 				//std::vector<std::string> paths = { name };
 				auto tempParameter = std::make_shared<SymbolParameter>(
 					child,
-					parentObjectReferenceSet,
-					parentEnumReferenceSet
+					_object_references,
+					_enum_references,
+					_callback_references
 					);
 				_result = tempParameter->toResult();
 				if (!_result)
@@ -86,4 +83,51 @@ LibraryInterfaceGenerator::Implementation::SymbolCallback::SymbolCallback(const 
 			}
 		}
 	}
+}
+
+std::string LibraryInterfaceGenerator::Implementation::SymbolCallback::getCppName() const
+{
+	std::string value{ "" };
+	for (auto& moduleName : parentModules)
+	{
+		value += moduleName;
+		value += "::";
+	}
+	value += name;
+	return value;
+}
+
+std::string LibraryInterfaceGenerator::Implementation::SymbolCallback::getKotlinName() const
+{
+	return name;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolCallback::collectAllClassReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _object_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolCallback::collectAllEnumReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _enum_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolCallback::collectAllCallbackReference() const
+{
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : _callback_references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
 }

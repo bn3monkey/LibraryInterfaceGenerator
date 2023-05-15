@@ -112,6 +112,7 @@ namespace LibraryInterfaceGenerator
 
             void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
+            void createForwardDeclaration(SourceStream& ss, const SymbolCallback& object);
 
             SourceStream createCallbackFileContent(const SymbolCallback& callback);
 

@@ -8,6 +8,20 @@
 std::mutex vm_mtx;
 JavaVM* g_vm {nullptr};
 
+template<typename ReturnType, typename... ParamTypes>
+inline std::function<ReturnType(ParamTypes...)> createNativeCallback(JNIEnv* env, jobject callback)
+{
+    {
+        std::lock_guard<std::mutex> lock(vm_mtx);
+        if (g_vm == nullptr)
+        {
+            env->GetJavaVM(&g_vm);
+        }
+    }
+
+    jobject globalRef = env->NewGlobalRef(reference);
+}
+
 inline std::function<void()> createNativeCallback(JNIEnv* env, jobject reference, jstring method_name)
 {
     {

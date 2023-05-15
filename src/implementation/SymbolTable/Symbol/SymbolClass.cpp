@@ -41,7 +41,7 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 	const std::vector<std::string>& module_paths, 
 	std::vector<std::string>& object_paths, 
 	SymbolObjectTable& objectTable, 
-	SymbolEnumTable& enumTable, 
+	SymbolEnumTable& enumTable,
 	std::vector<std::weak_ptr<HasSymbolType>>& hasTypes) : isInterface(isInterface), parentModules(module_paths), parentObjects(object_paths)
 {
 	std::unordered_map<std::string, int> method_name_map;
@@ -104,7 +104,8 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 			parentModules,
 			hasTypes,
 			_object_references,
-			_enum_references
+			_enum_references,
+			_callback_references
 			);
 
 		method_name_map["constructor"] = 0;
@@ -157,7 +158,8 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 					parentModules,
 					hasTypes,
 					_object_references,
-					_enum_references
+					_enum_references,
+					_callback_references
 					);
 
 				_result = tempMethod->toResult();
@@ -200,7 +202,8 @@ LibraryInterfaceGenerator::Implementation::SymbolClass::SymbolClass
 				auto tempProperty = std::make_shared<SymbolProperty>(
 					child,
 					_object_references,
-					_enum_references
+					_enum_references,
+					_callback_references
 					);
 
 				_result = tempProperty->toResult();
@@ -320,6 +323,33 @@ std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObjec
 		}
 	}
 	for (auto& reference : _enum_references)
+	{
+		references.insert(reference);
+	}
+
+	std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> ret;
+	for (auto& reference : references)
+	{
+		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObject>> LibraryInterfaceGenerator::Implementation::SymbolClass::collectAllCallbackReference() const
+{
+	ReferenceSet references;
+	for (auto& base : bases)
+	{
+		if (auto pBase = base.lock())
+		{
+			auto base_references = pBase->collectAllCallbackReference();
+			for (auto& reference : base_references)
+			{
+				references.insert(reference);
+			}
+		}
+	}
+	for (auto& reference : _callback_references)
 	{
 		references.insert(reference);
 	}

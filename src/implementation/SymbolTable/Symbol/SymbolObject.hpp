@@ -21,7 +21,8 @@ namespace LibraryInterfaceGenerator
             {
                 Interface,
                 Class,
-                Enum
+                Enum,
+                Callback
             };
 
             virtual Tag getTag() const = 0;
@@ -32,7 +33,7 @@ namespace LibraryInterfaceGenerator
 
         using SymbolObjectTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;
         using SymbolEnumTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;
-
+        using SymbolCallbackTable = std::unordered_map<std::string, std::weak_ptr<SymbolObject>>;
 
         class ReferenceComparaer
         {
@@ -54,20 +55,23 @@ namespace LibraryInterfaceGenerator
         using ReferenceSet = std::set<std::weak_ptr<SymbolObject>, ReferenceComparaer>;
         using EnumReferenceSet = ReferenceSet;
         using ObjectReferenceSet = ReferenceSet;
-
+        using CallbackReferenceSet = ReferenceSet;
 
         class HasReference // Global Method & Interface & Class & Callback
         {
         public:
             inline const EnumReferenceSet& getEnumReferences() { return _enum_references;  }
             inline const ObjectReferenceSet& getObjectReferences() { return _object_references; }
+            inline const CallbackReferenceSet& getCallbackReferences() { return _callback_references; }
 
             virtual std::vector<std::weak_ptr<SymbolObject>> collectAllClassReference() const = 0;
             virtual std::vector<std::weak_ptr<SymbolObject>> collectAllEnumReference() const = 0;
+            virtual std::vector<std::weak_ptr<SymbolObject>> collectAllCallbackReference() const = 0;
 
         protected:
             EnumReferenceSet _enum_references;
             ObjectReferenceSet _object_references;
+            CallbackReferenceSet _callback_references;
         };
 
         

@@ -457,3 +457,28 @@ TEST(KotlinSourceStream, PropertyKotlinSourceScopedStream)
 	}
 	return;
 }
+
+TEST(KotlinSourceStream, CallbackKotlinSourceStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	{
+		CallbackKotlinSourceStream callback{
+			ss,
+			"ACallback",
+			"Int",
+			{"ObjectA", "ObjectB", "Float"}
+		};
+	}
+
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"typealias ACallback = (ObjectA, ObjectB, Float) -> Int\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}

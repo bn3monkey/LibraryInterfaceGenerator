@@ -244,24 +244,28 @@
                             "order" : "parameter",
                             "name" : "current_image",
                             "description" : "Image currently being sent",
+                            "io" : "in",
                             "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage"
                         },
                         {
                             "order" : "parameter",
                             "name" : "num_of_total_images",
                             "description" : "The number of images in all queues that are currently sending",
+                            "io" : "in",
                             "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "num_of_sent_images",
                             "description" : "number of images sent",
+                            "io" : "in",
                             "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "result",
                             "description" : "result of current progress",
+                            "io" : "in",
                             "type" : "HsnUltrasoundDICOM/Type/Result"
                         }
                     ]
@@ -375,12 +379,12 @@
                         {
                             "order" : "method",
                             "name" : "registerProgressCallback",
-                            "description" : "Clear all images in the image queue.",
+                            "description" : "register progress callback",
                             "return" : "N/A",
                             "type" : "void",
                             "parameters" : [
                                 {
-                                    "order" : "method",
+                                    "order" : "parameter",
                                     "name" : "callback",
                                     "type" : "HsnUltrasoundDICOM/Service/StorageProgressCallback",
                                     "io" : "in",
@@ -391,7 +395,10 @@
                         {
                             "order" : "method",
                             "name" : "unregisterProgressCallback",
-                            "description" : ""
+                            "description" : "unregister progress callback",
+                            "return" : "N/A",
+                            "type" : "void",
+                            "parameters" : []
                         }
                     ]
                 },
@@ -784,7 +791,7 @@
                         "ISO_2022_IR_166/28/ISO 2022 IR 166",
                         "ISO_2022_IR_87/29/ISO 2022 IR 87",
                         "ISO_2022_IR_159/30/ISO 2022 IR 159",
-                        "ISO_IR_192/31",
+                        "ISO_IR_192/31/ISO IR 192",
                         "GB18030/32/GB18030",
                         "None/1000/None"
                     ]
@@ -1709,28 +1716,28 @@
                                 "name" : "minX",
                                 "readonly" : false,
                                 "description" : "region of start x",
-                                "type" : "uint32"
+                                "type" : "int32"
                             },
                             {
                                 "order" : "property",
                                 "name" : "minY",
                                 "readonly" : false,
                                 "description" : "region of start y",
-                                "type" : "uint32"
+                                "type" : "int32"
                             },
                             {
                                 "order" : "property",
                                 "name" : "maxX",
                                 "readonly" : false,
                                 "description" : "region of end x",
-                                "type" : "uint32"
+                                "type" : "int32"
                             },
                             {
                                 "order" : "property",
                                 "name" : "maxY",
                                 "readonly" : false,
                                 "description" : "region of end y",
-                                "type" : "uint32"
+                                "type" : "int32"
                             },
                             {
                                 "order" : "property",
@@ -1821,14 +1828,14 @@
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/Laterality",
                             "description" : "the laterality of the image.\nIf the series holding this image has laterality, this value becomes invalid.",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "laterality"  
                         },
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/Type/HsnDate",
                             "description" : "The date the image pixel data creation started.",
-                            "readonly" : "false",
+                            "readonly" : false,
                             "name" : "date"
                         },
                         {

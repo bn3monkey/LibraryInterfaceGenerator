@@ -4,8 +4,10 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 	const std::string& type,
 	const SymbolObjectTable& objectTable,
 	const SymbolEnumTable& enumTable,
+	const SymbolCallbackTable& callbackTable,
 	ObjectReferenceSet* objectReferenceSet,
-	EnumReferenceSet* enumReferenceSet)
+	EnumReferenceSet* enumReferenceSet,
+	CallbackReferenceSet* callbackReferenceSet)
 {
 	using namespace LibraryInterfaceGenerator::Implementation;
 	if (type == "void") {
@@ -104,6 +106,17 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 
 					return std::make_unique< SymbolTypeArray<SymbolTypeEnum>>(object);
 				}
+				auto callback_iter = callbackTable.find(inner_type);
+				if (callback_iter != callbackTable.end())
+				{
+					auto callback = callback_iter->second;
+					if (callbackReferenceSet != nullptr)
+					{
+						callbackReferenceSet->insert(callback);
+					}
+
+					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback);
+				}
 			}
 		}
 		else if (hasPrefix(type, "vector<") && hasPostfix(type, ">"))
@@ -163,6 +176,18 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 					}
  					return std::make_unique< SymbolTypeVector<SymbolTypeEnum>>(object);
 				}
+
+				auto callback_iter = callbackTable.find(inner_type);
+				if (callback_iter != callbackTable.end())
+				{
+					auto callback = callback_iter->second;
+					if (callbackReferenceSet != nullptr)
+					{
+						callbackReferenceSet->insert(callback);
+					}
+
+					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback);
+				}
 			}
 		}
 		else
@@ -187,14 +212,26 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				}
 				return std::make_unique<SymbolTypeEnum>(object);
 			}
+
+			auto callback_iter = callbackTable.find(type);
+			if (callback_iter != callbackTable.end())
+			{
+				auto callback = callback_iter->second;
+				if (callbackReferenceSet != nullptr)
+				{
+					callbackReferenceSet->insert(callback);
+				}
+
+				return std::make_unique< SymbolTypeCallback>(callback);
+			}
 		}
 	}
 	return std::make_unique<SymbolType>();
 }
 
-LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::HasSymbolType::change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable)
+LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::HasSymbolType::change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable, SymbolCallbackTable& callbackTable)
 {
-	type = LibraryInterfaceGenerator::Implementation::makeType(_type, objectTable, enumTable, _objectReferenceSet, _enumReferenceSet);
+	type = LibraryInterfaceGenerator::Implementation::makeType(_type, objectTable, enumTable, callbackTable, _objectReferenceSet, _enumReferenceSet, _callbackReferenceSet);
 	if (type->valid())
 	{
 		_type.clear();
@@ -206,8 +243,9 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::HasSymbolType::registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet)
+void LibraryInterfaceGenerator::Implementation::HasSymbolType::registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet, CallbackReferenceSet* callbackReferenceSet)
 {
 	_objectReferenceSet = objectReferenceSet;
 	_enumReferenceSet = enumReferenceSet;
+	_callbackReferenceSet = callbackReferenceSet;
 }

@@ -25,6 +25,7 @@ namespace LibraryInterfaceGenerator
             explicit SymbolPackage(const nlohmann::json& object,
                 SymbolObjectTable& objectTable,
                 SymbolEnumTable& enumTable,
+                SymbolCallbackTable& callbackTable,
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
         };
     }

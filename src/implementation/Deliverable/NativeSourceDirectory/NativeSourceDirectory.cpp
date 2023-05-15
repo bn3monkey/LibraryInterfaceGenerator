@@ -115,6 +115,14 @@ Result NativeSourceDirectory::createModule(const SymbolModule& object, std::stri
             return result;
     }
 
+    auto& callbacks = object.callbacks;
+    for (auto& callback : callbacks)
+    {
+        auto result = createCallbackFile(*callback, include_path);
+        if (!result)
+            return result;
+    }
+
     return result;
 }
 
@@ -281,6 +289,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         ExternalIncludeCXXSourceStream ex2{ ss, "vector" };
         ExternalIncludeCXXSourceStream ex3{ ss, "string" };
         ExternalIncludeCXXSourceStream ex4{ ss, "memory" };
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
 
         createForwardDeclaration(ss, object);
 
@@ -393,6 +404,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         }
         {
             ExternalIncludeCXXSourceStream ex{ ss, "memory" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "functional" };
         }
 
         std::vector<std::string> base_classes_names;
@@ -592,6 +606,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         {
             ExternalIncludeCXXSourceStream ex{ ss, "memory" };
         }
+        {
+            ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
 
         createForwardDeclaration(ss, object);
 
@@ -684,6 +701,20 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createFor
             }
         }
     }
+
+    {
+        auto callback_objects = object.collectAllCallbackReference();
+        for (auto& w_callback_object : callback_objects)
+        {
+            if (auto callback_object = w_callback_object.lock())
+            {
+                auto callback = std::dynamic_pointer_cast<SymbolCallback>(callback_object);
+                NamespaceCXXSourceScopedStream namespace_scope(ss, callback->parentModules);
+                createCallbackDefinition(ss, *callback);
+            }
+        }
+    }
+
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createForwardDeclaration(SourceStream& ss, const SymbolModule& object)
@@ -710,6 +741,61 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createFor
                 auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enum_object);
                 NamespaceCXXSourceScopedStream namespace_scope(ss, enumm->parentModules);
                 EnumCXXSourceScopedStream enum_scope{ ss, true, enumm->name };
+            }
+        }
+    }
+
+    {
+        auto callback_objects = object.collectAllCallbackReference();
+        for (auto& w_callback_object : callback_objects)
+        {
+            if (auto callback_object = w_callback_object.lock())
+            {
+                auto callback = std::dynamic_pointer_cast<SymbolCallback>(callback_object);
+                NamespaceCXXSourceScopedStream namespace_scope(ss, callback->parentModules);
+                createCallbackDefinition(ss, *callback);
+            }
+        }
+    }
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createForwardDeclaration(SourceStream& ss, const SymbolCallback& object)
+{
+    {
+        auto class_objects = object.collectAllClassReference();
+        for (auto& w_class_object : class_objects)
+        {
+            if (auto class_object = w_class_object.lock())
+            {
+                auto clazz = std::dynamic_pointer_cast<SymbolClass>(class_object);
+                NamespaceCXXSourceScopedStream namespace_scope{ ss, clazz->parentModules };
+                ClassCXXSourceScopedStream class_scope{ ss, true, clazz->name, {} };
+            }
+        }
+    }
+
+    {
+        auto enum_objects = object.collectAllEnumReference();
+        for (auto& w_enum_object : enum_objects)
+        {
+            if (auto enum_object = w_enum_object.lock())
+            {
+                auto enumm = std::dynamic_pointer_cast<SymbolEnum>(enum_object);
+                NamespaceCXXSourceScopedStream namespace_scope(ss, enumm->parentModules);
+                EnumCXXSourceScopedStream enum_scope{ ss, true, enumm->name };
+            }
+        }
+    }
+
+    {
+        auto callback_objects = object.collectAllCallbackReference();
+        for (auto& w_callback_object : callback_objects)
+        {
+            if (auto callback_object = w_callback_object.lock())
+            {
+                auto callback = std::dynamic_pointer_cast<SymbolCallback>(callback_object);
+                NamespaceCXXSourceScopedStream namespace_scope(ss, callback->parentModules);
+                createCallbackDefinition(ss, *callback);
             }
         }
     }
@@ -761,7 +847,20 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createEnu
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCallbackDefinition(SourceStream&ss, const SymbolCallback& callback)
 {
+    std::vector<std::string> param_types;
+    for (auto& param : callback.parameters)
+    {
+        param_types.push_back(param->type->toCppType());
+    }
 
+    {
+        CallbackCXXSourceStream callback_scope{
+            ss,
+            callback.name,
+            callback.type->toCppType(),
+            param_types
+        };
+    }
 }
 
 static ParameterNode createParameter(const SymbolParameter& parameter)

@@ -7,11 +7,12 @@ using namespace LibraryInterfaceGenerator::Implementation::Definition;
 LibraryInterfaceGenerator::Implementation::SymbolParameter::SymbolParameter
 	(const nlohmann::json& object,
 		ObjectReferenceSet& parentObjectReferenceSet,
-		EnumReferenceSet& parentEnumReferenceSet)
+		EnumReferenceSet& parentEnumReferenceSet,
+		CallbackReferenceSet& paraentCallbackReferenceSet)
 {
 	_result = Result(Result::Code::SUCCESS);
 
-	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet);
+	registerReferenceSet(&parentObjectReferenceSet, &parentEnumReferenceSet, &paraentCallbackReferenceSet);
 
 	{
 		auto iter = object.find(Field::Name);

@@ -107,6 +107,7 @@ namespace LibraryInterfaceGenerator
             return prefix;
         }
 
+
         inline std::string createRelativeHeaderPath(const SymbolClass& src, const SymbolClass& dest)
         {
             std::string path;

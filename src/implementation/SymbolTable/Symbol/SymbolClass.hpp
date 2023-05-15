@@ -8,6 +8,7 @@
 #include "SymbolProperty.hpp"
 #include "SymbolEnum.hpp"
 #include "SymbolMethod.hpp"
+#include "SymbolCallback.hpp"
 #include <memory>
 #include <string>
 #include <utility>
@@ -37,7 +38,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::pair<std::shared_ptr<SymbolMethod>, int>> getBaseMethods() const;
             std::vector<std::shared_ptr<SymbolProperty>> getBaseProperties() const;
-
+            
             explicit SymbolClass(const nlohmann::json& object,
                 bool isInterface,
                 const std::vector<std::string>& module_paths,
@@ -54,7 +55,7 @@ namespace LibraryInterfaceGenerator
 
             std::vector<std::weak_ptr<SymbolObject>> collectAllClassReference() const override;
             std::vector<std::weak_ptr<SymbolObject>> collectAllEnumReference() const override;
-
+            std::vector<std::weak_ptr<SymbolObject>> collectAllCallbackReference() const override;
         private:
             std::vector<std::string> _bases;
 

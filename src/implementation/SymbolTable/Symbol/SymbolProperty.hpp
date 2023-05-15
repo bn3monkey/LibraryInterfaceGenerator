@@ -25,7 +25,8 @@ namespace LibraryInterfaceGenerator
 
             explicit SymbolProperty(const nlohmann::json& object, 
                 ObjectReferenceSet& parentobjectReferenceSet,
-                EnumReferenceSet& parentEnumReferenceSet
+                EnumReferenceSet& parentEnumReferenceSet,
+                CallbackReferenceSet& parentCallbackReferenceSet
                 );
 
         };

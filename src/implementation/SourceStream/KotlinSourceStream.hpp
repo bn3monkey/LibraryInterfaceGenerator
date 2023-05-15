@@ -193,6 +193,13 @@ namespace LibraryInterfaceGenerator
             SourceStream& _stream;
             std::vector<std::string> tokenize(const std::string& description);
         };
+
+        class CallbackKotlinSourceStream
+        {
+        public:
+            explicit CallbackKotlinSourceStream(SourceStream& sourceStream, const std::string& name, const std::string& ret_type, const std::vector<std::string>& param_types);
+            virtual ~CallbackKotlinSourceStream() {}
+        };
     }
 }
 

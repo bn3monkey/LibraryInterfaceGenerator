@@ -527,3 +527,28 @@ TEST(CXXSourceStream, CallCXXSourceScopedStream)
 	}
 	return;
 }
+
+TEST(CXXSourceStream, CallbackCXXSourceStream)
+{
+	using namespace LibraryInterfaceGenerator::Implementation;
+	SourceStream ss;
+
+	{
+		CallbackCXXSourceStream callback{
+			ss,
+			"ACallback",
+			"int32_t",
+			{"ObjectA", "ObjectB", "float"}
+		};
+	}
+
+	{
+		const char* result = ss.str();
+		EXPECT_STREQ(result,
+			"using ACallback = std::function<int32_t(ObjectA, ObjectB, float)>;\n"
+		);
+		printf(result);
+		ss.clear();
+	}
+	return;
+}

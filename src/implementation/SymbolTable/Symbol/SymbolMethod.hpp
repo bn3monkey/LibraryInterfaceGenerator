@@ -31,7 +31,8 @@ namespace LibraryInterfaceGenerator
                 const std::vector<std::string>& module_paths,
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes,
                 ObjectReferenceSet& parentObjectReferenceSet,
-                EnumReferenceSet& parentEnumReferenceSet
+                EnumReferenceSet& parentEnumReferenceSet,
+                CallbackReferenceSet& parentCallbackReferenceSet
                 );
         };
     }

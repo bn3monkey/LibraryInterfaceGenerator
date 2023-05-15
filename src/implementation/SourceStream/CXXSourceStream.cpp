@@ -352,7 +352,7 @@ void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addDescr
 
 void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addBrief(const std::string& brief)
 {
-	_stream << " * \\brief : " << brief << "\n";
+	_stream << " * \\brief : \n";
 	auto descriptions = tokenize(brief);
 	for (auto& line : descriptions)
 	{

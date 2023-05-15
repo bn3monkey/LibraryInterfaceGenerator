@@ -29,6 +29,7 @@ namespace LibraryInterfaceGenerator
                 STRING,
                 ENUM,
                 OBJECT,
+                CALLBACK,
 
                 BOOLARRAY,
                 INT8ARRAY,
@@ -40,6 +41,7 @@ namespace LibraryInterfaceGenerator
                 STRINGARRAY,
                 ENUMARRAY,
                 OBJECTARRAY,
+                CALLBACKARRAY,
 
                 BOOLVECTOR,
                 INT8VECTOR,
@@ -51,6 +53,7 @@ namespace LibraryInterfaceGenerator
                 STRINGVECTOR,
                 ENUMVECTOR,
                 OBJECTVECTOR,
+                CALLBACKVECTOR
             };
 
             virtual Name getTypeName() {return Name::INVALID;}
@@ -292,7 +295,57 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinInnerType() override {
                 if (auto object = _obj.lock())
                 {
+                    return object->getKotlinName();
+                }
+                return "";
+            }
+        private:
+            std::weak_ptr<SymbolObject> _obj;
+        };
+
+        class SymbolTypeCallback : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
+            bool isPrimitive() override { return false; }
+            bool requiredDeclaration() override { return true; }
+
+            Name getTypeName() override { return Name::CALLBACK; }
+            SymbolTypeCallback(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
+            std::string toCppType() override {
+                if (auto object = _obj.lock())
+                {
+                    std::string ret = object->getCppName();
+                    return ret;
+                }
+                return "";
+            }
+            std::string toCppInterfaceType() override { return "void*"; }
+            std::string toJNIType() override {
+                return "jobject";
+            }
+            std::string toKotlinWrapperType() override { return "Any"; }
+            std::string toKotlinType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto ret = object->getKotlinName();
+                    return ret;
+                }
+                return "";
+            }
+
+            std::string toCppInnerType() override {
+                if (auto object = _obj.lock())
+                {
                     return object->getCppName();
+                }
+                return "";
+            }
+            std::string toCppInterfaceInnerType() override { return "void*"; }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
                 }
                 return "";
             }
@@ -614,6 +667,63 @@ namespace LibraryInterfaceGenerator
             std::weak_ptr<SymbolObject> _obj;
         };
 
+        template<>
+        class SymbolTypeArray<SymbolTypeCallback> : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
+            bool isPrimitive() override { return false; }
+            bool requiredDeclaration() override { return true; }
+
+            Name getTypeName() override { return Name::CALLBACKARRAY; }
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
+            std::string toCppType() override {
+                if (auto object = _obj.lock())
+                {
+                    std::string ret = "std::vector<";
+                    ret += object->getCppName();
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
+            std::string toJNIType() override {
+                return "jobjectArray";
+            }
+            std::string toKotlinWrapperType() override { return "Array<Any>"; }
+            std::string toKotlinType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto name = object->getKotlinName();
+                    std::string ret{ "Array<" };
+                    ret += name;
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+
+            using InnerType = SymbolTypeCallback;
+            std::string toCppInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getCppName();
+                }
+                return "";
+            }
+            std::string toCppInterfaceInnerType() override { return "void*"; }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
+            }
+        private:
+            std::weak_ptr<SymbolObject> _obj;
+        };
+
         template<class T>
         class SymbolTypeVector : SymbolType
         {
@@ -923,25 +1033,85 @@ namespace LibraryInterfaceGenerator
             std::weak_ptr<SymbolObject> _obj;
         };
 
+        template<>
+        class SymbolTypeVector<SymbolTypeCallback> : public SymbolType
+        {
+        public:
+            bool valid() override { return true; }
+            bool isPrimitive() override { return false; }
+            bool requiredDeclaration() override { return true; }
+
+            Name getTypeName() override { return Name::CALLBACKVECTOR; }
+            SymbolTypeVector(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
+            std::string toCppType() override {
+                if (auto object = _obj.lock())
+                {
+                    std::string ret = "std::vector<";
+                    ret += object->getCppName();
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
+            std::string toJNIType() override {
+                return "jobject";
+            }
+            std::string toKotlinWrapperType() override { return "MutableList<Any>"; }
+            std::string toKotlinType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto name = object->getKotlinName();
+                    std::string ret{ "MutableList<" };
+                    ret += name;
+                    ret += ">";
+                    return ret;
+                }
+                return "";
+            }
+
+            using InnerType = SymbolTypeCallback;
+            std::string toCppInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getCppName();
+                }
+                return "";
+            }
+            std::string toCppInterfaceInnerType() override { return "void*"; }
+            std::string toKotlinInnerType() override {
+                if (auto object = _obj.lock())
+                {
+                    return object->getKotlinName();
+                }
+                return "";
+            }
+        private:
+            std::weak_ptr<SymbolObject> _obj;
+        };
+
         std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> makeType(
             const std::string& type,
             const SymbolObjectTable& objectTable,
             const SymbolEnumTable& enumTable,
+            const SymbolCallbackTable& callbackTable,
             ObjectReferenceSet* objectReferenceSet,
-            EnumReferenceSet* enumReferenceSet
+            EnumReferenceSet* enumReferenceSet,
+            CallbackReferenceSet* callbackReferenceSet
             );
 
         class HasSymbolType
         {
         public:
             std::unique_ptr<SymbolType> type;
-            Result change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable);
-            void registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet);
+            Result change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable, SymbolCallbackTable& callbackTable);
+            void registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet, CallbackReferenceSet* callbackReferenceSet);
         
         protected:
             std::string _type;
             ObjectReferenceSet* _objectReferenceSet{ nullptr };
             EnumReferenceSet* _enumReferenceSet{ nullptr };
+            CallbackReferenceSet* _callbackReferenceSet{ nullptr };
         };
 
     }

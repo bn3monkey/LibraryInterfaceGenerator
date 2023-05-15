@@ -22,12 +22,14 @@ LibraryInterfaceGenerator::Implementation::SymbolTable::SymbolTable(const nlohma
 
 	SymbolObjectTable objectTable;
 	SymbolEnumTable enumTable;
+	SymbolCallbackTable callbackTable;
 	std::vector<std::weak_ptr<HasSymbolType>> hasTypes;
 
 	_package = std::make_shared<LibraryInterfaceGenerator::Implementation::SymbolPackage>(
 		object,
 		objectTable,
 		enumTable,
+		callbackTable,
 		hasTypes
 		);
 
@@ -41,7 +43,7 @@ LibraryInterfaceGenerator::Implementation::SymbolTable::SymbolTable(const nlohma
 	{
 		if (auto hasType = hasTypePtr.lock())
 		{
-			_result = hasType->change(objectTable, enumTable);
+			_result = hasType->change(objectTable, enumTable, callbackTable);
 			if (!_result)
 			{
 				return;
