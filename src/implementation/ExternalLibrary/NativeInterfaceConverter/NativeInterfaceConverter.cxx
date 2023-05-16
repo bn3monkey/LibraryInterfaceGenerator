@@ -2,6 +2,8 @@
 #include <vector>
 #include <functional>
 #include <string>
+#include <algorithm>
+#include <iterator>
 
 #ifdef __BN3MONKEY_MEMORY_POOL__
 static Bn3Monkey::Bn3Container::vector<std::function<void()>> releasers { Bn3Monkey::Bn3Allocator<std::function<void()>>(Bn3Monkey::Bn3Tag("releasers")) };
@@ -31,61 +33,142 @@ void releaseNativeInterface()
 #endif
 }
 
-template<class T, class ...Args>
-inline void* createReference(Args... args)
+template<class T>
+class ReferenceConverter
 {
+public:
+
+	using Instance = std::shared_ptr<T>;
+	using LibraryReference = Instance*; 
+	using Reference = void*;
+
+	using ReferenceCast = reinterpret_cast<Reference>;
+	using LibraryReferenceCast = reinterpret_cast<LibraryReference>;
+
+	template<class ...Args>
+	static Reference create(Args... args)
+	{
+		LibraryReference ret;
 #ifdef __BN3MONKEY_MEMORY_POOL__
-	char ptr_tag[256]{0};
-	sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
-	char raw_tag[256]{0};
-	sprintf(raw_tag, "raw_%d", raw_ptr_num++);
+		char ptr_tag[256]{0};
+		sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
+		char raw_tag[256]{0};
+		sprintf(raw_tag, "raw_%d", raw_ptr_num++);
 
-    auto* ret = Bn3Monkey::Bn3MemoryPool::construct<std::shared_ptr<T>>(Bn3Monkey::Bn3Tag(ptr_tag));
-    *ret = std::shared_ptr<T>(Bn3Monkey::Bn3MemoryPool::construct<T>(Bn3Monkey::Bn3Tag(raw_tag), args...), [](T* p) {
-        Bn3Monkey::Bn3MemoryPool::destroy<T>(p);
-    });
+    	ret = Bn3Monkey::Bn3MemoryPool::construct<Instance>(Bn3Monkey::Bn3Tag(ptr_tag));
+    	*ret = Instance(Bn3Monkey::Bn3MemoryPool::construct<T>(Bn3Monkey::Bn3Tag(raw_tag), args...), [](T* p) {
+        	Bn3Monkey::Bn3MemoryPool::destroy<T>(p);
+    	});
 #else
-    auto* ret = new std::shared_ptr<T>(new T(args...));
+    	ret = new Instance(new T(args...));
 #endif
-    return ret;
-}
+    	return ReferenceCast(ret);
+	}	
 
-template<class T>
-inline void releaseReference(void* cptr)
-{
+	static void release(Reference ref)
+	{
 #ifdef __BN3MONKEY_MEMORY_POOL__
-    Bn3Monkey::Bn3MemoryPool::destroy(reinterpret_cast<std::shared_ptr<T>*>(cptr));
+    	Bn3Monkey::Bn3MemoryPool::destroy(LibraryReferenceCast(ref));
 #else
-    delete reinterpret_cast<std::shared_ptr<T>*>(cptr);
+    	delete LibraryReferenceCast(ref);
 #endif
-}
-template<class T>
-inline std::shared_ptr<T>& getReference(const void* cptr)
-{
-    auto* ret = const_cast<std::shared_ptr<T>*>(reinterpret_cast<const std::shared_ptr<T>*>(cptr));
-    return *ret;
-}
-template<class T>
-inline std::shared_ptr<T>* cloneReference(const std::shared_ptr<T>& cptr)
-{
-#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-	char ptr_tag[256]{0};
-	sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
+	}
 
-    auto* ret = Bn3Monkey::Bn3MemoryPool::construct<std::shared_ptr<T>>(Bn3Monkey::Bn3Tag(ptr_tag));
-    *ret = cptr;
-#else
-    auto* ret = new shared_ptr<T>(cptr);
-#endif
-    return ret;
-}
-inline void addReferenceReleaser(void* releaser)
-{
-	auto* param = reinterpret_cast<std::function<void()>*>(releaser);
+	static Instance& get(Reference ref)
+	{
+		LibraryReference ret = LibraryReferenceCast(ref);
+		return *ret;
+	}
+
+	static Reference clone(Reference ref)
+	{
+		LibraryReference src = LibraryReferenceCast(ref);
+		LibraryReference dest;
+		
 #ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
-	releasers.push_back(*param);
+		char ptr_tag[256]{0};
+		sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
+    	dest = Bn3Monkey::Bn3MemoryPool::construct<Instance>(Bn3Monkey::Bn3Tag(ptr_tag));
+    	*dest = src;
+#else
+    	dest = new Instance(*src);
 #endif
-}
+    	return ReferenceCast(dest);	
+	}
+
+	static void addReleaser(Reference releaser)
+	{
+#ifdef __LIBRARYINTERFACEGENERATOR_MEMORY_POOL__
+		auto* param = reinterpret_cast<std::function<void()>*)(releaser);
+		releasers.push_back(*param);
+#endif
+	}	
+};
+
+template<typename ENUM>
+class EnumConverter
+{
+public:
+	using NativeType = ENUM;
+	using InterfaceType = int32_t;
+
+	using NativeTypeArray = std::vector<ENUM>;
+	using InterfaceTypeArray = std::vector<int32_t>;
+	
+	using NativeTypeVector = std::vector<ENUM>;
+	using InterfaceTypeVector = std::vector<int32_t>;
+
+	static NativeType toNativeType(InterfaceType value)
+	{
+		return static_cast<NativeType>(value);
+	}
+	static InterfaceType toInterfaceType(NativeType value)
+	{
+		return static_cast<InterfaceType>(value);
+	}
+
+	static NativeTypeArray toNativeTypeArray(InterfaceTypeArray values)
+	{
+		NativeTypeArray ret;
+		std::transform(value.begin(), value.end(), std::back_inserter(ret), EnumConverter<ENUM>::toNativeType);
+		return ret;
+	}
+
+	static InterfaceTypeArray toInterfaceTypeArray(NativeTypeArray values)
+	{
+		InterfaceTypeArray ret;
+		std::transform(value.begin(), value.end(), std::back_inserter(ret), EnumConverter<ENUM>::toInterfaceType);
+		return ret;	
+	}
+
+	static NativeTypeVector toNativeTypeVector(InterfaceTypeVector values)
+	{
+		NativeTypeVector ret;
+		std::transform(value.begin(), value.end(), std::back_inserter(ret), EnumConverter<ENUM>::toNativeType);
+		return ret;
+	}
+
+	static InterfaceTypeVector toInterfaceTypeArray(NativeTypeVector values)
+	{
+		InterfaceTypeVector ret;
+		std::transform(value.begin(), value.end(), std::back_inserter(ret), EnumConverter<ENUM>::toInterfaceType);
+		return ret;	
+	}
+};
+
+template<typename CLASS>
+class ObjectConverter
+{
+
+};
+
+template<typename CALLBACK>
+class CallbackConverter
+{
+
+};
+
+
 
 
 template<class ENUM>
