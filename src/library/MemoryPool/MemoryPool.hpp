@@ -56,6 +56,7 @@ namespace Bn3Monkey
 			return _impl.deallocate<Type>(reference, size);
 		}
 
+
 		class Analyzer
 		{
 		public:

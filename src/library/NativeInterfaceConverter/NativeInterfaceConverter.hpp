@@ -98,6 +98,22 @@ public:
 			return toNativeType(value);
 			});
 	}
+protected:
+#ifdef __BN3MONKEY_MEMORY_POOL__
+	Bn3Monkey::Bn3Tag handleTag() {
+		static int num{ 0 };
+		char tag[32]{ 0 };
+		sprintf(tag, "managedhandle_%d", num++);
+		return Bn3Monkey::Bn3Tag(tag);
+	}
+	Bn3Monkey::Bn3Tag objectTag() {
+		static int num{ 0 };
+		char tag[32]{ 0 };
+		sprintf(tag, "managedobject_%d", num++);
+		return Bn3Monkey::Bn3Tag(tag);
+
+	}
+#endif
 };
 
 template<typename NativeEnum, typename ManagedEnum = int32_t>
@@ -105,85 +121,84 @@ class EnumConverter : public TypeConverter<NativeEnum, ManagedEnum>
 {
 public:
 	using BaseConverter = TypeConverter<NativeEnum, ManagedEnum>;
+	using NativeType = typename BaseConverter::NativeType;
+	using ManagedType = typename BaseConverter::ManagedType;
 
-	BaseConverter::NativeType toNativeType(const BaseConverter::ManagedType& value) override
+	NativeType toNativeType(const ManagedType& value) override
 	{
-		return static_cast<BaseConverter::NativeType>(value);
+		return static_cast<NativeType>(value);
 	}
-	BaseConverter::ManagedType toManagedType(const BaseConverter::NativeType& value) override
+	ManagedType toManagedType(const NativeType& value) override
 	{
-		return static_cast<BaseConverter::ManagedType>(value);
+		return static_cast<ManagedType>(value);
 	}
 
 };	
 
-/*
 template<typename Type, typename NativeObject = std::shared_ptr<Type>, typename ManagedObject = void*>
 class ObjectConverter : public TypeConverter<NativeObject, ManagedObject>
 {
 public:
 	using BaseConverter = TypeConverter<NativeObject, ManagedObject>;
+	using NativeType = typename BaseConverter::NativeType;
+	using ManagedType = typename BaseConverter::ManagedType;
 
-private:
-	static size_t shared_ptr_num{ 0 };
-	static size_t raw_ptr_num{ 0 };
-
-	BaseConverter::NativeType* createManagedHandle()
+	
+	NativeType toNativeType(const ManagedType& value) override
 	{
-#ifdef __BN3MONKEY_MEMORY_POOL
-		char ptr_tag[32]{ 0 };
-		sprintf(ptr_tag, "ptr_%d", shared_ptr_num++);
-		return Bn3Monkey::Bn3MemoryPool::construct<BaseConverter::NativeType>(Bn3Monkey::Bn3Tag(ptr_tag));
-#else
-		return new BaseConverter::NativeType();
-#endif
+		NativeType* ref = reinterpret_cast<NativeType*>(value);
+		return *ref;
 	}
 
-public:
+	ManagedType toManagedType(const NativeType& value) override
+	{
+		return clone(value);
+	}
 
 	template<class... Args>
-	BaseConverter::ManagedType construct(Args... args)
+	ManagedObject construct(Args... args)
 	{
-		BaseConverter::NativeType* ret = createManagedHandle();
+		NativeObject* ret = createManagedHandle();
 
 #ifdef __BN3MONKEY_MEMORY_POOL__
-		char raw_tag[32]{ 0 };
-		sprintf(raw_tag, "raw_%d", raw_ptr_num++);
-		*ret = BaseConverter::NativeType(Bn3Monkey::Bn3MemoryPool::construct<Type>(Bn3Monkey::Bn3Tag(raw_tag), args...), [](Type* p) {
+		*ret = NativeObject(Bn3Monkey::Bn3MemoryPool::construct<Type>(BaseConverter::objectTag(), std::forward<Args>(args)...), [](Type* p) {
 			Bn3Monkey::Bn3MemoryPool::destroy<Type>(p);
 			});
 #else
 		*ret = new Type(args...);
 #endif
-		return reinterpret_cast<ManagedType>(ret);
+		return reinterpret_cast<ManagedObject>(ret);
 	}
 
-	BaseConverter::ManagedType clone(const NativeType& src)
+	ManagedObject clone(const NativeObject& src)
 	{
-		BaseConverter::NativeType* ret = createManagedHandle();
+		NativeObject* ret = createManagedHandle();
 		*ret = src;
-		return reinterpret_cast<BaseConverter::ManagedType>(ret);
+		return reinterpret_cast<ManagedObject>(ret);
 	}
 
-	void release(const BaseConverter::ManagedType& ref)
+	void release(const ManagedObject& ref)
 	{
-		auto* ret = reinterpret_cast<BaseConverter::NativeType*>(ref);
+		NativeObject* ret = reinterpret_cast<NativeObject*>(ref);
 #ifdef __BN3MONKEY_MEMORY_POOL__
 		Bn3Monkey::Bn3MemoryPool::destroy(ret);
 #else
 		delete ret;
 #endif
 	}
+		
 
-	BaseConverter::NativeType toNativeType(const BaseConverter::ManagedType& value) override
+private:
+
+	NativeObject* createManagedHandle()
 	{
-		BaseConverter::NativeType* ref = reinterpret_cast<BaseConverter::NativeType*>(value);
-		return *ref;
+#ifdef __BN3MONKEY_MEMORY_POOL__		
+		return Bn3Monkey::Bn3MemoryPool::construct<NativeObject>(BaseConverter::handleTag());
+#else
+		return new NativeObject();
+#endif
 	}
-	BaseConverter::ManagedType toManagedType(const BaseConverter::NativeType& value) override
-	{
-		return clone(src);
-	}
+
 };
 
 
@@ -192,19 +207,21 @@ class CallbackConverter : public TypeConverter<NativeCallback, ManagedCallback>
 {
 public:
 	using BaseConverter = TypeConverter<NativeCallback, ManagedCallback>;
+	using NativeType = typename BaseConverter::NativeType;
+	using ManagedType = typename BaseConverter::ManagedType;
 
-	BaseConverter::NativeType toNativeType(const BaseConverter::ManagedType& value) override
+	NativeType toNativeType(const ManagedType& value) override
 	{
-		auto callback = reinterpret_cast<BaseConverter::NativeType*>(value);
+		auto callback = reinterpret_cast<NativeType*>(value);
 		return *callback;
 	}
-	BaseConverter::ManagedType toManagedType(const BaseConverter::NativeType& value) override
+	ManagedType toManagedType(const NativeType& value) override
 	{
 		// NOT USED
+		// return reinterpret_cast<BaseConverter::ManagedType>(&value);
 		return nullptr;
 	}
 
 };
-*/
 
 #endif

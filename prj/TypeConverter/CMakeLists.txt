@@ -41,3 +41,20 @@ target_link_libraries(TypeConverterTest gtest)
 
 set_property(TARGET TypeConverterTest PROPERTY CXX_STANDARD 17)
 set_property(TARGET TypeConverterTest PROPERTY CXX_STANDARD_REQUIRED ON)
+
+# ABOUT JNI
+
+find_package(JNI REQUIRED)
+
+if (JNI_FOUND)
+    include_directories(${JNI_INCLUDE_DIRS})
+    message(STATUS "JNI_INCLUDE_DIRS: ${JNI_INCLUDE_DIRS}")
+    message(STATUS "JNI_LIBRARIES: ${JNI_LIBRARIES}")
+
+    target_include_directories(TypeConverterTest PUBLIC ${JNI_INCLUDE_DIRS})
+    target_link_libraries(TypeConverterTest ${JNI_LIBRARIES})
+    target_link_libraries(TypeConverterTest "C:/Program Files/Java/jre-1.8/bin/server/jvm.dll")
+
+else ()
+    message(FATAL_ERROR "JNI not found")
+endif ()
