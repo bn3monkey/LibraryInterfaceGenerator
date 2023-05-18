@@ -1,7 +1,140 @@
-#ifndef __BN3MONKEY_KOTLIN_WRAPPER_CONVERTER__
+ #ifndef __BN3MONKEY_KOTLIN_WRAPPER_CONVERTER__
 #define __BN3MONKEY_KOTLIN_WRAPPER_CONVERTER__
 
+#include <jni.h>
+#include <vector>
+#include <functional>
+#include <algorithm>
+
+template<typename _ManagedType, typename _WrapperType, typename _WrapperTypeArray, typename _WrapperTypeVector = jobject>
+class TypeConverter
+{
+public:
+    using ManagedType = _ManagedType;
+    using WrapperType = _WrapperType;
+
+    using ManagedTypeArray = std::vector<ManagedType>;
+    using ManagedTypeVector = std::vector<ManagedType>;
+
+    using WrapperTypeArray = _WrapperTypeArray;
+    using WrapperTypeVector = _WrapperTypeVector;
+
+    TypeConverter(JNIEnv* env) : _env(env) {}
+
+    virtual ManagedType toManagedType(const WrapperType& value) = 0;
+    virtual WrapperType toWrapperType(const ManagedType& value) = 0;
+
+    virtual ManagedTypeArray toManagedTypeArray(const WrapperTypeArray& values) = 0;
+    virtual WrapperTypeArray toWrapperTypeArray(const ManagedTypeArray& value) = 0;
+
+    virtual ManagedTypeVector toManagedTypeVector(const WrapperTypeVector& values) = 0;
+    virtual WrapperTypeVector toWrapperTypeVector(const ManagedTypeVector& values) = 0;
+
+    virtual void copyArray(const ManagedTypeArray& src, const WrapperTypeArray& values) = 0;
+    virtual void copyVector(const ManagedTypeVector& src, const WrapperTypeVector& values) = 0;
+
+    JNIEnv* _env;
+};
+
+class BooleanConverter : public TypeConverter<bool, jboolean, jbooleanArray>
+{
+public:
+    using BaseConverter = TypeConverter<bool, jboolean, jbooleanArray>;
+    using ManagedType = typename BaseConverter::ManagedType;
+    using WrapperType = typename BaseConverter::WrapperType;
+    using ManagedTypeArray = typename BaseConverter::ManagedTypeArray;
+    using ManagedTypeVector = typename BaseConverter::ManagedTypeVector;
+    using WrapperTypeArray = typename BaseConverter::WrapperTypeArray;
+    using WrapperTypeVector = typename BaseConverter::WrapperTypeVector;
+
+    BooleanConverter(JNIEnv* env) : TypeConverter(env) {}
+
+    ManagedType toManagedType(const WrapperType& value) override {
+        return static_cast<ManagedType>(value);
+    }
+    WrapperType toWrapperType(const ManagedType& value) override {
+        return static_cast<WrapperType>(value);
+    }
+    ManagedTypeArray toManagedTypeArray(const WrapperTypeArray& values) override
+    {
+
+        ManagedTypeArray ret;
+        auto* elements = _env->GetBooleanArrayElements(values, nullptr);
+        if (!elements)
+            return ret;
+        jint size = _env->GetArrayLength(values);
+        ret.reserve(size);
+        std::copy(elements, elements + size, ret.end());
+
+        return ret;
+    }
+    WrapperTypeArray toWrapperTypeArray(const ManagedTypeArray& value) override
+    {
+        WrapperTypeArray ret = _env->NewBooleanArray(value.size());
+        if (!ret)
+            return nullptr;
+
+        auto* arr = _env->GetBooleanArrayElements(ret, nullptr);
+        if (!arr)
+            return nullptr;
+
+        std::copy(value.begin(), value.end(), arr);
+        _env->ReleaseBooleanArrayElements(ret, arr, 0);
+        return ret;
+    }
+    ManagedTypeVector toManagedTypeVector(const WrapperTypeVector& values) override
+    {
+        jclass arrayListClass = _env->FindClass("java/util/ArrayList");
+        jmethodID methodSize = _env->GetMethodID(arrayListClass, "size", "()I");
+        jmethodID methodGet = _env->GetMethodID(arrayListClass, "get", "(I)Z");
+                
+        jint size = _env->CallIntMethod(values, methodSize);
+
+        ManagedTypeVector ret;
+        for (jint i = 0; i < size; i++)
+        {
+            auto value = _env->CallBooleanMethod(values, methodGet, i);
+            ret.push_back(toManagedType(value));
+        }
+        return ret;
+    }
+    WrapperTypeVector toWrapperTypeVector(const ManagedTypeVector& values) override
+    {
+        jclass arrayListClass = _env->FindClass("java/util/ArrayList");
+        jmethodID methodInit = _env->GetMethodID(arrayListClass, "<init>", "()V");
+        jobject ret = _env->NewObject(arrayListClass, methodInit);
+
+        jmethodID methodAdd = _env->GetMethodID(arrayListClass, "add", "(Z)Z");
+        for (const auto& value : values)
+        {
+            _env->CallBooleanMethod(ret, methodAdd, toWrapperType(value));
+        }
+        return ret;
+    }
+    void copyArray(const ManagedTypeArray& src, const WrapperTypeArray& dest) override
+    {
+        auto* arr = _env->GetBooleanArrayElements(dest, nullptr);
+        if (!arr)
+            return;
+        std::copy(src.begin(), src.end(), arr);
+        _env->ReleaseBooleanArrayElements(dest, arr, 0);
+    }
+    void copyVector(const ManagedTypeVector& src, const WrapperTypeVector& dest) override
+    {
+        jclass arrayListClass = _env->FindClass("java/util/ArrayList");
+        jmethodID methodAdd = _env->GetMethodID(arrayListClass, "add", "(Z)Z");
+        for (const auto& value : src)
+        {
+            _env->CallBooleanMethod(dest, methodAdd, toWrapperType(value));
+        }
+    }
+};
+
 #endif
+
+
+
+
 
 /*
 #include <jni.h>

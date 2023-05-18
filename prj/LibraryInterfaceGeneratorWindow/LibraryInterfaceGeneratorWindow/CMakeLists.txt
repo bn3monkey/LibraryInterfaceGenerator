@@ -5,8 +5,8 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("LibraryInterfaceGeneratorWindow")
 
-execute_process(COMMAND "python ../../script/makeNativeExternalLibrary.py")
-execute_process(COMMAND "python ../../script/makeConverter.py")
+# execute_process(COMMAND "python ../../script/makeNativeExternalLibrary.py")
+# execute_process(COMMAND "python ../../script/makeConverter.py")
 
 set(repository_dir ${CMAKE_SOURCE_DIR}/../../..)
 
