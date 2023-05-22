@@ -59,7 +59,7 @@ namespace Bn3Monkey
             static jmethodID _KVector_size;
             static jmethodID _KVector_add;
             static jmethodID _KVector_get;
-
+            static jmethodID _KVector_clear;
         };
 
         class KVoid : public KotlinTypeConverter
@@ -228,10 +228,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallDoubleMethod(value, _KDouble_init);
+                return env->CallDoubleMethod(value, _KDouble_doubleValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KDouble, _KDouble_doubleValue, value);
+                return env->NewObject(_KDouble, _KDouble_init, value);
             }
         };
         class KString : public KotlinTypeConverter
@@ -724,18 +724,15 @@ namespace Bn3Monkey
             using ManagedType = std::array<int32_t, size>;
             using KotlinType = jobjectArray;
 
-            
-
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
                 size_t length = env->GetArrayLength(value);
                 
                 ManagedType ret;
-                ret.reserve(length);
                 for (size_t i = 0; i < length; i++)
                 {
                     auto element = env->GetObjectArrayElement(value, i);
-                    auto new_element = KDerivedEnum().toManagedType(element);
-                    ret.push_back(new_element);
+                    auto new_element = KDerivedEnum().toManagedType(env, element);
+                    ret[i] = new_element;
                 }
                 
                 return ret;
@@ -746,7 +743,7 @@ namespace Bn3Monkey
                 for (size_t i =0;i<value.size();i++)
                 {
                     auto element = value[i];
-                    auto new_element = KDerivedEnum().toKotlinType(element);
+                    auto new_element = KDerivedEnum().toKotlinType(env, element);
                     env->SetObjectArrayElement(ret, i, new_element);
                 }
                 return ret;
@@ -755,8 +752,8 @@ namespace Bn3Monkey
             {
                 for (size_t i =0;i<src.size();i++) {
                     auto element = src[i];
-                    auto new_element = KDerivedEnum().toKotlinType(element);
-                    auto *arr = env->SetObjectArrayElement(dest, i, new_element);
+                    auto new_element = KDerivedEnum().toKotlinType(env, element);
+                    env->SetObjectArrayElement(dest, i, new_element);
                 }
             }
         };
@@ -906,6 +903,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -952,6 +950,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -998,6 +997,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1044,6 +1044,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1090,6 +1091,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1136,6 +1138,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1182,10 +1185,57 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
+                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                }
+            }
+        };
+
+        template<>
+        struct KVector<KString> : public KotlinTypeConverter
+        {
+            using NativeType = std::vector<std::string>;
+            using ManagedType = NativeType;
+            using KotlinType = jobject;
+
+            const char* signature() override {
+                return "Ljava/lang/ArrayList;";
+            }
+
+            ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
+                auto size = env->CallIntMethod(value, _KVector_size);
+                ManagedType ret;
+
+                for (size_t i = 0; i < size; i++)
+                {
+                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto k_element = KString().toKotlinType(env, ko_element);
+                    ret.push_back(KString().toManagedType(env, k_element));
+                }
+
+                return ret;
+            }
+            KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
+                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                for (auto element : value)
+                {
+                    auto kelemnent = KString().toKotlinType(env, element);
+                    auto ko_element = KString().toKotlinWrapperType(env, kelemnent);
+                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                }
+                return ret;
+            }
+            void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
+            {
+                env->CallVoidMethod(dest, _KVector_clear);
+                for (auto element : src)
+                {
+                    auto kelemnent = KString().toKotlinType(env, element);
+                    auto ko_element = KString().toKotlinWrapperType(env, kelemnent);
                     env->CallBooleanMethod(dest, _KVector_add, ko_element);
                 }
             }
@@ -1228,6 +1278,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1274,6 +1325,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1322,6 +1374,7 @@ namespace Bn3Monkey
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
+                env->CallVoidMethod(dest, _KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
@@ -1333,3 +1386,5 @@ namespace Bn3Monkey
 
     }
 }
+
+#endif

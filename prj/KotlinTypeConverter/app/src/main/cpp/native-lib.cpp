@@ -430,10 +430,226 @@ Java_com_example_kotlintypeconverter_TestLibrary_primitiveVectorTest(JNIEnv *env
         auto origin_value = value1;
         auto value = Converter().toManagedType(env, origin_value);
         auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
 
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KInt8> implementation fail");
+            }
+        }
+        value.push_back('b');
+        value.push_back('b');
+        Converter().copy(env, value, origin_value);
     }
+    {
+        using Converter = KVector<KInt16>;
+        auto origin_value = value2;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
 
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KInt16> implementation fail");
+            }
+        }
+        value.push_back(2);
+        value.push_back(2);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KInt32>;
+        auto origin_value = value3;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
 
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KInt32> implementation fail");
+            }
+        }
+        value.push_back(2);
+        value.push_back(2);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KInt64>;
+        auto origin_value = value4;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KInt64> implementation fail");
+            }
+        }
+        value.push_back(2);
+        value.push_back(2);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KFloat>;
+        auto origin_value = value5;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KFloat> implementation fail");
+            }
+        }
+        value.push_back(2.0f);
+        value.push_back(2.0f);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KDouble>;
+        auto origin_value = value6;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KDouble> implementation fail");
+            }
+        }
+        value.push_back(2.0);
+        value.push_back(2.0);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KBoolean>;
+        auto origin_value = value7;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KBoolean> implementation fail");
+            }
+        }
+        value.push_back(true);
+        value.push_back(true);
+        Converter().copy(env, value, origin_value);
+    }
+    {
+        using Converter = KVector<KString>;
+        auto origin_value = value8;
+        auto value = Converter().toManagedType(env, origin_value);
+        auto jvalue = Converter().toKotlinType(env, value);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i=0;i<value.size();i++)
+        {
+            if (value[i] != new_value[i])
+            {
+                return env->NewStringUTF("Vector<KString> implementation fail");
+            }
+        }
+        value.push_back("PAPYRUS");
+        value.push_back("PAPYRUS");
+        Converter().copy(env, value, origin_value);
+    }
     Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return env->NewStringUTF("");
+}
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject thiz,
+                                                                  jobject value1,
+                                                                  jobjectArray value2,
+                                                                  jobject value3) {
+    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
+
+    using namespace Bn3Monkey::Kotlin;
+
+    class KTestEnum : public KEnum
+    {
+    public:
+        const char* className() override { return "com/example/kotlintypeconverter/TestEnum";}
+        const char* signature() override { return "Lcom/example/kotlintypeconverter/TestEnum;"; }
+    };
+
+    jobject ret;
+    do {
+        {
+            using Converter = KTestEnum;
+            auto mvalue = Converter().toManagedType(env, value1);
+            auto kvalue = Converter().toKotlinType(env, mvalue);
+            auto new_mvalue = Converter().toManagedType(env, kvalue);
+
+            if (mvalue != new_mvalue) {
+                ret = KTestEnum().toKotlinType(env, 8);
+                break;
+            }
+            ret = kvalue;
+        }
+        {
+            using Converter = KArray<KTestEnum, 3>;
+            auto mvalue = Converter().toManagedType(env, value2);
+            auto kvalue = Converter().toKotlinType(env, mvalue);
+            auto new_mvalue = Converter().toManagedType(env, kvalue);
+
+            bool isError = false;
+            for (size_t i=0 ;i<3; i++) {
+                if (mvalue[i] != new_mvalue[i]) {
+                    ret = KTestEnum().toKotlinType(env, 8);
+                    isError= true;
+                    break;
+                }
+            }
+
+            if (isError)
+                break;
+
+            for (size_t i=0;i<3;i++) {
+                mvalue[i] = 6;
+            }
+            Converter().copy(env, mvalue, value2);
+        }
+        {
+            using Converter = KVector<KTestEnum>;
+            auto mvalue = Converter().toManagedType(env, value3);
+            auto kvalue = Converter().toKotlinType(env, mvalue);
+            auto new_mvalue = Converter().toManagedType(env, kvalue);
+
+            bool isError = false;
+            for (size_t i=0 ;i<3; i++) {
+                if (mvalue[i] != new_mvalue[i]) {
+                    ret = KTestEnum().toKotlinType(env, 8);
+                    isError= true;
+                    break;
+                }
+            }
+
+            if (isError)
+                break;
+
+            mvalue.push_back(2);
+            mvalue.push_back(2);
+            Converter().copy(env, mvalue, value3);
+        }
+    }
+    while(false);
+    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
+    return ret;
 }

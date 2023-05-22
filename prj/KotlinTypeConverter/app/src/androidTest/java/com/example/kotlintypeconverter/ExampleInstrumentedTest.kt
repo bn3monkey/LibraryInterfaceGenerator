@@ -56,4 +56,58 @@ class ExampleInstrumentedTest {
         assertArrayEquals(BooleanArray(3){false}, value7)
         assertArrayEquals(Array<String>(3){"PAPYRUS"}, value8)
     }
+    @Test
+    fun primiteveVectorTest()
+    {
+        val value1 = MutableList<Byte>(3) { _ -> 'a'.toByte() }
+        val value2 = MutableList<Short>(3) {1}
+        val value3 = MutableList<Int>(3) {1}
+        val value4 = MutableList<Long>(3) {1}
+        val value5 = MutableList<Float>(3) {1.0f}
+        val value6 = MutableList<Double>(3) {1.0}
+        val value7 = MutableList<Boolean>(3) {false}
+        val value8 = MutableList<String>(3) {"SANS"}
+        val result = TestLibrary().primitiveVectorTest(
+            value1,
+            value2,
+            value3,
+            value4, value5, value6, value7, value8
+        )
+        assertEquals("", result)
+
+        assertEquals(
+            value1, mutableListOf<Byte>(
+                'a'.toByte(),
+                'a'.toByte(),
+                'a'.toByte(),
+                'b'.toByte(),
+                'b'.toByte()
+            ))
+        assertEquals(value2, mutableListOf<Short>(1, 1, 1, 2, 2))
+        assertEquals(value3, mutableListOf<Int>(1, 1, 1, 2, 2))
+        assertEquals(value4, mutableListOf<Long>(1, 1, 1, 2, 2))
+        assertEquals(value5, mutableListOf<Float>(1.0f, 1.0f, 1.0f, 2.0f, 2.0f))
+        assertEquals(value6, mutableListOf<Double>(1.0, 1.0, 1.0, 2.0, 2.0))
+        assertEquals(value7, mutableListOf<Boolean>(false, false, false, true, true))
+        assertEquals(value8, mutableListOf<String>("SANS", "SANS", "SANS", "PAYPRUS", "PAPYRUS"))
+
+    }
+
+    @Test
+    fun enumTest()
+    {
+        val value1 = TestEnum.A;
+        val value2 = arrayOf(TestEnum.A, TestEnum.B, TestEnum.C);
+        val value3= mutableListOf(TestEnum.A, TestEnum.B, TestEnum.C);
+
+        val ret = TestLibrary().enumTest(
+            value1,
+            value2,
+            value3
+        )
+
+        assertEquals(TestEnum.A, ret)
+        assertArrayEquals(arrayOf(TestEnum.C, TestEnum.C, TestEnum.C), value2)
+        assertEquals(mutableListOf(TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.A, TestEnum.A), value3)
+    }
 }

@@ -56,6 +56,7 @@ jmethodID Bn3Monkey::Kotlin::KotlinTypeConverter::_KVector_init {nullptr};
 jmethodID Bn3Monkey::Kotlin::KotlinTypeConverter::_KVector_size {nullptr};
 jmethodID Bn3Monkey::Kotlin::KotlinTypeConverter::_KVector_add {nullptr};
 jmethodID Bn3Monkey::Kotlin::KotlinTypeConverter::_KVector_get {nullptr};
+jmethodID Bn3Monkey::Kotlin::KotlinTypeConverter::_KVector_clear {nullptr};
 
 bool Bn3Monkey::Kotlin::KotlinTypeConverter::isInitialized {false};
 JavaVM* Bn3Monkey::Kotlin::KotlinTypeConverter::jvm;
@@ -218,6 +219,11 @@ bool Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(JNIEnv* env)
         _KVector_get = newGlobalMethodID(env, _KVector, "get", "(I)Ljava/lang/Object;");
         if (_KVector_get == nullptr) {
             LOG_E("%s : Array List Class / get method cannot be loaded", __FUNCTION__);
+            break;
+        }
+        _KVector_clear = newGlobalMethodID(env, _KVector, "clear", "()V");
+        if (_KVector_clear == nullptr) {
+            LOG_E("%s : Array List Class / clear method cannot be loaded", __FUNCTION__);
             break;
         }
 

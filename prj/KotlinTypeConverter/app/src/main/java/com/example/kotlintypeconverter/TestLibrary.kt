@@ -43,4 +43,9 @@ class TestLibrary {
         value7 : MutableList<Boolean>,
         value8 : MutableList<String>) : String
 
+    external fun enumTest(
+        value1 : TestEnum,
+        value2 : Array<TestEnum>,
+        value3 : MutableList<TestEnum>
+    ) : TestEnum
 }
