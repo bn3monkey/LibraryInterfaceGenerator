@@ -98,7 +98,7 @@ void Bn3Monkey::Log::print(int priority, const char* tag, const char* format, va
 #endif
     {
         std::lock_guard<std::mutex> lock(console_mtx);
-        printf(buffer);
+        printf("%s", buffer);
     }
 
     logStream.read(buffer);

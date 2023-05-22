@@ -1,4 +1,5 @@
 #include "SymbolType.hpp"
+#include <sstream>
 
 std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::makeType(
 	const std::string& type,
@@ -49,38 +50,45 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 	{
 		if (hasPrefix(type, "array<") && hasPostfix(type, ">"))
 		{
-			auto inner_type = std::string(type.begin() + sizeof("array<") - 1, type.end() - 1);
+			auto array_info = std::string(type.begin() + sizeof("array<") - 1, type.end() - 1);
+			std::stringstream ss {array_info};
+			std::string inner_type;
+			std::getline(ss, inner_type, ',');
+			std::string size_str;
+			std::getline(ss, size_str, ',');
+			size_t size = std::atoi(size_str.c_str());
+
 			if (inner_type == "bool")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeBool>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeBool>>(size);
 			}
 			else if (inner_type == "int8")
 			{
-				return std::make_unique<SymbolTypeArray<SymbolTypeInt8>>();
+				return std::make_unique<SymbolTypeArray<SymbolTypeInt8>>(size);
 			}
 			else if (inner_type == "int16")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt16>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeInt16>>(size);
 			}
 			else if (inner_type == "int32")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt32>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeInt32>>(size);
 			}
 			else if (inner_type == "int64")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt64>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeInt64>>(size);
 			}
 			else if (inner_type == "float")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeFloat>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeFloat>>(size);
 			}
 			else if (inner_type == "double")
 			{
-				return std::make_unique<SymbolTypeArray<SymbolTypeDouble>>();
+				return std::make_unique<SymbolTypeArray<SymbolTypeDouble>>(size);
 			}
 			else if (inner_type == "string")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeString>>();
+				return std::make_unique< SymbolTypeArray<SymbolTypeString>>(size);
 			}
 			else
 			{
@@ -93,7 +101,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						objectReferenceSet->insert(object);
 					}
 
-					return std::make_unique<SymbolTypeArray<SymbolTypeObject>>(object);
+					return std::make_unique<SymbolTypeArray<SymbolTypeObject>>(object, size);
 				}
 				auto enum_iter = enumTable.find(inner_type);
 				if (enum_iter != enumTable.end())
@@ -104,7 +112,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						enumReferenceSet->insert(object);
 					}
 
-					return std::make_unique< SymbolTypeArray<SymbolTypeEnum>>(object);
+					return std::make_unique< SymbolTypeArray<SymbolTypeEnum>>(object, size);
 				}
 				auto callback_iter = callbackTable.find(inner_type);
 				if (callback_iter != callbackTable.end())
@@ -115,7 +123,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						callbackReferenceSet->insert(callback);
 					}
 
-					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback);
+					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback, size);
 				}
 			}
 		}

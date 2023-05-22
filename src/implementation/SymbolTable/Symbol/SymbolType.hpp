@@ -61,15 +61,11 @@ namespace LibraryInterfaceGenerator
             virtual bool isPrimitive() { return false; }
             virtual bool requiredDeclaration() { return false; }
 
-            virtual std::string toCppType() { return ""; }
-            virtual std::string toCppInterfaceType() { return ""; }
+            virtual std::string toNativeType() { return ""; }
+            virtual std::string toManagedType() { return ""; }
             virtual std::string toJNIType() { return ""; }
-            virtual std::string toKotlinWrapperType() { return ""; }
             virtual std::string toKotlinType() { return ""; }
 
-            virtual std::string toCppInnerType() { return ""; }
-            virtual std::string toCppInterfaceInnerType() { return ""; }
-            virtual std::string toKotlinInnerType() { return ""; }
         };
 
         class SymbolTypeVoid : public SymbolType
@@ -80,12 +76,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::VOID;}
-            std::string toCppType() override {return "void";}
-            std::string toCppInterfaceType() override { return "void"; }
+            std::string toNativeType() override {return "void";}
+            std::string toManagedType() override { return "void"; }
             std::string toJNIType() override {return "void";}
-            std::string toKotlinWrapperType() override { return "Unit"; }
             std::string toKotlinType() override {return "Unit"; }
-            std::string toKotlinInnerType() override { return "Unit"; }
         };
 
         class SymbolTypeBool : public SymbolType
@@ -96,12 +90,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::BOOL;}
-            std::string toCppType() override { return "bool"; }
-            std::string toCppInterfaceType() override { return "bool"; }
+            std::string toNativeType() override { return "bool"; }
+            std::string toManagedType() override {return "bool"; }
             std::string toJNIType() override { return "jboolean"; }
-            std::string toKotlinWrapperType() override { return "Boolean"; }
             std::string toKotlinType() override { return "Boolean"; }
-            std::string toKotlinInnerType() override { return "Boolean"; }
         };
 
         class SymbolTypeInt8 : public SymbolType
@@ -112,12 +104,11 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT8;}
-            std::string toCppType() override {return "int8_t";}
-            std::string toCppInterfaceType() override { return "int8_t"; }
-            std::string toJNIType() override {return "jbyte";}
-            std::string toKotlinWrapperType() override { return "Byte"; }
-            std::string toKotlinType() override {return "Byte"; }
-            std::string toKotlinInnerType() override { return "Byte"; }
+            std::string toNativeType() override { return "int8_t"; }
+            std::string toManagedType() override {return "int8_t"; }
+            std::string toJNIType() override { return "jbyte"; }
+            std::string toKotlinType() override { return "Byte"; }
+
         };
         class SymbolTypeInt16 : public SymbolType
         {
@@ -127,12 +118,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT16;}
-            std::string toCppType() override {return "int16_t";}
-            std::string toCppInterfaceType() override { return "int16_t"; }
-            std::string toJNIType() override {return "jshort";}
-            std::string toKotlinWrapperType() override { return "Short"; }
-            std::string toKotlinType() override {return "Short"; }
-            std::string toKotlinInnerType() override { return "Short"; }
+            std::string toNativeType() override { return "int16_t"; }
+            std::string toManagedType() override {return "int16_t"; }
+            std::string toJNIType() override { return "jshort"; }
+            std::string toKotlinType() override { return "Short"; }
         };
         class SymbolTypeInt32 : public SymbolType
         {
@@ -142,12 +131,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT32;}
-            std::string toCppType() override {return "int32_t";}
-            std::string toCppInterfaceType() override { return "int32_t"; }
-            std::string toJNIType() override {return "jint";}
-            std::string toKotlinWrapperType() override { return "Int"; }
-            std::string toKotlinType() override {return "Int"; }
-            std::string toKotlinInnerType() override { return "Int"; }
+            std::string toNativeType() override { return "int32_t"; }
+            std::string toManagedType() override {return "int32_t"; }
+            std::string toJNIType() override { return "jint"; }
+            std::string toKotlinType() override { return "Int"; }
         };
         class SymbolTypeInt64 : public SymbolType
         {
@@ -157,12 +144,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT64;}
-            std::string toCppType() override {return "int64_t";}
-            std::string toCppInterfaceType() override { return "int64_t"; }
-            std::string toJNIType() override {return "jlong";}
-            std::string toKotlinWrapperType() override { return "Long"; }
-            std::string toKotlinType() override {return "Long"; }
-            std::string toKotlinInnerType() override { return "Long"; }
+            std::string toNativeType() override { return "int64_t"; }
+            std::string toManagedType() override {return "int64_t"; }
+            std::string toJNIType() override { return "jlong"; }
+            std::string toKotlinType() override { return "Long"; }
         };
         class SymbolTypeDouble : public SymbolType
         {
@@ -172,12 +157,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::DOUBLE;}
-            std::string toCppType() override {return "double";}
-            std::string toCppInterfaceType() override { return "double"; }
-            std::string toJNIType() override {return "jdouble";}
-            std::string toKotlinWrapperType() override { return "Double"; }
-            std::string toKotlinType() override {return "Double"; }
-            std::string toKotlinInnerType() override { return "Double"; }
+            std::string toNativeType() override { return "double"; }
+            std::string toManagedType() override {return "double"; }
+            std::string toJNIType() override { return "jdouble"; }
+            std::string toKotlinType() override { return "Double"; }
         };
         class SymbolTypeFloat : public SymbolType
         {
@@ -187,12 +170,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::FLOAT;}
-            std::string toCppType() override {return "float";}
-            std::string toCppInterfaceType() override { return "float"; }
-            std::string toJNIType() override {return "jfloat";}
-            std::string toKotlinWrapperType() override { return "Float"; }
-            std::string toKotlinType() override {return "Float"; }
-            std::string toKotlinInnerType() override { return "Float"; }
+            std::string toNativeType() override { return "float"; }
+            std::string toManagedType() override {return "float"; }
+            std::string toJNIType() override { return "jfloat"; }
+            std::string toKotlinType() override { return "Float"; }
         };
         class SymbolTypeString : public SymbolType
         {
@@ -202,12 +183,10 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::STRING;}
-            std::string toCppType() override {return "std::string";}
-            std::string toCppInterfaceType() override { return "std::string"; }
-            std::string toJNIType() override {return "jstring";}
-            std::string toKotlinWrapperType() override { return "String"; }
-            std::string toKotlinType() override {return "String"; }
-            std::string toKotlinInnerType() override { return "String"; }
+            std::string toNativeType() override { return "std::string"; }
+            std::string toManagedType() override {return "std::string"; }
+            std::string toJNIType() override { return "jstring"; }
+            std::string toKotlinType() override { return "String"; }
         };
        
         class SymbolTypeEnum : public SymbolType
@@ -219,7 +198,8 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::ENUM;}
             SymbolTypeEnum(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
-            std::string toCppType() override {
+
+            std::string toNativeType() override {
                 if (auto object = _obj.lock())
                 {
                     auto ret = object->getCppName();
@@ -227,20 +207,11 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toCppInterfaceType() override { return "int32_t"; }
+            std::string toManagedType() override { return "int32_t"; }
             std::string toJNIType() override {
                 return "jint";
             }
-            std::string toKotlinWrapperType() override { return "Int"; }
             std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto ret = object->getKotlinName();
-                    return ret;
-                }
-                return "";
-            }
-            std::string toKotlinInnerType() override { 
                 if (auto object = _obj.lock())
                 {
                     auto ret = object->getKotlinName();
@@ -260,7 +231,8 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::OBJECT;}
             SymbolTypeObject(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
-            std::string toCppType() override {
+
+            std::string toNativeType() override {
                 if (auto object = _obj.lock())
                 {
                     std::string ret = "std::shared_ptr<";
@@ -270,11 +242,10 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toCppInterfaceType() override { return "void*"; }
+            std::string toManagedType() override { return "void*"; }
             std::string toJNIType() override {
                 return "jlong";
             }
-            std::string toKotlinWrapperType() override { return "Long"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -284,21 +255,6 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
 
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
-            }
-            std::string toCppInterfaceInnerType() override { return "void*"; }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
-            }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
@@ -312,7 +268,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override { return Name::CALLBACK; }
             SymbolTypeCallback(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
-            std::string toCppType() override {
+            std::string toNativeType() override {
                 if (auto object = _obj.lock())
                 {
                     std::string ret = object->getCppName();
@@ -320,11 +276,10 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toCppInterfaceType() override { return "void*"; }
+            std::string toManagedType() override { return "void*"; }
             std::string toJNIType() override {
                 return "jobject";
             }
-            std::string toKotlinWrapperType() override { return "Any"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -334,33 +289,31 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
 
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
-            }
-            std::string toCppInterfaceInnerType() override { return "void*"; }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
-            }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
+
+        class SymbolTypeBaseArray : public SymbolType
+        {
+        public:
+            SymbolTypeBaseArray(size_t size) : size(size) {}
+            virtual std::string toNativeElementType() = 0;
+            virtual std::string toManagedElementType() = 0;
+            virtual std::string toJNIElementType() = 0;
+            virtual std::string toKotlinElementType() = 0;
+        protected:
+            size_t size;
+        };
+        
         template<class T>
-        class SymbolTypeArray : public SymbolType
+        class SymbolTypeArray : public SymbolTypeBaseArray
         {
             
         };
 
         template<>
-        class SymbolTypeArray <SymbolTypeBool> : public SymbolType
+        class SymbolTypeArray <SymbolTypeBool> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -368,22 +321,51 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::BOOLARRAY;}
-            std::string toCppType() override { return "std::vector<bool>"; }
-            std::string toCppInterfaceType() override { return "std::vector<bool>"; }
-            std::string toJNIType() override { return "jbooleanArray"; }
-            std::string toKotlinType() override { return "BooleanArray"; }
-            std::string toKotlinWrapperType() override { return "BooleanArray"; }
 
-            using InnerType = SymbolTypeBool;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+
+            using ElementType = SymbolTypeBool;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt8> : public SymbolType
+        class SymbolTypeArray<SymbolTypeInt8> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -391,22 +373,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT8ARRAY;}
-            std::string toCppType() override {return "std::vector<char>";}
-            std::string toCppInterfaceType() override { return "std::vector<char>"; }
-            std::string toJNIType() override {return "jbyteArray";}  
-            std::string toKotlinType() override {return "ByteArray"; }
-            std::string toKotlinWrapperType() override { return "ByteArray"; }
 
-            using InnerType = SymbolTypeInt8;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeInt8;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt16> : public SymbolType
+        class SymbolTypeArray<SymbolTypeInt16> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -414,22 +424,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT16ARRAY;}
-            std::string toCppType() override {return "std::vector<int16_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
-            std::string toJNIType() override {return "jshortArray";}  
-            std::string toKotlinType() override {return "ShortArray"; }
-            std::string toKotlinWrapperType() override { return "ShortArray"; }
-
-            using InnerType = SymbolTypeInt16;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeInt16;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt32> : public SymbolType
+        class SymbolTypeArray<SymbolTypeInt32> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -437,22 +475,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT32ARRAY;}
-            std::string toCppType() override {return "std::vector<int32_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
-            std::string toJNIType() override {return "jintArray";}  
-            std::string toKotlinType() override {return "IntArray"; }
-            std::string toKotlinWrapperType() override { return "IntArray"; }
 
-            using InnerType = SymbolTypeInt32;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeInt32;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeInt64> : public SymbolType
+        class SymbolTypeArray<SymbolTypeInt64> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -460,22 +526,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT64ARRAY;}
-            std::string toCppType() override {return "std::vector<int64_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
-            std::string toJNIType() override {return "jlongArray";}  
-            std::string toKotlinType() override {return "LongArray"; }
-            std::string toKotlinWrapperType() override { return "LongArray"; }
 
-            using InnerType = SymbolTypeInt64;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeInt64;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeFloat> : public SymbolType
+        class SymbolTypeArray<SymbolTypeFloat> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -483,22 +577,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::FLOATARRAY;}
-            std::string toCppType() override {return "std::vector<float>";}
-            std::string toCppInterfaceType() override { return "std::vector<float>"; }
-            std::string toJNIType() override {return "jfloatArray";}  
-            std::string toKotlinType() override {return "FloatArray"; }
-            std::string toKotlinWrapperType() override { return "FloatArray"; }
 
-            using InnerType = SymbolTypeFloat;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeFloat;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeDouble> : public SymbolType
+        class SymbolTypeArray<SymbolTypeDouble> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -506,22 +628,50 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::DOUBLEARRAY;}
-            std::string toCppType() override {return "std::vector<double>";}
-            std::string toCppInterfaceType() override { return "std::vector<double>"; }
-            std::string toJNIType() override {return "jdoubleArray";}  
-            std::string toKotlinType() override {return "DoubleArray"; }
-            std::string toKotlinWrapperType() override { return "DoubleArray"; }
 
-            using InnerType = SymbolTypeDouble;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeDouble;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toJNIType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "%sArray", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeString> : public SymbolType
+        class SymbolTypeArray<SymbolTypeString> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -529,146 +679,152 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::STRINGARRAY;}
-            std::string toCppType() override { return "std::vector<std::string>"; }
-            std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
-            std::string toJNIType() override { return "jobjectArray"; }
-            std::string toKotlinType() override { return "Array<String>"; }
-            std::string toKotlinWrapperType() override { return "Array<String>"; }
 
-            using InnerType = SymbolTypeString;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            SymbolTypeArray(size_t size) : SymbolTypeBaseArray(size) {}
+            using ElementType = SymbolTypeString;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobjectArray";
+            }
+            std::string toKotlinType() override {
+                return "Array<String>";
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeEnum> : public SymbolType
+        class SymbolTypeArray<SymbolTypeEnum> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return true; }
-
-            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
-                _obj(obj) {};
 
             Name getTypeName() override {return Name::ENUMARRAY;}
-            std::string toCppType() override {   
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret {"std::vector<"};
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toCppInterfaceType() override { 
-                return "std::vector<int>"; 
-            }
-            std::string toJNIType() override {return "jintArray";}  
-            std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret{ "Array<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toKotlinWrapperType() override { return "IntArray"; }
 
-            using InnerType = SymbolTypeEnum;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
+                _obj(obj), SymbolTypeBaseArray(size) {};
+
+            using ElementType = SymbolTypeEnum;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
             }
-            std::string toCppInterfaceInnerType() override {
-                return "int";
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
             }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toJNIType() override { 
+                return "jobjectArray";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeObject> : public SymbolType
+        class SymbolTypeArray<SymbolTypeObject> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
             bool isPrimitive() override { return false; }
             bool requiredDeclaration() override { return true; }
 
-            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) :
-                _obj(obj) {};
-
             Name getTypeName() override {return Name::OBJECTARRAY;}
-            std::string toCppType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret{ "std::vector<std::shared_ptr<" };
-                    ret += name;
-                    ret += ">*>";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toCppInterfaceType() override {
-                return "std::vector<void*>";
-            }
-            std::string toJNIType() override { return "jlongArray"; }
-            std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret{ "Array<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toKotlinWrapperType() override { return "LongArray"; }
 
-            using InnerType = SymbolObject;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
+                _obj(obj), SymbolTypeBaseArray(size) {};
+
+            using ElementType = SymbolTypeObject;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
             }
-            std::string toCppInterfaceInnerType() override {
-                return "void*";
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
             }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toJNIType() override { 
+                return "jobjectArray";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
         template<>
-        class SymbolTypeArray<SymbolTypeCallback> : public SymbolType
+        class SymbolTypeArray<SymbolTypeCallback> : public SymbolTypeBaseArray
         {
         public:
             bool valid() override { return true; }
@@ -676,62 +832,67 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return true; }
 
             Name getTypeName() override { return Name::CALLBACKARRAY; }
-            SymbolTypeArray(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
-            std::string toCppType() override {
-                if (auto object = _obj.lock())
-                {
-                    std::string ret = "std::vector<";
-                    ret += object->getCppName();
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+
+            SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
+                _obj(obj), SymbolTypeBaseArray(size) {};
+
+            using ElementType = SymbolTypeObject;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
+                return std::string(buffer);
             }
-            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
-            std::string toJNIType() override {
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
                 return "jobjectArray";
             }
-            std::string toKotlinWrapperType() override { return "Array<Any>"; }
             std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret{ "Array<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+                char buffer[64] {0};
+                sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
             }
-
-            using InnerType = SymbolTypeCallback;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
             }
-            std::string toCppInterfaceInnerType() override { return "void*"; }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
+        class SymbolTypeBaseVector: public SymbolType
+        {
+        public:
+            virtual std::string toNativeElementType() = 0;
+            virtual std::string toManagedElementType() = 0;
+            virtual std::string toJNIElementType() = 0;
+            virtual std::string toKotlinElementType() = 0;
+        };
+
         template<class T>
-        class SymbolTypeVector : SymbolType
+        class SymbolTypeVector : public SymbolTypeBaseVector
         {
 
         };
 
         template<>
-        class SymbolTypeVector <SymbolTypeBool> : public SymbolType
+        class SymbolTypeVector <SymbolTypeBool> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -739,22 +900,47 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::BOOLVECTOR;}
-            std::string toCppType() override { return "std::vector<bool>"; }
-            std::string toCppInterfaceType() override { return "std::vector<bool>"; }
-            std::string toJNIType() override { return "jobject"; }
-            std::string toKotlinType() override { return "MutableList<Boolean>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Boolean>"; }
 
-            using InnerType = SymbolTypeBool;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeBool;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt8> : public SymbolType
+        class SymbolTypeVector<SymbolTypeInt8> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -762,22 +948,47 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT8VECTOR;}
-            std::string toCppType() override {return "std::vector<char>";}
-            std::string toCppInterfaceType() override { return "std::vector<char>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Byte>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Byte>"; }
 
-            using InnerType = SymbolTypeInt8;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeInt8;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt16> : public SymbolType
+        class SymbolTypeVector<SymbolTypeInt16> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -785,22 +996,47 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT16VECTOR;}
-            std::string toCppType() override {return "std::vector<int16_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int16_t>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Short>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Short>"; }
-
-            using InnerType = SymbolTypeInt16;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            
+            using ElementType = SymbolTypeInt16;
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt32> : public SymbolType
+        class SymbolTypeVector<SymbolTypeInt32> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -808,22 +1044,46 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT32VECTOR;}
-            std::string toCppType() override {return "std::vector<int32_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int32_t>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Int>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Int>"; }
-
-            using InnerType = SymbolTypeInt32;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeInt32;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeInt64> : public SymbolType
+        class SymbolTypeVector<SymbolTypeInt64> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -831,22 +1091,46 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::INT64VECTOR;}
-            std::string toCppType() override {return "std::vector<int64_t>";}
-            std::string toCppInterfaceType() override { return "std::vector<int64_t>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Long>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Long>"; }
-
-            using InnerType = SymbolTypeInt64;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeInt64;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeFloat> : public SymbolType
+        class SymbolTypeVector<SymbolTypeFloat> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -854,22 +1138,46 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::FLOATVECTOR;}
-            std::string toCppType() override {return "std::vector<float>";}
-            std::string toCppInterfaceType() override { return "std::vector<float>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Float>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Float>"; }
-
-            using InnerType = SymbolTypeFloat;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeFloat;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeDouble> : public SymbolType
+        class SymbolTypeVector<SymbolTypeDouble> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -877,22 +1185,47 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::DOUBLEVECTOR;}
-            std::string toCppType() override {return "std::vector<double>";}
-            std::string toCppInterfaceType() override { return "std::vector<double>"; }
-            std::string toJNIType() override {return "jobject";}  
-            std::string toKotlinType() override {return "MutableList<Double>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<Double>"; }
 
-            using InnerType = SymbolTypeDouble;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeDouble;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeString> : public SymbolType
+        class SymbolTypeVector<SymbolTypeString> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -900,22 +1233,47 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return false; }
 
             Name getTypeName() override {return Name::STRINGVECTOR;}
-            std::string toCppType() override { return "std::vector<std::string>"; }
-            std::string toCppInterfaceType() override { return "std::vector<std::string>"; }
-            std::string toJNIType() override { return "jobject"; }
-            std::string toKotlinType() override { return "MutableList<String>"; }
-            std::string toKotlinWrapperType() override { return "MutableList<String>"; }
 
-            using InnerType = SymbolTypeString;
-            std::string toCppInnerType() override { return InnerType().toCppType(); }
-            std::string toCppInterfaceInnerType() override { return InnerType().toCppInterfaceType(); }
-            std::string toKotlinInnerType() override {
-                return InnerType().toKotlinType();
+            using ElementType = SymbolTypeString;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType().toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType().toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType().toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType().toKotlinType();
             }
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeEnum> : public SymbolType
+        class SymbolTypeVector<SymbolTypeEnum> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -926,55 +1284,48 @@ namespace LibraryInterfaceGenerator
                 _obj(obj) {};
 
             Name getTypeName() override {return Name::ENUMVECTOR;}
-            std::string toCppType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret{ "std::vector<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+            using ElementType = SymbolTypeEnum;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
             }
-            std::string toCppInterfaceType() override { return "std::vector<int>"; }
-            std::string toJNIType() override { return "jobject"; }
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
+                return "jobject";
+            }
             std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret{ "MutableList<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
             }
-            std::string toKotlinWrapperType() override { return "MutableList<Int>"; }
-            using InnerType = SymbolObject;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
             }
-            std::string toCppInterfaceInnerType() override {
-                return "int";
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
             }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeObject> : public SymbolType
+        class SymbolTypeVector<SymbolTypeObject> : public SymbolTypeBaseVector
         {
         public:
             bool valid() { return true; }
@@ -985,56 +1336,49 @@ namespace LibraryInterfaceGenerator
                 _obj(obj) {};
 
             Name getTypeName() override {return Name::OBJECTVECTOR;}
-            std::string toCppType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getCppName();
-                    std::string ret{ "std::vector<std::shared_ptr<" };
-                    ret += name;
-                    ret += ">>";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
-            std::string toJNIType() override { return "jobject"; }
-            std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret{ "MutableList<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
-            }
-            std::string toKotlinWrapperType() override { return "MutableList<Long>"; }
 
-            using InnerType = SymbolObject;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            using ElementType = SymbolTypeEnum;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
             }
-            std::string toCppInterfaceInnerType() override {
-                return "void*";
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
             }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toJNIType() override { 
+                return "jobject";
+            }
+            std::string toKotlinType() override {
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
+            }
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
         };
 
         template<>
-        class SymbolTypeVector<SymbolTypeCallback> : public SymbolType
+        class SymbolTypeVector<SymbolTypeCallback> : public SymbolTypeBaseVector
         {
         public:
             bool valid() override { return true; }
@@ -1043,48 +1387,42 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override { return Name::CALLBACKVECTOR; }
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
-            std::string toCppType() override {
-                if (auto object = _obj.lock())
-                {
-                    std::string ret = "std::vector<";
-                    ret += object->getCppName();
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+            
+            using ElementType = SymbolTypeEnum;            
+            std::string toNativeType() override 
+            {
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
+                return std::string(buffer);
             }
-            std::string toCppInterfaceType() override { return "std::vector<void*>"; }
-            std::string toJNIType() override {
+            std::string toManagedType() override { 
+                char buffer[64] {0};
+                sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toJNIType() override { 
                 return "jobject";
             }
-            std::string toKotlinWrapperType() override { return "MutableList<Any>"; }
             std::string toKotlinType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto name = object->getKotlinName();
-                    std::string ret{ "MutableList<" };
-                    ret += name;
-                    ret += ">";
-                    return ret;
-                }
-                return "";
+                char buffer[64] {0};
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
             }
-
-            using InnerType = SymbolTypeCallback;
-            std::string toCppInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getCppName();
-                }
-                return "";
+            std::string toNativeElementType() override
+            {
+                return ElementType(_obj).toNativeType();
             }
-            std::string toCppInterfaceInnerType() override { return "void*"; }
-            std::string toKotlinInnerType() override {
-                if (auto object = _obj.lock())
-                {
-                    return object->getKotlinName();
-                }
-                return "";
+            std::string toManagedElementType() override
+            {
+                return ElementType(_obj).toManagedType();
+            }
+            std::string toJNIElementType() override
+            {
+                return ElementType(_obj).toJNIType();
+            }
+            std::string toKotlinElementType() override
+            {
+                return ElementType(_obj).toKotlinType();
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
