@@ -48,4 +48,18 @@ class TestLibrary {
         value2 : Array<TestEnum>,
         value3 : MutableList<TestEnum>
     ) : TestEnum
+
+    external fun createNativeHandle(value : Int) : Long
+    external fun releaseNativeHandle(handle : Long)
+
+    external fun TestObject_getValue(handle : Long) : Int
+    external fun TestObject_sum(handle : Long, value1 : TestObject, value2 : TestObject) : TestObject
+
+    external fun objectTest(
+        value1 : TestObject,
+        value2 : Array<TestObject>,
+        value3 : MutableList<TestObject>
+    ) : TestObject
+
+
 }

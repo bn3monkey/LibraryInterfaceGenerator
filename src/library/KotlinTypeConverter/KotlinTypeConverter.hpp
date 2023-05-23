@@ -769,19 +769,18 @@ namespace Bn3Monkey
             }
 
             using NativeType = std::array<typename KDerivedObject::NativeType, size>;
-            using ManagedType = std::array<int64_t, size>;
+            using ManagedType = std::array<void*, size>;
             using KotlinType = jobjectArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
                 size_t length = env->GetArrayLength(value);
 
                 ManagedType ret;
-                ret.reserve(length);
                 for (size_t i = 0; i < length; i++)
                 {
                     auto element = env->GetObjectArrayElement(value, i);
-                    auto new_element = KDerivedObject().toManagedType(element);
-                    ret.push_back(new_element);
+                    auto new_element = KDerivedObject().toManagedType(env, element);
+                    ret[i] = new_element;
                 }
 
                 return ret;
@@ -792,8 +791,8 @@ namespace Bn3Monkey
                 for (size_t i =0;i<value.size();i++)
                 {
                     auto element = value[i];
-                    auto new_element = KDerivedObject().toKotlinType(element);
-                    auto* arr = env->SetObjectArrayElement(ret, i, new_element);
+                    auto new_element = KDerivedObject().toKotlinType(env, element);
+                    env->SetObjectArrayElement(ret, i, new_element);
                 }
                 return ret;
             }
@@ -802,8 +801,8 @@ namespace Bn3Monkey
                 for (size_t i =0;i<src.size();i++)
                 {
                     auto element = src[i];
-                    auto new_element = KDerivedObject().toKotlinType(element);
-                    auto* arr = env->SetObjectArrayElement(dest, i, new_element);
+                    auto new_element = KDerivedObject().toKotlinType(env, element);
+                    env->SetObjectArrayElement(dest, i, new_element);
                 }
             }
         };
@@ -1292,7 +1291,7 @@ namespace Bn3Monkey
         struct KVector<KDerivedObject, typename std::enable_if<std::is_base_of<KObject, KDerivedObject>::value>::type> : public KotlinTypeConverter
         {
             using NativeType = std::vector<typename KDerivedObject::NativeType>;
-            using ManagedType = std::vector<int32_t>;
+            using ManagedType = std::vector<void*>;
             using KotlinType = jobject;
             using KotlinElementType = KDerivedObject;
 

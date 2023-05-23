@@ -110,4 +110,44 @@ class ExampleInstrumentedTest {
         assertArrayEquals(arrayOf(TestEnum.C, TestEnum.C, TestEnum.C), value2)
         assertEquals(mutableListOf(TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.A, TestEnum.A), value3)
     }
+
+    @Test
+    fun ObjectLifeCycleTest() {
+        TestObject(2).use {
+            obj ->
+            val ret = obj.getValue()
+            assertEquals(ret, 2)
+
+            TestObject(3).use {
+                obj1 ->
+                assertEquals(obj1.getValue(), 3)
+
+                TestObject(4).use {
+                    obj2 ->
+                    assertEquals(obj2.getValue(), 4)
+
+                    val obj3 = obj.sum(obj1, obj2)
+                    assertEquals(obj3.getValue(), 7)
+
+                }
+            }
+        }
+    }
+
+    @Test
+    fun ObjectTest()
+    {
+        val value1 = TestObject(1)
+        val value2 = arrayOf(TestObject(2), TestObject(3), TestObject(4))
+        val value3 = mutableListOf(TestObject(5), TestObject(6), TestObject(7))
+
+        val ret = TestLibrary().objectTest(value1, value2, value3)
+
+        assertEquals(value2[0].getValue(), 10)
+        assertEquals(value2[1].getValue(), 20)
+        assertEquals(value2[2].getValue(), 30)
+
+        assertEquals(value3[3].getValue(), 10)
+        assertEquals(value3[4].getValue(), 10)
+    }
 }

@@ -1,7 +1,9 @@
 #include <jni.h>
 #include <string>
+#include <memory>
 
 #include <KotlinTypeConverter/KotlinTypeConverter.hpp>
+
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_primitiveTest(
@@ -650,6 +652,152 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
         }
     }
     while(false);
+    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
+    return ret;
+}
+
+class TestObject
+{
+public:
+    TestObject(int value) : _value(value) {}
+
+    std::shared_ptr<TestObject> sum(const std::shared_ptr<TestObject>& v1, const std::shared_ptr<TestObject>& v2) {
+        return std::shared_ptr<TestObject>(new TestObject(v1->_value + v2->_value));
+    }
+
+    int getValue() {return _value;}
+
+private:
+    int _value;
+};
+
+
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_createNativeHandle(JNIEnv *env, jobject thiz, int value) {
+    return reinterpret_cast<jlong>(new std::shared_ptr<TestObject>(new TestObject(value)));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_releaseNativeHandle(JNIEnv *env, jobject thiz, jlong ptr) {
+    delete reinterpret_cast<std::shared_ptr<TestObject>*>(ptr);
+}
+
+class KTestObject : public Bn3Monkey::Kotlin::KObject
+{
+public:
+    using NativeType = std::shared_ptr<TestObject>*;
+    const char* className() override { return "com/example/kotlintypeconverter/TestObject"; }
+    const char* signature() override { return "Lcom/example/kotlintypeconverter/TestObject;"; }
+};
+
+inline int Managed_getValue(void* handle)
+{
+    auto self = reinterpret_cast<KTestObject::NativeType>(handle);
+    auto ret = (*self)->getValue();
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1getValue(JNIEnv *env, jobject thiz,
+                                                                      jlong handle) {
+    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
+
+    using namespace Bn3Monkey::Kotlin;
+
+    auto __ret = Managed_getValue((void*)handle);
+    auto ret = KInt32().toKotlinType(env, __ret);
+    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
+
+    return ret;
+}
+
+inline void* Managed_sum(void* handle, void* value1, void* value2)
+{
+    auto _handle = reinterpret_cast<KTestObject::NativeType>(handle);
+    auto _value1 = reinterpret_cast<KTestObject::NativeType>(value1);
+    auto _value2 = reinterpret_cast<KTestObject::NativeType>(value2);
+
+    auto ret = (*_handle)->sum(*_value1, *_value2);
+    auto new_handle = new std::shared_ptr<TestObject>();
+    *new_handle = ret;
+    return reinterpret_cast<void*>(new_handle);
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1sum(JNIEnv *env, jobject thiz,
+                                                                 jlong handle, jobject value1, jobject value2) {
+    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
+
+    using namespace Bn3Monkey::Kotlin;
+
+    auto _value1 = KTestObject().toManagedType(env, value1);
+    auto _value2 = KTestObject().toManagedType(env, value2);
+
+    auto _ret = Managed_sum((void *)handle, _value1, _value2);
+    auto ret = KTestObject().toKotlinType(env, _ret);
+
+    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_objectTest(JNIEnv *env, jobject thiz,
+                                                            jobject value1, jobjectArray value2,
+                                                            jobject value3) {
+
+    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
+
+    auto ret = value1;
+
+    using namespace Bn3Monkey::Kotlin;
+    {
+        using Converter = KArray<KTestObject, 3>;
+        auto mvalue = Converter().toManagedType(env, value2);
+        auto jvalue = Converter().toKotlinType(env, mvalue);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i =0;i<3;i++)
+        {
+            if (mvalue[i] != new_value[i])
+            {
+                return value1;
+            }
+        }
+
+        for (size_t i=0;i<3;i++)
+        {
+            mvalue[i] = new std::shared_ptr<TestObject>(new TestObject(10*(i+1)));
+        }
+
+        Converter().copy(env, mvalue, value2);
+    }
+
+    {
+        using Converter = KVector<KTestObject>;
+        auto mvalue = Converter().toManagedType(env, value3);
+        auto jvalue = Converter().toKotlinType(env, mvalue);
+        auto new_value = Converter().toManagedType(env, jvalue);
+
+        for (size_t i =0;i<3;i++)
+        {
+            if (mvalue[i] != new_value[i])
+            {
+                return value1;
+            }
+        }
+
+        mvalue.push_back(new std::shared_ptr<TestObject>(new TestObject(20)));
+        mvalue.push_back(new std::shared_ptr<TestObject>(new TestObject(20)));
+
+        Converter().copy(env, mvalue, value3);
+    }
+
     Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return ret;
 }
