@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <string>
 #include <memory>
+#include <mutex>
+#include <atomic>
 
 #include <KotlinTypeConverter/KotlinTypeConverter.hpp>
 
@@ -125,6 +127,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_primitiveTest(
     }
     Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return env->NewStringUTF("");
+
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -571,7 +574,6 @@ Java_com_example_kotlintypeconverter_TestLibrary_primitiveVectorTest(JNIEnv *env
         value.push_back("PAPYRUS");
         Converter().copy(env, value, origin_value);
     }
-    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return env->NewStringUTF("");
 }
 
@@ -588,6 +590,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
                                                                   jobject value1,
                                                                   jobjectArray value2,
                                                                   jobject value3) {
+
     Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
 
     using namespace Bn3Monkey::Kotlin;
@@ -707,13 +710,11 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1getValue(JNIEnv *env, jobject thiz,
                                                                       jlong handle) {
-    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
 
     using namespace Bn3Monkey::Kotlin;
 
     auto __ret = Managed_getValue((void*)handle);
     auto ret = KInt32().toKotlinType(env, __ret);
-    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
 
     return ret;
 }
@@ -734,7 +735,6 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1sum(JNIEnv *env, jobject thiz,
                                                                  jlong handle, jobject value1, jobject value2) {
-    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
 
     using namespace Bn3Monkey::Kotlin;
 
@@ -744,7 +744,6 @@ Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1sum(JNIEnv *env, jo
     auto _ret = Managed_sum((void *)handle, _value1, _value2);
     auto ret = KTestObject().toKotlinType(env, _ret);
 
-    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return ret;
 }
 
@@ -865,19 +864,19 @@ Java_com_example_kotlintypeconverter_TestLibrary_callbackTest(JNIEnv *env, jobje
     {
         auto mcallback = KCallback<KInt16, KInt32, KFloat>().toManagedType(env, short_callback);
         auto ret = mcallback(1, 1.0f);
-        if (ret != std::numeric_limits<int8_t>::max())
+        if (ret != std::numeric_limits<int16_t>::max())
             return false;
     }
     {
         auto mcallback = KCallback<KInt32, KInt32, KFloat>().toManagedType(env, int_callback);
         auto ret = mcallback(1, 1.0f);
-        if (ret != std::numeric_limits<int16_t>::max())
+        if (ret != std::numeric_limits<int32_t>::max())
             return false;
     }
     {
         auto mcallback = KCallback<KInt64, KInt32, KFloat>().toManagedType(env, long_callback);
         auto ret = mcallback(1, 1.0f);
-        if (ret != std::numeric_limits<int32_t>::max())
+        if (ret != std::numeric_limits<int64_t>::max())
             return false;
     }
     {
