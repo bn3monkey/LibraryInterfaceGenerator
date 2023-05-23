@@ -61,5 +61,17 @@ class TestLibrary {
         value3 : MutableList<TestObject>
     ) : TestObject
 
-
+    external fun callbackTest(
+        voidCallback : (Int, String, TestObject, MutableList<String>) -> Unit,
+        booleanCallback : (Int, Float) -> Boolean,
+        byteCallback : (Int, Float) -> Byte,
+        shortCallback : (Int, Float) -> Short,
+        IntCallback : (Int, Float) -> Int,
+        LongCallback : (Int, Float) -> Long,
+        floatCallback : (Int, Float) -> Float,
+        doubleCallback : (Int, Float) -> Double,
+        stringCallback : (Int, Float) -> String,
+        enumCallback : (Int, Float) -> TestEnum,
+        objectCallback : (Int, Float) -> TestObject
+        ) : Boolean
 }

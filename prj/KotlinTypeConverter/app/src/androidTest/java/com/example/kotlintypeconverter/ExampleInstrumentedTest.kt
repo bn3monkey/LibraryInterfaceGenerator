@@ -150,4 +150,101 @@ class ExampleInstrumentedTest {
         assertEquals(value3[3].getValue(), 10)
         assertEquals(value3[4].getValue(), 10)
     }
+
+    @Test
+    fun callbackTest()
+    {
+        val voidCallback = {
+            value1 : Int, value2 : String, value3 : TestObject, value4 : MutableList<String> ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, "SANS")
+            assertEquals(value3.getValue(), 2)
+            assertEquals(value4, mutableListOf("PAPYRUS", "PAPYRUS"))
+        }
+
+        val booleanCallback = {
+            value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            true
+        }
+
+        val byteCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            'a'.toByte()
+        }
+
+        val shortCallback = {
+            value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            Short.MAX_VALUE
+        }
+
+        val intCallback = {
+            value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            Int.MAX_VALUE
+        }
+
+        val longCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            Long.MAX_VALUE
+        }
+
+        val floatCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            Float.MAX_VALUE
+        }
+
+        val doubleCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            Double.MAX_VALUE
+        }
+
+        val stringCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            "SANS"
+        }
+
+        val enumCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            TestEnum.B
+        }
+
+
+        val objectCallback = {
+                value1 : Int, value2 : Float ->
+
+            assertEquals(value1, 1)
+            assertEquals(value2, 1.0f)
+            TestObject(1)
+        }
+
+        val ret = TestLibrary().callbackTest(voidCallback, booleanCallback, byteCallback, shortCallback, intCallback, longCallback, floatCallback, doubleCallback, stringCallback, enumCallback, objectCallback)
+        assertEquals(ret, true)
+    }
 }

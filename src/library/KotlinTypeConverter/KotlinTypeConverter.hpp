@@ -1,5 +1,5 @@
-#ifndef __BN3MONKEY_KOTLIN_TYPE_CONVERTER__
-#define __BN3MONKEY_KOTLIN_TYPE_CONVERTER__
+#ifndef __BN3MONKEYhelper->_KOTLIN_TYPE_CONVERTER__
+#define __BN3MONKEYhelper->_KOTLIN_TYPE_CONVERTER__
 
 #include <jni.h>
 #include <vector>
@@ -21,45 +21,52 @@ namespace Bn3Monkey
             static bool initialize(JNIEnv* env);
             static void release(JNIEnv* env);
             virtual const char* signature() = 0;
+
+            struct Helper {
+                jclass _KBoolean;
+                jclass _KByte;
+                jclass _KShort;
+                jclass _KInt;
+                jclass _KLong;
+                jclass _KFloat;
+                jclass _KDouble;
+                jclass _KString;
+                jclass _KVector; // arraylist
+
+                jmethodID _KBoolean_init;
+                jmethodID _KBoolean_booleanValue;
+
+                jmethodID _KByte_init;
+                jmethodID _KByte_byteValue;
+
+                jmethodID _KShort_init;
+                jmethodID _KShort_shortValue;
+
+                jmethodID _KInt_init;
+                jmethodID _KInt_intValue;
+
+                jmethodID _KLong_init;
+                jmethodID _KLong_longValue;
+
+                jmethodID _KFloat_init;
+                jmethodID _KFloat_floatValue;
+
+                jmethodID _KDouble_init;
+                jmethodID _KDouble_doubleValue;
+
+                jmethodID _KVector_init;
+                jmethodID _KVector_size;
+                jmethodID _KVector_add;
+                jmethodID _KVector_get;
+                jmethodID _KVector_clear;
+            };
+            
         protected:
             static bool isInitialized;
             static JavaVM* jvm;
-            static jclass _KBoolean;
-            static jclass _KByte;
-            static jclass _KShort;
-            static jclass _KInt;
-            static jclass _KLong;
-            static jclass _KFloat;
-            static jclass _KDouble;
-            static jclass _KString;
-            static jclass _KVector; // arraylist
 
-            static jmethodID _KBoolean_init;
-            static jmethodID _KBoolean_booleanValue;
 
-            static jmethodID _KByte_init;
-            static jmethodID _KByte_byteValue;
-
-            static jmethodID _KShort_init;
-            static jmethodID _KShort_shortValue;
-
-            static jmethodID _KInt_init;
-            static jmethodID _KInt_intValue;
-
-            static jmethodID _KLong_init;
-            static jmethodID _KLong_longValue;
-
-            static jmethodID _KFloat_init;
-            static jmethodID _KFloat_floatValue;
-
-            static jmethodID _KDouble_init;
-            static jmethodID _KDouble_doubleValue;
-
-            static jmethodID _KVector_init;
-            static jmethodID _KVector_size;
-            static jmethodID _KVector_add;
-            static jmethodID _KVector_get;
-            static jmethodID _KVector_clear;
+            static Helper* helper;
         };
 
         class KVoid : public KotlinTypeConverter
@@ -89,10 +96,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallBooleanMethod(value, _KBoolean_booleanValue);
+                return env->CallBooleanMethod(value, helper->_KBoolean_booleanValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KBoolean, _KBoolean_init, value);
+                return env->NewObject(helper->_KBoolean, helper->_KBoolean_init, value);
             }
         private:    
         };
@@ -113,10 +120,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallByteMethod(value, _KByte_byteValue);
+                return env->CallByteMethod(value, helper->_KByte_byteValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KByte, _KByte_init, value);
+                return env->NewObject(helper->_KByte, helper->_KByte_init, value);
             }
         };
         class KInt16 : public KotlinTypeConverter
@@ -136,10 +143,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallShortMethod(value, _KShort_shortValue);
+                return env->CallShortMethod(value, helper->_KShort_shortValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KShort, _KShort_init, value);
+                return env->NewObject(helper->_KShort, helper->_KShort_init, value);
             }
         };
         class KInt32 : public KotlinTypeConverter
@@ -159,10 +166,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallIntMethod(value, _KInt_intValue);
+                return env->CallIntMethod(value, helper->_KInt_intValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KInt, _KInt_init, value);
+                return env->NewObject(helper->_KInt, helper->_KInt_init, value);
             }
         };
         class KInt64 : public KotlinTypeConverter
@@ -182,10 +189,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallLongMethod(value, _KLong_longValue);
+                return env->CallLongMethod(value, helper->_KLong_longValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KLong, _KLong_init, value);
+                return env->NewObject(helper->_KLong, helper->_KLong_init, value);
             }
         };
         class KFloat : public KotlinTypeConverter
@@ -205,10 +212,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallFloatMethod(value, _KFloat_floatValue);
+                return env->CallFloatMethod(value, helper->_KFloat_floatValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KFloat, _KFloat_init, value);
+                return env->NewObject(helper->_KFloat, helper->_KFloat_init, value);
             }
         };
         class KDouble : public KotlinTypeConverter
@@ -228,10 +235,10 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return env->CallDoubleMethod(value, _KDouble_doubleValue);
+                return env->CallDoubleMethod(value, helper->_KDouble_doubleValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return env->NewObject(_KDouble, _KDouble_init, value);
+                return env->NewObject(helper->_KDouble, helper->_KDouble_init, value);
             }
         };
         class KString : public KotlinTypeConverter
@@ -331,6 +338,7 @@ namespace Bn3Monkey
         template<class KotlinReturnType, class... KotlinArgumentType>
         class KCallback : public KotlinTypeConverter
         {
+        public:
             const char* signature() override
             {
                 assert("Kotlin Callback cannot be used as a Callback, Array, or Vector argument.");
@@ -341,7 +349,7 @@ namespace Bn3Monkey
             static_assert(std::conjunction<std::is_base_of<KotlinTypeConverter, KotlinArgumentType>...>::value, "All KotlinArgumentType must be derived from KotlinTypeConverter");
 
             using NativeType = std::function<typename KotlinReturnType::NativeType(typename KotlinArgumentType::NativeType...)>;
-            using ManagedType = std::function<typename KotlinReturnType::ManagdType(typename KotlinArgumentType::ManagedType...)>;
+            using ManagedType = std::function<typename KotlinReturnType::ManagedType(typename KotlinArgumentType::ManagedType...)>;
             using KotlinType = jobject;
             using KotlinWrapperType = jobject;
 
@@ -351,33 +359,68 @@ namespace Bn3Monkey
 
                 return [&, jcallback](typename KotlinArgumentType::ManagedType... args) -> typename KotlinReturnType::ManagedType
                 {
+                    size_t arg_size = sizeof...(KotlinArgumentType);
+                    size_t index {1};
+                    const char* sig = "Ljava/lang/Object;";
+                    size_t sig_size = strlen(sig);
                     char invoke_signature[256]{ 0 };
-                    // getKotlinSignature<KotlinReturnType, KotlinParamTypes...>(invoke_signature);
+                    invoke_signature[0] = '(';
+                    for (size_t i =0;i<arg_size;i++)
+                    {
+                        std::strcpy(invoke_signature + index, sig);
+                        index += sig_size;
+                    }
+                    invoke_signature[index++] = ')';
+                    std::strcpy(invoke_signature + index, sig);
+
+                    bool load_error {false};
 
                     JNIEnv* env {nullptr};
                     int getEnvStat = jvm->GetEnv((void **)&env, JNI_VERSION_1_6);
                     if (getEnvStat == JNI_EDETACHED) {
                         if (jvm->AttachCurrentThread(&env, NULL) != 0) {
-                            return;
+                            load_error= true;
                         }
                     }
                     else if (getEnvStat == JNI_EVERSION) {
-                        return;
+                        load_error = true;
                     }
                     else if (getEnvStat == JNI_OK) {
+                    }
+
+                    if (load_error) {
+                        if constexpr (std::is_same_v<KotlinReturnType, KVoid>) {
+                            return;
+                        } else {
+                            return typename KotlinReturnType::ManagedType();
+                        }
                     }
 
                     jclass clazz = env->GetObjectClass(jcallback);
                     jmethodID callback = env->GetMethodID(clazz, "invoke", invoke_signature);
 
-                    if constexpr(std::is_same_v<typename KotlinReturnType::NativeType, typename KVoid::NativeType>)
+
+                    if constexpr(std::is_same_v<KotlinReturnType, KVoid>)
                     {
-                        env->CallVoidMethod(clazz, callback);
+                        env->CallObjectMethod(jcallback, callback,
+                                            KotlinArgumentType().toKotlinWrapperType(env, KotlinArgumentType().toKotlinType(env, args))...);
+                        if (getEnvStat == JNI_EDETACHED)
+                            jvm->DetachCurrentThread();
+                        return;
+                    }
+                    else
+                    {
+                        typename KotlinReturnType::ManagedType ret;
+
+                        auto _ret = env->CallObjectMethod(jcallback, callback, KotlinArgumentType().toKotlinWrapperType(env, KotlinArgumentType().toKotlinType(env, args))...);
+                        ret = KotlinReturnType().toManagedType(env, KotlinReturnType().toKotlinType(env, _ret));
+
+                        if (getEnvStat == JNI_EDETACHED)
+                            jvm->DetachCurrentThread();
+                        return ret;
                     }
 
-                    if (getEnvStat == JNI_EDETACHED)
-                        jvm->DetachCurrentThread();
-                };
+               };
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value)
             {
@@ -390,6 +433,8 @@ namespace Bn3Monkey
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
                 return value;
             }
+        private:
+
 
         };
 
@@ -436,6 +481,14 @@ namespace Bn3Monkey
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseBooleanArrayElements(dest, arr, 0);
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
+            }
         };
 
         template<size_t size>
@@ -473,6 +526,14 @@ namespace Bn3Monkey
 
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseByteArrayElements(dest, arr, 0);
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
             }
         };
 
@@ -512,6 +573,14 @@ namespace Bn3Monkey
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseShortArrayElements(dest, arr, 0);
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
+            }
         };
 
         template<size_t size>
@@ -549,6 +618,14 @@ namespace Bn3Monkey
 
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseIntArrayElements(dest, arr, 0);
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
             }
         };
 
@@ -588,6 +665,14 @@ namespace Bn3Monkey
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseLongArrayElements(dest, arr, 0);
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
+            }
         };
 
         template<size_t size>
@@ -625,6 +710,14 @@ namespace Bn3Monkey
 
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseFloatArrayElements(dest, arr, 0);
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
             }
         };
 
@@ -664,6 +757,14 @@ namespace Bn3Monkey
                 std::copy(src.begin(), src.end(), arr);
                 env->ReleaseDoubleArrayElements(dest, arr, 0);
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
+            }
         };
 
         template<size_t size>
@@ -690,7 +791,7 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObjectArray(value.size(), _KString, nullptr);
+                KotlinType ret = env->NewObjectArray(value.size(), helper->_KString, nullptr);
                 for (size_t i =0;i<value.size();i++)
                 {
                     auto element = value[i];
@@ -707,6 +808,14 @@ namespace Bn3Monkey
                     auto new_element = KString().toKotlinType(env, element);
                     env->SetObjectArrayElement(dest, i, new_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<jobject>(value);
             }
         };
 
@@ -756,6 +865,14 @@ namespace Bn3Monkey
                     env->SetObjectArrayElement(dest, i, new_element);
                 }
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
+            }
         };
         
         template<typename KDerivedObject, size_t size>
@@ -804,6 +921,14 @@ namespace Bn3Monkey
                     auto new_element = KDerivedObject().toKotlinType(env, element);
                     env->SetObjectArrayElement(dest, i, new_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -856,6 +981,14 @@ namespace Bn3Monkey
                     auto* arr = env->SetObjectArrayElement(dest, i, new_element);
                 }
             }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
+            }
         };
 
 
@@ -878,12 +1011,12 @@ namespace Bn3Monkey
                 return "Ljava/lang/ArrayList;";
             }
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -891,24 +1024,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -925,12 +1066,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -938,24 +1079,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -972,12 +1121,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -985,24 +1134,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1019,12 +1176,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1032,24 +1189,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1066,12 +1231,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1079,24 +1244,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1113,12 +1286,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1126,24 +1299,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1160,12 +1341,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1173,24 +1354,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1206,12 +1395,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KString().toKotlinType(env, ko_element);
                     ret.push_back(KString().toManagedType(env, k_element));
                 }
@@ -1219,24 +1408,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KString().toKotlinType(env, element);
                     auto ko_element = KString().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KString().toKotlinType(env, element);
                     auto ko_element = KString().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1253,12 +1450,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1266,24 +1463,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1300,12 +1505,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1313,24 +1518,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 
@@ -1349,12 +1562,12 @@ namespace Bn3Monkey
             }
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto size = env->CallIntMethod(value, _KVector_size);
+                auto size = env->CallIntMethod(value, helper->_KVector_size);
                 ManagedType ret;
 
                 for (size_t i = 0; i < size; i++)
                 {
-                    auto ko_element = env->CallObjectMethod(value, _KVector_get, i);
+                    auto ko_element = env->CallObjectMethod(value, helper->_KVector_get, i);
                     auto k_element = KotlinElementType().toKotlinType(env, ko_element);
                     ret.push_back(KotlinElementType().toManagedType(env, k_element));
                 }
@@ -1362,24 +1575,32 @@ namespace Bn3Monkey
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                KotlinType ret = env->NewObject(_KVector, _KVector_init);
+                KotlinType ret = env->NewObject(helper->_KVector, helper->_KVector_init);
                 for (auto element : value)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(ret, _KVector_add, ko_element);
+                    env->CallBooleanMethod(ret, helper->_KVector_add, ko_element);
                 }
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                env->CallVoidMethod(dest, _KVector_clear);
+                env->CallVoidMethod(dest, helper->_KVector_clear);
                 for (auto element : src)
                 {
                     auto kelemnent = KotlinElementType().toKotlinType(env, element);
                     auto ko_element = KotlinElementType().toKotlinWrapperType(env, kelemnent);
-                    env->CallBooleanMethod(dest, _KVector_add, ko_element);
+                    env->CallBooleanMethod(dest, helper->_KVector_add, ko_element);
                 }
+            }
+
+            using KotlinWrapperType = jobject;
+            KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
+                return static_cast<KotlinType>(value);
+            }
+            KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
+                return static_cast<KotlinWrapperType>(value);
             }
         };
 

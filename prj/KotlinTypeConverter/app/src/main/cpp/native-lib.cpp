@@ -574,6 +574,14 @@ Java_com_example_kotlintypeconverter_TestLibrary_primitiveVectorTest(JNIEnv *env
     Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return env->NewStringUTF("");
 }
+
+class KTestEnum : public Bn3Monkey::Kotlin::KEnum
+{
+public:
+    const char* className() override { return "com/example/kotlintypeconverter/TestEnum";}
+    const char* signature() override { return "Lcom/example/kotlintypeconverter/TestEnum;"; }
+};
+
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject thiz,
@@ -584,12 +592,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
 
     using namespace Bn3Monkey::Kotlin;
 
-    class KTestEnum : public KEnum
-    {
-    public:
-        const char* className() override { return "com/example/kotlintypeconverter/TestEnum";}
-        const char* signature() override { return "Lcom/example/kotlintypeconverter/TestEnum;"; }
-    };
+
 
     jobject ret;
     do {
@@ -800,4 +803,117 @@ Java_com_example_kotlintypeconverter_TestLibrary_objectTest(JNIEnv *env, jobject
 
     Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
     return ret;
+}
+
+#include <limits>
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_callbackTest(JNIEnv *env, jobject thiz,
+                                                              jobject void_callback,
+                                                              jobject boolean_callback,
+                                                              jobject byte_callback,
+                                                              jobject short_callback,
+                                                              jobject int_callback,
+                                                              jobject long_callback,
+                                                              jobject float_callback,
+                                                              jobject double_callback,
+                                                              jobject string_callback,
+                                                              jobject enum_callback,
+                                                              jobject object_callback) {
+    Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
+    using namespace Bn3Monkey::Kotlin;
+
+    /*
+    {
+        auto clazz = env->GetObjectClass(void_callback);
+        auto methodID = env->GetMethodID(clazz, "invoke",
+                                         "(ILjava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V");
+
+        auto v1 = new std::shared_ptr<TestObject>(
+                new TestObject(2));
+        auto v2 = std::vector<std::string> {"PAPYRUS", "PAPYRUS"};
+        auto k1 = KTestObject().toKotlinType(env, v1);
+        auto k2 = KVector<KString>().toKotlinType(env, v2);
+        auto k3 = env->NewStringUTF("SANS");
+
+        env->CallVoidMethod(void_callback, methodID, 1, k3, k1, k2);
+        printf("s\n");
+    }
+    */
+
+    {
+        auto mvoid_callback = KCallback<KVoid, KInt32, KString, KTestObject, KVector<KString>>().toManagedType(env, void_callback);
+
+        auto new_object = new std::shared_ptr<TestObject>(
+                new TestObject(2));
+        auto vector = std::vector<std::string> {"PAPYRUS", "PAPYRUS"};
+        mvoid_callback(1, "SANS", new_object, vector);
+    }
+    {
+        auto mcallback = KCallback<KBoolean, KInt32, KFloat>().toManagedType(env, boolean_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (!ret)
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KInt8, KInt32, KFloat>().toManagedType(env, byte_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret != 'a')
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KInt16, KInt32, KFloat>().toManagedType(env, short_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret != std::numeric_limits<int8_t>::max())
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KInt32, KInt32, KFloat>().toManagedType(env, int_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret != std::numeric_limits<int16_t>::max())
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KInt64, KInt32, KFloat>().toManagedType(env, long_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret != std::numeric_limits<int32_t>::max())
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KFloat, KInt32, KFloat>().toManagedType(env, float_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret !=  std::numeric_limits<float>::max())
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KDouble, KInt32, KFloat>().toManagedType(env, double_callback);
+        auto ret = mcallback(1, 1.0f);
+        auto mret = KDouble().toManagedType(env, ret);
+        if (ret !=  std::numeric_limits<double>::max())
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KString, KInt32, KFloat>().toManagedType(env, string_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret !=  "SANS")
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KTestEnum, KInt32, KFloat>().toManagedType(env, enum_callback);
+        auto ret = mcallback(1, 1.0f);
+        if (ret != 4)
+            return false;
+    }
+    {
+        auto mcallback = KCallback<KTestObject, KInt32, KFloat>().toManagedType(env, object_callback);
+        auto ret = mcallback(1, 1.0f);
+        auto ref = reinterpret_cast<std::shared_ptr<TestObject>*>(ret);
+        auto value = (*ref)->getValue();
+        if (value != 1)
+            return false;
+    }
+
+    Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);
+    return JNI_TRUE;
 }
