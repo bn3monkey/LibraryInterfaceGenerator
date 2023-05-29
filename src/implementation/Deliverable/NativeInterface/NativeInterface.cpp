@@ -1,6 +1,5 @@
 ﻿#include "NativeInterface.hpp"
 #include "../../Converter/CXXConverter.hpp"
-#include "../../ExternalLibrary/NativeInterfaceConverter/NativeInterfaceConverter_cpp.h"
 
 using namespace LibraryInterfaceGenerator::Implementation;
 using namespace LibraryInterfaceGenerator::Implementation::Definition;
@@ -121,6 +120,8 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		{
 			NamespaceCXXSourceScopedStream nameSpace{ ss, root_namespace };
 
+			createCallbackDeclaration(ss, obj);
+
 			for (auto& module_ : obj.modules)
 			{
 				createCXXComment(ss, obj);
@@ -200,6 +201,39 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 			createCXXComment(ss, *method);
 			createClassMethodDeclaration(ss, clazz, *method);
 		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createCallbackDeclaration(SourceStream& ss, const SymbolPackage& obj)
+{
+	for (auto& module_ : obj.modules) {
+		createCallbackDeclaration(ss, *module_);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createCallbackDeclaration(SourceStream& ss, const SymbolModule& obj)
+{
+	std::vector<std::string> param_types;
+	for (auto& callback : obj.callbacks)
+	{
+		for (auto& param : callback->parameters)
+		{
+			param_types.push_back(param->type->toManagedType());
+		}
+
+		std::string callback_name = "_" + callback->getCppName();
+		{
+			CallbackCXXSourceStream callback_scope{
+				ss,
+				callback_name,
+				callback->type->toManagedType(),
+				param_types
+			};
+		}
+	}
+
+	for (auto& module_ : obj.submodules) {
+		createCallbackDeclaration(ss, *module_);
 	}
 }
 
@@ -307,7 +341,7 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
 			io = ParameterNode::REFERENCE_IN;
 		}
 	}
-	return ParameterNode(io, parameter.type->toCppInterfaceType(), parameter.name);
+	return ParameterNode(io, parameter.type->toManagedType(), parameter.name);
 }
 
 static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
@@ -342,7 +376,7 @@ static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty&
 
 		ParameterNode(
 			ParameterNode::REFERENCE_IN,
-			obj.type->toCppInterfaceType(),
+			obj.type->toManagedType(),
 			"value")
 	);
 	return ret;
@@ -460,7 +494,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 	
 		std::string prefix = "extern " + api_macro;
 
-		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, obj.name, parameters};
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toManagedType(), {}, obj.name, parameters};
 	}
 }
 
@@ -470,7 +504,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 		auto parameters = createParametersWithHandle(obj);
 		auto scope = createInterfaceScope(root_namespace, clazz);
 
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), scope, obj.name, parameters };
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toManagedType(), scope, obj.name, parameters };
 
 		ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
 		for (auto& parameter : obj.parameters)
@@ -518,7 +552,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 		auto parameters = createParameters(obj);
 		std::string prefix = "extern " + api_macro;
 
-		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, obj.name, parameters };
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toManagedType(), {}, obj.name, parameters };
 	}
 }
 
@@ -529,7 +563,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 		auto parameters = createParameters(obj);
 		auto scope = createInterfaceScope(root_namespace, obj);
 
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toCppInterfaceType(), scope, obj.name, parameters };
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toManagedType(), scope, obj.name, parameters };
 
 		for (auto& parameter : obj.parameters)
 		{
@@ -622,22 +656,22 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPara
 	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ss << "auto i_" << obj.name << " = createNativeEnum<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		ss << "auto i_" << obj.name << " = createNativeEnum<" << obj.type->toNativeType() << ">(" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto i_" << obj.name << " = createNativeObject<" << obj.type->toCppInnerType() << ">(" << obj.name 	<< ");\n";
+		ss << "auto i_" << obj.name << " = createNativeObject<" << obj.type->toNativeType() << ">(" << obj.name 	<< ");\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ss << "auto i_" << obj.name << " = createNativeEnumArray<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		ss << "auto i_" << obj.name << " = createNativeEnumArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto i_" << obj.name << " = createNativeEnumVector<" << obj.type->toCppType() << ">(" << obj.name << ");\n";
+		ss << "auto i_" << obj.name << " = createNativeEnumVector<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto i_" << obj.name << " = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(" << obj.name << ");\n";
+		ss << "auto i_" << obj.name << " = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto i_" << obj.name << " = createNativeObjectVector<" << obj.type->toCppInnerType() << ">(" << obj.name	<< ");\n";
+		ss << "auto i_" << obj.name << " = createNativeObjectVector<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(" << obj.name	<< ");\n";
 		break;
 	default:
 		if (obj.type->isPrimitive())
@@ -708,7 +742,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyG
 		std::string name = "get" + property_name;
 		auto parameters = createHandleParameter();
 
-		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toCppInterfaceType(), {}, name, parameters};
+		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", obj.type->toManagedType(), {}, name, parameters};
 	}
 }
 
@@ -755,7 +789,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyG
 		auto scopes = createInterfaceScope(root_namespace, clazz);
 		std::string name = "get" + property_name;
 
-		MethodCXXSourceScopedStream method_scope{ ss, false, "", "",  obj.type->toCppInterfaceType(), scopes, name, parameters };
+		MethodCXXSourceScopedStream method_scope{ ss, false, "", "",  obj.type->toManagedType(), scopes, name, parameters };
 
 		callPropertyGetter(ss, property_name, clazz, obj);
 		createOutputPropertyChanger(ss, obj);
@@ -778,22 +812,22 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputProp
 	switch (obj.type->getTypeName())
 	{
 	case SymbolType::Name::ENUM:
-		ss << "auto i_value = createNativeEnum<" << obj.type->toCppType() << ">(value);\n";
+		ss << "auto i_value = createNativeEnum<" << obj.type->toNativeType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto i_value = getReference<" << obj.type->toCppInnerType() << ">(value);\n";
+		ss << "auto i_value = getReference<" << obj.type->toNativeType() << ">(value);\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ss << "auto i_value = createNativeEnumArray<" << obj.type->toCppType() << ">(value);\n";
+		ss << "auto i_value = createNativeEnumArray<" << obj.type->toNativeType() << ">(value);\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto i_value = createNativeEnumVector<" << obj.type->toCppType() << ">(value);\n";
+		ss << "auto i_value = createNativeEnumVector<" << obj.type->toNativeType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto i_value = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(value);\n";
+		ss << "auto i_value = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto i_value = createNativeObjectArray<" << obj.type->toCppInnerType() << ">(value);\n";
+		ss << "auto i_value = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(value);\n";
 		break;
 	default:
 		if (obj.type->isPrimitive())

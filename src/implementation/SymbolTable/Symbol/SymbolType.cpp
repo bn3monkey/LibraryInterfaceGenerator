@@ -194,7 +194,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						callbackReferenceSet->insert(callback);
 					}
 
-					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback);
+					return std::make_unique< SymbolTypeVector<SymbolTypeCallback>>(callback);
 				}
 			}
 		}

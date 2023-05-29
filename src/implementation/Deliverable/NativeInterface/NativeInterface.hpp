@@ -66,6 +66,9 @@ namespace LibraryInterfaceGenerator
             void createModuleDeclaration(SourceStream& ss, const SymbolModule& obj);
             void createClassDeclaration(SourceStream& ss, const SymbolClass& clazz);
 
+            void createCallbackDeclaration(SourceStream& ss, const SymbolPackage& obj);
+            void createCallbackDeclaration(SourceStream& ss, const SymbolModule& obj);
+
             void createPackageDefinition(SourceStream& ss, const SymbolPackage& obj);
             void createModuleDefinition(SourceStream& ss, const SymbolModule& obj);
             void createClassDefinition(SourceStream& ss, const SymbolClass& clazz);

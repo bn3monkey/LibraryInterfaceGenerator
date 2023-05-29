@@ -18,6 +18,9 @@ namespace LibraryInterfaceGenerator
             {
                 Log,
                 MemoryPool,
+                ManagedTypeConverter,
+                KotlinTypeConverter,
+                LENGTH
             };
 
             explicit NativeExternalLibraryDirectory(
@@ -50,7 +53,7 @@ namespace LibraryInterfaceGenerator
             std::string _lib_dir_name;
             std::string _lib_dir_path;
 
-            bool is_created[2] {false, false};
+            bool is_created[static_cast<size_t>(ExternalTool::LENGTH)]{false, false, false, false};
         };
     }
 }

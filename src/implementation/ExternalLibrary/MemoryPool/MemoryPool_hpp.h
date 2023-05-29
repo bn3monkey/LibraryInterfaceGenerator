@@ -59,6 +59,7 @@ static constexpr char* MEMORYPOOL_HPP =
 "			return _impl.deallocate<Type>(reference, size);\n"
 "		}\n"
 "\n"
+"\n"
 "		class Analyzer\n"
 "		{\n"
 "		public:\n"

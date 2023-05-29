@@ -276,7 +276,16 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toManagedType() override { return "void*"; }
+            std::string toManagedType() override { 
+                // return "void*";
+                if (auto object = _obj.lock())
+                {
+                    std::string ret{ "_" };
+                    ret += object->getCppName();
+                    return ret;
+                }
+                return "";
+            }
             std::string toJNIType() override {
                 return "jobject";
             }
@@ -327,22 +336,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeBool;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -378,22 +387,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt8;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -429,22 +438,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt16;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -480,22 +489,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt32;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -531,22 +540,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt64;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -582,22 +591,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeFloat;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -633,22 +642,22 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeDouble;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -684,12 +693,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeString;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
@@ -733,12 +742,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeEnum;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
@@ -746,7 +755,7 @@ namespace LibraryInterfaceGenerator
                 return "jobjectArray";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -786,12 +795,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeObject;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
@@ -799,7 +808,7 @@ namespace LibraryInterfaceGenerator
                 return "jobjectArray";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -839,12 +848,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeObject;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
                 return std::string(buffer);
             }
@@ -852,7 +861,7 @@ namespace LibraryInterfaceGenerator
                 return "jobjectArray";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "Array<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -904,12 +913,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeBool;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -917,7 +926,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -952,12 +961,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt8;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -965,7 +974,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1000,12 +1009,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt16;
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1013,7 +1022,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1047,12 +1056,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt32;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1060,7 +1069,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1094,12 +1103,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeInt64;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1107,7 +1116,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1141,12 +1150,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeFloat;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1154,7 +1163,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1189,12 +1198,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeDouble;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1202,7 +1211,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1237,12 +1246,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeString;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1250,7 +1259,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1287,12 +1296,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeEnum;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1300,7 +1309,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1340,12 +1349,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeEnum;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[128] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[128] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1353,7 +1362,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }
@@ -1391,12 +1400,12 @@ namespace LibraryInterfaceGenerator
             using ElementType = SymbolTypeEnum;            
             std::string toNativeType() override 
             {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
             std::string toManagedType() override { 
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
                 return std::string(buffer);
             }
@@ -1404,7 +1413,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinType() override {
-                char buffer[64] {0};
+                char buffer[256] {0};
                 sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
                 return std::string(buffer);
             }

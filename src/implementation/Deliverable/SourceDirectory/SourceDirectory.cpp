@@ -840,19 +840,20 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createReturnVal
 		ss << "val __ret = enumValues<" << object.type->toKotlinType() << ">().find{it.value == __temp_ret}!!" << "\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ss << "val __ret = Array(__temp_ret.size) { idx -> enumValues<" << object.type->toKotlinInnerType() << ">().find { it.value == __temp_ret[idx]}!! }" << "\n";
+		
+		ss << "val __ret = Array(__temp_ret.size) { idx -> enumValues<" << dynamic_cast<SymbolTypeBaseArray&>(*object.type).toKotlinElementType() << ">().find { it.value == __temp_ret[idx]}!! }" << "\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ss << "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<" << object.type->toKotlinInnerType() << ">().find { it.value == __temp_ret[idx]}!! }" << "\n";
+		ss << "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<" << dynamic_cast<SymbolTypeBaseVector&>(*object.type).toKotlinElementType() << ">().find { it.value == __temp_ret[idx]}!! }" << "\n";
 		break;
 	case SymbolType::Name::OBJECT:
 		ss << "val __ret = " << object.type->toKotlinType() << "(__temp_ret)" << "\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "val __ret = Array(__temp_ret.size) {" <<  object.type->toKotlinInnerType() << "(__temp_ret[it]) }" << "\n";
+		ss << "val __ret = Array(__temp_ret.size) {" << dynamic_cast<SymbolTypeBaseArray&>(*object.type).toKotlinElementType() << "(__temp_ret[it]) }" << "\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "val __ret = MutableList(__temp_ret.size) {" <<  object.type->toKotlinInnerType() <<  "(__temp_ret[it]) }" << "\n";
+		ss << "val __ret = MutableList(__temp_ret.size) {" << dynamic_cast<SymbolTypeBaseVector&>(*object.type).toKotlinElementType() <<  "(__temp_ret[it]) }" << "\n";
 		break;
 	default:
 		ss << "val __ret = __temp_ret" << "\n";
@@ -923,7 +924,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputPar
 		ss << "for (value in i_" + object.name << ")\n";
 		{
 			SourceScopedStream for_scope(ss, CodeStyle::Kotlin);
-			ss << object.name << ".add(" << object.type->toKotlinInnerType() << "(value)" << ")\n";
+			ss << object.name << ".add(" << dynamic_cast<SymbolTypeBaseArray&>(*object.type).toKotlinElementType() << "(value)" << ")\n";
 		}
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
@@ -931,7 +932,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputPar
 		ss << "for (value in i_" + object.name << ")\n";
 		{
 			SourceScopedStream for_scope(ss, CodeStyle::Kotlin);
-			ss << object.name << ".add(" << object.type->toKotlinInnerType() << "(value)" << ")\n";
+			ss << object.name << ".add(" << dynamic_cast<SymbolTypeBaseVector&>(*object.type).toKotlinElementType() << "(value)" << ")\n";
 		}
 		break;
 	default:
@@ -976,19 +977,19 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputPro
 		ss << "val __ret = enumValues<" << object.type->toKotlinType() << ">().find { it.value == __temp_ret}!!\n";
 		break;
 	case SymbolType::Name::ENUMARRAY:
-		ss << "val __ret = Array(__temp_ret.size) { idx -> enumValues<" << object.type->toKotlinInnerType() << ">().find { it.value == __temp_ret[idx]}!! }\n";
+		ss << "val __ret = Array(__temp_ret.size) { idx -> enumValues<" << dynamic_cast<SymbolTypeBaseArray&>(*object.type).toKotlinElementType() << ">().find { it.value == __temp_ret[idx]}!! }\n";
 		break;
 	case SymbolType::Name::ENUMVECTOR:
-		ss << "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<" << object.type->toKotlinInnerType() << ">().find { it.value == __temp_ret[idx]}!! }\n";
+		ss << "val __ret = MutableList(__temp_ret.size) { idx -> enumValues<" << dynamic_cast<SymbolTypeBaseVector&>(*object.type).toKotlinElementType() << ">().find { it.value == __temp_ret[idx]}!! }\n";
 		break;
 	case SymbolType::Name::OBJECT:
 		ss << "val __ret = " << object.type->toKotlinType() << "(__temp_ret)\n";
 		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "val __ret = Array(__temp_ret.size) {" << object.type->toKotlinInnerType() << "(__temp_ret[it]) }\n";
+		ss << "val __ret = Array(__temp_ret.size) {" << dynamic_cast<SymbolTypeBaseArray&>(*object.type).toKotlinElementType() << "(__temp_ret[it]) }\n";
 		break;
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "val __ret = MutableList(__temp_ret.size) {" << object.type->toKotlinInnerType() << "(__temp_ret[it]) }\n";
+		ss << "val __ret = MutableList(__temp_ret.size) {" << dynamic_cast<SymbolTypeBaseVector&>(*object.type).toKotlinElementType() << "(__temp_ret[it]) }\n";
 		break;
 	default:
 		ss << "val __ret = __temp_ret\n";

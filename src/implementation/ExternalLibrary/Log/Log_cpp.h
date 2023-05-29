@@ -101,7 +101,7 @@ static constexpr char* LOG_CPP =
 "#endif\n"
 "    {\n"
 "        std::lock_guard<std::mutex> lock(console_mtx);\n"
-"        printf(buffer);\n"
+"        printf(\"%s\", buffer);\n"
 "    }\n"
 "\n"
 "    logStream.read(buffer);\n"

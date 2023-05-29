@@ -390,7 +390,7 @@ static std::vector<ParameterNode> createNativeInputPropertyParameters(const Symb
 	ret.push_back(
 		ParameterNode(
 			ParameterNode::VALUE,
-			obj.type->toCppInterfaceType(),
+			obj.type->toManagedType(),
 			"i_value"
 		)
 	);
@@ -758,10 +758,10 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputParame
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ss << "auto i_" << object.name << " = static_cast<" << object.type->toCppInterfaceType() << ">(" << object.name << ");\n";
+		ss << "auto i_" << object.name << " = static_cast<" << object.type->toManagedType() << ">(" << object.name << ");\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto i_" << object.name << " = (const " <<  object.type->toCppInterfaceInnerType() <<  ")" <<  object.name <<  ";\n";
+		ss << "auto i_" << object.name << " = (const " <<  object.type->toManagedType() <<  ")" <<  object.name <<  ";\n";
 		break;
 	case SymbolType::Name::STRING:
 		ss << "auto i_" << object.name << " = createNativeString(env, " << object.name << ");\n";
@@ -1025,10 +1025,10 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputProper
 	case SymbolType::Name::FLOAT:
 	case SymbolType::Name::DOUBLE:
 	case SymbolType::Name::ENUM:
-		ss << "auto i_value = static_cast<" << object.type->toCppInterfaceType() << ">(value);\n";
+		ss << "auto i_value = static_cast<" << object.type->toManagedType() << ">(value);\n";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto i_value = (const " << object.type->toCppInterfaceInnerType() << ")value;\n";
+		ss << "auto i_value = (const " << object.type->toManagedType() << ")value;\n";
 		break;
 	case SymbolType::Name::STRING:
 		ss << "auto i_value = createNativeString(env, value);\n";
@@ -1300,7 +1300,7 @@ static ParameterNode createWrapperParameter(const SymbolParameter& parameter)
 			io = ParameterNode::REFERENCE_IN;
 		}
 	}
-	return ParameterNode(io, parameter.type->toKotlinWrapperType(), parameter.name);
+	return ParameterNode(io, parameter.type->toKotlinType(), parameter.name);
 }
 
 static std::vector<ParameterNode> createWrapperParameters(const SymbolMethod& object)
@@ -1332,7 +1332,7 @@ static std::vector<ParameterNode> createWrapperPropertyParameters(const SymbolPr
 {
 	auto ret = createWrapperHandleParameters();
 	ret.push_back(
-		ParameterNode( ParameterNode::REFERENCE_IN, obj.type->toKotlinWrapperType(), "value")
+		ParameterNode( ParameterNode::REFERENCE_IN, obj.type->toKotlinType(), "value")
 	);
 	return ret;
 }
@@ -1423,7 +1423,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMetho
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinWrapperType(),
+			object.type->toKotlinType(),
 			method_name,
 			createWrapperMemberParameters(object)
 		};
@@ -1446,7 +1446,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMeth
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinWrapperType(),
+			object.type->toKotlinType(),
 			method_name,
 			createWrapperParameters(object)
 		};
@@ -1486,7 +1486,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyGe
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinWrapperType(),
+			object.type->toKotlinType(),
 			method_name,
 			createWrapperHandleParameters()
 		};

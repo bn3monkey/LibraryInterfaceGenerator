@@ -823,6 +823,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         {
             ExternalIncludeCXXSourceStream ex{ ss, "functional" };
         }
+        {
+            createForwardDeclaration(ss, callback);
+        }
 
         {
             NamespaceCXXSourceScopedStream namespace_scope{ ss, callback.parentModules };
@@ -850,14 +853,14 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCal
     std::vector<std::string> param_types;
     for (auto& param : callback.parameters)
     {
-        param_types.push_back(param->type->toCppType());
+        param_types.push_back(param->type->toNativeType());
     }
 
     {
         CallbackCXXSourceStream callback_scope{
             ss,
             callback.name,
-            callback.type->toCppType(),
+            callback.type->toNativeType(),
             param_types
         };
     }
@@ -881,7 +884,7 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
             io = ParameterNode::REFERENCE_IN;
         }
     }
-    return ParameterNode(io, parameter.type->toCppType(), parameter.name);
+    return ParameterNode(io, parameter.type->toNativeType(), parameter.name);
 }
 
 static std::vector<ParameterNode> createParameters(const SymbolMethod& object)
@@ -898,7 +901,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createSta
 {
     {
         auto parameters = createParameters(object);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", object.type->toCppType(), {}, object.name, parameters };        
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", object.type->toNativeType(), {}, object.name, parameters };        
     }
 }
 
@@ -906,7 +909,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
 {
     {
         auto parameters = createParameters(object);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", object.type->toCppType(), {}, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "", object.type->toNativeType(), {}, object.name, parameters };
     }
 }
 
@@ -914,7 +917,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
 {
     {
         auto parameters = createParameters(object);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", object.type->toCppType(), {}, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", object.type->toNativeType(), {}, object.name, parameters };
     }
 }
 
@@ -922,7 +925,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
 {
     {
         auto parameters = createParameters(object);
-        MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", object.type->toCppType(), {}, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", object.type->toNativeType(), {}, object.name, parameters };
     }
 }
 
@@ -931,7 +934,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createSta
     {
         auto parameters = createParameters(object);
         auto scopes = createScope(object);
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toCppType(), scopes, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toNativeType(), scopes, object.name, parameters };
     }
 }
 
@@ -940,7 +943,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
     {
         auto parameters = createParameters(object);
         auto scopes = createScope(clazz);
-        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toCppType(), scopes, object.name, parameters };
+        MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toNativeType(), scopes, object.name, parameters };
     }
 }
 
@@ -1002,7 +1005,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
             {
                 ParameterNode(
                     ParameterNode::REFERENCE_IN,
-                    object.type->toCppType(),
+                    object.type->toNativeType(),
                     "value")
             }
         };
@@ -1015,7 +1018,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
         std::string name = "get";
         name += propertyName;
 
-        std::string type = object.type->toCppType();
+        std::string type = object.type->toNativeType();
         if (!object.type->isPrimitive())
             type += "&";
 
@@ -1043,7 +1046,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
             {
                 ParameterNode(
                     ParameterNode::REFERENCE_IN,
-                    object.type->toCppType(),
+                    object.type->toNativeType(),
                     "value")
             }
         };
@@ -1056,7 +1059,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
         std::string name = "get";
         name += propertyName;
 
-        std::string type = object.type->toCppType();
+        std::string type = object.type->toNativeType();
         if (!object.type->isPrimitive())
             type += "&";
 
@@ -1084,7 +1087,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
             {
                 ParameterNode(
                     ParameterNode::REFERENCE_IN,
-                    object.type->toCppType(),
+                    object.type->toNativeType(),
                     "value")
             }
         };
@@ -1097,7 +1100,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
         std::string name = "get";
         name += propertyName;
 
-        std::string type = object.type->toCppType();
+        std::string type = object.type->toNativeType();
         if (!object.type->isPrimitive())
             type += "&";
 
@@ -1120,7 +1123,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     std::string name = "get";
     name += propertyName;
 
-    std::string type = object.type->toCppType();
+    std::string type = object.type->toNativeType();
     if (!object.type->isPrimitive())
         type += "&";
 
@@ -1145,7 +1148,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
             {
                 ParameterNode(
                     ParameterNode::REFERENCE_IN,
-                    object.type->toCppType(),
+                    object.type->toNativeType(),
                     "value")
             }
         };
@@ -1164,5 +1167,5 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyField(SourceStream& ss, const SymbolProperty& object)
 {
-    ss << object.type->toCppType() << " _" << object.name << ";\n";
+    ss << object.type->toNativeType() << " _" << object.name << ";\n";
 }

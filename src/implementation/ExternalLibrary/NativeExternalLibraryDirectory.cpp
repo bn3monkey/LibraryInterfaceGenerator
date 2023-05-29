@@ -6,6 +6,12 @@
 #include "MemoryPool/MemoryPool_hpp.h"
 #include "MemoryPool/MemoryPoolImpl_hpp.h"
 #include "MemoryPool/Tag_hpp.h"
+#include "ManagedTypeConverter/ManagedTypeConverter_hpp.h"
+#include "ManagedTypeConverter/ManagedTypeConverter_cpp.h"
+#include "KotlinTypeConverter/KotlinTypeConverter_hpp.h"
+#include "KotlinTypeConverter/KotlinTypeConverter_cpp.h"
+
+
 
 #ifdef __linux__
 static char* delimeter = "/";
@@ -102,6 +108,40 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				return ret;
 		}
 		break;
+	case ExternalTool::ManagedTypeConverter:
+		{
+			auto ret = createExternalToolDirectory(_lib_dir_path, "ManagedTypeConverter");
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "ManagedTypeConverter", "ManagedTypeConverter.hpp", MANAGEDTYPECONVERTER_HPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "ManagedTypeConverter", "ManagedTypeConverter.vpp", MANAGEDTYPECONVERTER_CPP);
+			if (!ret)
+				return ret;
+		}
+		break;
+	case ExternalTool::KotlinTypeConverter:
+		{
+			auto ret = createExternalToolDirectory(_lib_dir_path, "KotlinTypeConverter");
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "KotlinTypeConverter", "KotlinTypeConverter.hpp", KOTLINTYPECONVERTER_HPP);
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "KotlinTypeConverter", "KotlinTypeConverter.vpp", KOTLINTYPECONVERTER_CPP);
+			if (!ret)
+				return ret;
+		}
+		break;
 	}
 	is_created[static_cast<size_t>(tool)] = true;
 	return Result();
@@ -121,6 +161,10 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	case ExternalTool::MemoryPool:
 		path += "MemoryPool/MemoryPool.hpp";
 		break;
+	case ExternalTool::ManagedTypeConverter:
+		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+	case ExternalTool::KotlinTypeConverter:
+		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
 	}
 	return path;
 }
@@ -142,6 +186,10 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	case ExternalTool::MemoryPool:
 		path += "MemoryPool/MemoryPool.hpp";
 		break;
+	case ExternalTool::ManagedTypeConverter:
+		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+	case ExternalTool::KotlinTypeConverter:
+		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
 	}
 	return path;
 }
@@ -163,6 +211,12 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 	case ExternalTool::MemoryPool:
 		path += "MemoryPool/MemoryPool.hpp";
 		break;
+	case ExternalTool::ManagedTypeConverter:
+		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+		break;
+	case ExternalTool::KotlinTypeConverter:
+		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
+		break;
 	}
 	return path;
 }
@@ -183,6 +237,12 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 		break;
 	case ExternalTool::MemoryPool:
 		path += "MemoryPool/MemoryPool.hpp";
+		break;
+	case ExternalTool::ManagedTypeConverter:
+		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+		break;
+	case ExternalTool::KotlinTypeConverter:
+		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
 		break;
 	}
 	return path;

@@ -16,6 +16,8 @@ set(include_dir ${src_dir}/include)
 message("include_dirs = ${include_dir}")
 set(implementation_dir ${src_dir}/implementation)
 message("implementation_dirs = ${implementation_dir}")
+set(library_dir ${src_dir}/library)
+message("library_dirs = ${library_dir}")
 
 set(test_dir "${repository_dir}/test")
 message("test_dir = ${test_dir}")
@@ -42,16 +44,16 @@ file(GLOB_RECURSE include_files
 message("include_files = ${include_files}")
 
 
-macro(importExternalLibrary library_path)
+macro(importExternalLibrary library_path target_dirpath)
 	get_filename_component(library_filename "${library_path}" NAME)
 	message("library file name : ${library_filename}")
 	get_filename_component(library_dirpath "${library_path}" DIRECTORY)
 	message("library directory path : ${library_dirpath}")
-	
+	get_filename_component(library_dirname "${library_dirpath}" NAME)
+	message("library dir name : ${library_dirname}")
+
 	string(TOUPPER "${library_filename}" variable_name)
 	string(REPLACE "." "_" variable_name "${variable_name}")
-	string(REPLACE "CXX" "CPP" variable_name "${variable_name}")
-	string(REPLACE "HXX" "HPP" variable_name "${variable_name}")
 	message("variable name : ${variable_name}")
 
 	set(header_guard "__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_${variable_name}__")
@@ -68,23 +70,23 @@ macro(importExternalLibrary library_path)
 
 	set(output_library_filename "${library_filename}")
 	string(REPLACE "." "_" output_library_filename "${output_library_filename}")
-	string(REPLACE "cxx" "cpp" output_library_filename "${output_library_filename}")
-	string(REPLACE "hxx" "hpp" output_library_filename "${output_library_filename}")
 	set(output_library_filename "${output_library_filename}.h")
 	message("output library filename : ${output_library_filename}")
 
-	set(output_library_filepath "${library_dirpath}/${output_library_filename}")
+	set(output_library_filepath "${target_dirpath}/${library_dirname}/${output_library_filename}")
 	file(WRITE "${output_library_filepath}" "${output_library_content}")
 
 endmacro()
 
 file(GLOB_RECURSE external_library_files
-	${implementation_dir}/*.hxx
-	${implementation_dir}/*.cxx
+	${library_dir}/*.hpp
+	${library_dir}/*.cpp
 )
 
+message("external_library_files : ${external_library_files}")
+
 foreach(external_library_file ${external_library_files})
-	importExternalLibrary(${external_library_file})
+	importExternalLibrary(${external_library_file} "${implementation_dir}/ExternalLibrary")
 endforeach()
 
 file(GLOB_RECURSE implementation_files
