@@ -66,6 +66,7 @@ namespace LibraryInterfaceGenerator
             void createModuleDeclaration(SourceStream& ss, const SymbolModule& obj);
             void createClassDeclaration(SourceStream& ss, const SymbolClass& clazz);
 
+            void createReleaserDeclaration(SourceStream& ss);
             void createCallbackDeclaration(SourceStream& ss, const SymbolPackage& obj);
             void createCallbackDeclaration(SourceStream& ss, const SymbolModule& obj);
 
@@ -93,7 +94,7 @@ namespace LibraryInterfaceGenerator
             void createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& obj);
             void callStaticMethod(SourceStream& ss, const SymbolMethod& obj);
 
-
+            void findConverter(SourceStream& ss, SymbolType& type);
             void createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj);
             void createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj);
             void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj);

@@ -35,6 +35,8 @@ namespace LibraryInterfaceGenerator
 
             Tag getTag() const override { return Tag::Enum; }
             std::string getCppName() const override;
+            std::string getManagedName() const override;
+
             std::string getKotlinName() const override;
         };
 

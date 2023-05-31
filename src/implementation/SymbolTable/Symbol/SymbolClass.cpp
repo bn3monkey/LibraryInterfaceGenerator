@@ -239,6 +239,11 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getCppName()
 	return value;
 }
 
+std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getManagedName() const
+{
+	return "void*";
+}
+
 std::string LibraryInterfaceGenerator::Implementation::SymbolClass::getKotlinName() const
 {
 	/*

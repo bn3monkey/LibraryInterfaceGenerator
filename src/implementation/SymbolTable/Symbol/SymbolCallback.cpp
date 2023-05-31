@@ -97,6 +97,11 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolCallback::getCppNam
 	return value;
 }
 
+std::string LibraryInterfaceGenerator::Implementation::SymbolCallback::getManagedName() const
+{
+	return name;
+}
+
 std::string LibraryInterfaceGenerator::Implementation::SymbolCallback::getKotlinName() const
 {
 	return name;
@@ -128,6 +133,21 @@ std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolObjec
 	for (auto& reference : _callback_references)
 	{
 		ret.push_back(reference);
+	}
+	return ret;
+}
+
+std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::SymbolCallback::returnType()
+{
+	return type;
+}
+
+std::vector<std::weak_ptr<LibraryInterfaceGenerator::Implementation::SymbolType>> LibraryInterfaceGenerator::Implementation::SymbolCallback::parameterTypes()
+{
+	std::vector<std::weak_ptr<SymbolType>> ret{};
+	for (auto& param : parameters)
+	{
+		ret.push_back(param->type);
 	}
 	return ret;
 }

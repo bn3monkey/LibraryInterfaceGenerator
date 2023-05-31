@@ -1215,7 +1215,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createChangerFunction(S
 	// vector<enum>   : std::vector<int> <-> java/util/ArrayList & java/lang/Integer
 	// vector<object> : std::vector<void*> <-> java/util/ArrayList & java/lang/Long 
 
-	ss << KOTLINWRAPPERCONVERTER_CPP;
+	ss << "";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPackageDeclaration(SourceStream& ss, const SymbolPackage& symbolObject)

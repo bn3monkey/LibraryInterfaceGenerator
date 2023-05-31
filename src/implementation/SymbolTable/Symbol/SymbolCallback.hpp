@@ -15,7 +15,7 @@ namespace LibraryInterfaceGenerator
 {
     namespace Implementation
     {
-        class SymbolCallback : public HasResult, public HasSymbolType, public SymbolObject, public HasReference
+        class SymbolCallback : public HasResult, public HasSymbolType, public HasSubSymbolTypes, public SymbolObject, public HasReference
         {
         public:
             const std::vector<std::string>& parentModules;
@@ -32,11 +32,15 @@ namespace LibraryInterfaceGenerator
 
             Tag getTag() const override { return Tag::Callback; }
             std::string getCppName() const override;
+            std::string getManagedName() const override;
             std::string getKotlinName() const override;
 
             std::vector<std::weak_ptr<SymbolObject>> collectAllClassReference() const override;
             std::vector<std::weak_ptr<SymbolObject>> collectAllEnumReference() const override;
             std::vector<std::weak_ptr<SymbolObject>> collectAllCallbackReference() const override;
+
+            std::weak_ptr<SymbolType> returnType() override;
+            std::vector<std::weak_ptr<SymbolType>> parameterTypes() override;
         };
     }
 }

@@ -110,6 +110,9 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		{
 			ExternalIncludeCXXSourceStream exclude{ ss, "vector" };
 		}
+		{
+			ExternalIncludeCXXSourceStream exclude{ ss, "functional" };
+		}
 
 		ss << "#ifdef " << export_macro << "\n";
 		ss << "#define " << api_macro << "\n";
@@ -120,6 +123,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		{
 			NamespaceCXXSourceScopedStream nameSpace{ ss, root_namespace };
 
+			createReleaserDeclaration(ss);
 			createCallbackDeclaration(ss, obj);
 
 			for (auto& module_ : obj.modules)
@@ -204,6 +208,16 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassDecl
 	}
 }
 
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createReleaserDeclaration(SourceStream& ss)
+{
+	CallbackCXXSourceStream callback_scope{
+		ss,
+		"Releaser",
+		"void",
+		{}
+	};
+}
+
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createCallbackDeclaration(SourceStream& ss, const SymbolPackage& obj)
 {
 	for (auto& module_ : obj.modules) {
@@ -221,11 +235,10 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createCallbackD
 			param_types.push_back(param->type->toManagedType());
 		}
 
-		std::string callback_name = "_" + callback->getCppName();
 		{
 			CallbackCXXSourceStream callback_scope{
 				ss,
-				callback_name,
+				callback->name,
 				callback->type->toManagedType(),
 				param_types
 			};
@@ -251,6 +264,11 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool))
 		{
 			auto poolPath = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
+			InternalIncludeCXXSourceStream poolInclude{ ss, poolPath };
+		}
+		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter))
+		{
+			auto poolPath = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter);
 			InternalIncludeCXXSourceStream poolInclude{ ss, poolPath };
 		}
 
@@ -382,6 +400,17 @@ static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty&
 	return ret;
 }
 
+static std::vector<ParameterNode> createReleaserParameters()
+{
+	std::vector<ParameterNode> ret{
+		ParameterNode(
+			ParameterNode::REFERENCE_IN,
+			"Releaser",
+			"releaser")
+	};
+	return ret;
+}
+
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstructorDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
 {
 	{
@@ -413,11 +442,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstruct
 void LibraryInterfaceGenerator::Implementation::NativeInterface::allocate(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& construrctor)
 {
 	auto scopes = createScope(clazz);
-	ss << "return createReference<";
-	for (auto& scope : scopes)
-		ss << scope << "::";
-	ss.pop(2);
-	ss << ">(";
+	ss << "return Bn3Monkey::MObject<" << clazz.getCppName() << ">().construct(";
 
 	if (!construrctor.parameters.empty())
 	{
@@ -453,17 +478,14 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createDestructo
 void LibraryInterfaceGenerator::Implementation::NativeInterface::deallocate(SourceStream& ss, const SymbolClass& clazz)
 {
 	auto scopes = createScope(clazz);
-	ss << "releaseReference<";
-	for (auto& scope : scopes)
-		ss << scope << "::";
-	ss.pop(2);
-	ss << ">(handle);\n";
+	ss << "return Bn3Monkey::MObject<" << clazz.getCppName() << ">().release(handle);\n";
+
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDeclaration(SourceStream& ss, const SymbolClass& clazz)
 {
 	{
-		auto parameters = createHandleParameter();
+		auto parameters = createReleaserParameters();
 
 		std::string prefix = "extern " + api_macro;
 		MethodCXXSourceScopedStream method_scope{ ss, true, prefix, "", "void", {}, "addReleaser", parameters };
@@ -473,7 +495,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleas
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleaserDefinition(SourceStream& ss, const SymbolClass& clazz)
 {
 	{
-		auto parameters = createHandleParameter();
+		auto parameters = createReleaserParameters();
 		auto scopes = createInterfaceScope(root_namespace, clazz);
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", "void", scopes, "addReleaser", parameters };
@@ -484,7 +506,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createAddReleas
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::addReleaser(SourceStream& ss, const SymbolClass& clazz)
 {
-	ss << "addReferenceReleaser(handle);\n";
+	ss << "Bn3Monkey::ManagedTypeConverter::addReleaser(releaser);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMethodDeclaration(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& obj)
@@ -506,7 +528,7 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toManagedType(), scope, obj.name, parameters };
 
-		ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
+		ss << "auto ptr = Bn3Monkey::MObject<" << clazz.getCppName() << ">().toNativeType(handle);\n";
 		for (auto& parameter : obj.parameters)
 		{
 			createInputParameterChanger(ss, *parameter);
@@ -620,97 +642,135 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createParameter
 }
 */
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj)
+void LibraryInterfaceGenerator::Implementation::NativeInterface::findConverter(SourceStream& ss, SymbolType& type)
 {
-	switch (obj.type->getTypeName())
+	ss << "Bn3Monkey::";
+	switch (type.getTypeName())
 	{
+	case SymbolType::Name::VOID:
+		ss << "MVoid";
+		break;
+	case SymbolType::Name::BOOL:
+		ss << "MBool";
+		break;
+	case SymbolType::Name::INT8:
+		ss << "MInt8";
+		break;
+	case SymbolType::Name::INT16:
+		ss << "MInt16";
+		break;
+	case SymbolType::Name::INT32:
+		ss << "MInt32";
+		break;
+	case SymbolType::Name::INT64:
+		ss << "MInt64";
+		break;
+	case SymbolType::Name::FLOAT:
+		ss << "MFloat";
+		break;
+	case SymbolType::Name::DOUBLE:
+		ss << "MDouble";
+		break;
+	case SymbolType::Name::STRING:
+		ss << "MString";
+		break;
 	case SymbolType::Name::ENUM:
-		ss << "auto __ret = createInterfaceEnum(__temp_ret);\n";
+		ss << "MEnum<"  << type.toNativeType() << ">";
 		break;
 	case SymbolType::Name::OBJECT:
-		ss << "auto __ret = createInterfaceObject(__temp_ret);\n";
+		{
+			auto& object = dynamic_cast<SymbolTypeObject&>(type);
+			ss << "MObject<" << object.toNativeName() << ">";
+		}
 		break;
+	case SymbolType::Name::CALLBACK:
+	{
+		ss << "MCallback<";
+		auto types = type.toElementTypes();
+		if (!types.empty())
+		{
+			for (auto& type : type.toElementTypes())
+			{
+				findConverter(ss, *type);
+				ss << ", ";
+			}
+			ss.pop(2);
+		}
+		ss << ">";
+	}
+		break;
+	case SymbolType::Name::BOOLARRAY:
+	case SymbolType::Name::INT8ARRAY:
+	case SymbolType::Name::INT16ARRAY:
+	case SymbolType::Name::INT32ARRAY:
+	case SymbolType::Name::INT64ARRAY:
+	case SymbolType::Name::FLOATARRAY:
+	case SymbolType::Name::DOUBLEARRAY:
+	case SymbolType::Name::STRINGARRAY:
 	case SymbolType::Name::ENUMARRAY:
-		ss << "auto __ret = createInterfaceEnumArray(__temp_ret);\n";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto __ret = createInterfaceEnumVector(__temp_ret);\n";
-		break;
 	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto __ret = createInterfaceObjectArray(__temp_ret);\n";
+	case SymbolType::Name::CALLBACKARRAY:
+		ss << "MArray<";
+		for (auto& type : type.toElementTypes())
+		{
+			findConverter(ss, *type);
+			ss << ", ";
+		}
+		ss.pop(2);
+		ss << ">";
 		break;
+
+	case SymbolType::Name::BOOLVECTOR:
+	case SymbolType::Name::INT8VECTOR:
+	case SymbolType::Name::INT16VECTOR:
+	case SymbolType::Name::INT32VECTOR:
+	case SymbolType::Name::INT64VECTOR:
+	case SymbolType::Name::FLOATVECTOR:
+	case SymbolType::Name::DOUBLEVECTOR:
+	case SymbolType::Name::STRINGVECTOR:
+	case SymbolType::Name::ENUMVECTOR:
 	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto __ret = createInterfaceObjectVector(__temp_ret);\n";
+	case SymbolType::Name::CALLBACKVECTOR:
+		ss << "MVector<";
+		for (auto& type : type.toElementTypes())
+		{
+			findConverter(ss, *type);
+			ss << ", ";
+		}
+		ss.pop(2);
+		ss << ">";
 		break;
-	default:
-		if (obj.type->isPrimitive())
-			ss << "auto __ret = __temp_ret;\n";
-		else
-			ss << "auto& __ret =  __temp_ret;\n";
-		break;
+	}
+	return;
+}
+
+void LibraryInterfaceGenerator::Implementation::NativeInterface::createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj)
+{
+	if (obj.type)
+	{
+		ss << "auto __ret = ";
+		findConverter(ss, *(obj.type));
+		ss << "().toManagedType(__temp_ret);\n";
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
 {
-	switch (obj.type->getTypeName())
+	if (obj.type)
 	{
-	case SymbolType::Name::ENUM:
-		ss << "auto i_" << obj.name << " = createNativeEnum<" << obj.type->toNativeType() << ">(" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECT:
-		ss << "auto i_" << obj.name << " = createNativeObject<" << obj.type->toNativeType() << ">(" << obj.name 	<< ");\n";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ss << "auto i_" << obj.name << " = createNativeEnumArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto i_" << obj.name << " = createNativeEnumVector<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto i_" << obj.name << " = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto i_" << obj.name << " = createNativeObjectVector<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(" << obj.name	<< ");\n";
-		break;
-	default:
-		if (obj.type->isPrimitive())
-		{
-			ss << "auto i_" << obj.name << " = " << obj.name << ";\n";
-		}
-		else
-		{
-			ss << "auto& i_" << obj.name << " = " << obj.name << ";\n";
-		}
-		break;
+		ss << "auto i_" << obj.name << " = ";
+		findConverter(ss, *(obj.type));
+		ss << "().toNativeType(" << obj.name << ");\n";
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
 {
-	switch (obj.type->getTypeName())
+	if (obj.type)
 	{
-	case SymbolType::Name::ENUM:
-		ss << obj.name << " = createInterfaceEnum(i_" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECT:
-		ss << obj.name << " = createInterfaceObject(i_" << obj.name	<< ");\n";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ss << obj.name << " = createInterfaceEnumArray(i_" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ss << obj.name << " = createInterfaceEnumVector(i_" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ss << obj.name << " = createInterfaceObjectArray(i_" << obj.name << ");\n";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ss << obj.name << " = createInterfaceObjectVector(i_" << obj.name << ");\n";
-		break;
-	default:
-		ss << obj.name << " = i_" << obj.name << ";\n";
-		break;
+		ss << obj.name << " = ";
+		findConverter(ss, *(obj.type));
+		ss << "().toManagedType(i_" << obj.name << ");\n";
 	}
 }
 
@@ -758,13 +818,13 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyD
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertySetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
+	ss << "auto ptr = Bn3Monkey::MObject<" << clazz.getCppName() << ">().toNativeType(handle);\n";
 	ss << "ptr->set" << property_name << "(i_value);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::callPropertyGetter(SourceStream& ss, const std::string& property_name, const SymbolClass& clazz, const SymbolProperty& obj)
 {
-	ss << "auto ptr = getReference<" << clazz.getCppName() << ">(handle);\n";
+	ss << "auto ptr = Bn3Monkey::MObject<" << clazz.getCppName() << ">().toNativeType(handle);\n";
 	ss << "auto __temp_ret = ptr->get" << property_name << "();\n";
 }
 
@@ -809,73 +869,27 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyD
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
 {
-	switch (obj.type->getTypeName())
+	if (obj.type)
 	{
-	case SymbolType::Name::ENUM:
-		ss << "auto i_value = createNativeEnum<" << obj.type->toNativeType() << ">(value);\n";
-		break;
-	case SymbolType::Name::OBJECT:
-		ss << "auto i_value = getReference<" << obj.type->toNativeType() << ">(value);\n";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ss << "auto i_value = createNativeEnumArray<" << obj.type->toNativeType() << ">(value);\n";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto i_value = createNativeEnumVector<" << obj.type->toNativeType() << ">(value);\n";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto i_value = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseArray&>(*obj.type).toNativeElementType() << ">(value);\n";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto i_value = createNativeObjectArray<" << dynamic_cast<SymbolTypeBaseVector&>(*obj.type).toNativeElementType() << ">(value);\n";
-		break;
-	default:
-		if (obj.type->isPrimitive())
-		{
-			ss << "auto i_value = value;\n";
-		}
-		else
-		{
-			ss << "auto& i_value = value;\n";
-		}
-		break;
+		ss << "auto i_value = ";
+		findConverter(ss, *(obj.type));
+		ss << "().toNativeType(value);\n";
 	}
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj)
 {
-	switch (obj.type->getTypeName())
+	if (obj.type)
 	{
-	case SymbolType::Name::ENUM:
-		ss << "auto __ret = createInterfaceEnum(__temp_ret);\n";
-		break;
-	case SymbolType::Name::OBJECT:
-		ss << "auto __ret = createInterfaceObject(__temp_ret);\n";
-		break;
-	case SymbolType::Name::ENUMARRAY:
-		ss << "auto __ret = createInterfaceEnumArray(__temp_ret);\n";
-		break;
-	case SymbolType::Name::ENUMVECTOR:
-		ss << "auto __ret = createInterfaceEnumVector(__temp_ret);\n";
-		break;
-	case SymbolType::Name::OBJECTARRAY:
-		ss << "auto __ret = createInterfaceObjectArray(__temp_ret);\n";
-		break;
-	case SymbolType::Name::OBJECTVECTOR:
-		ss << "auto __ret = createInterfaceObjectVector(__temp_ret);\n";
-		break;
-	default:
-		if (obj.type->isPrimitive())
-			ss << "auto __ret = __temp_ret;\n";
-		else
-			ss << "auto& __ret =  __temp_ret;\n";
-		break;
+		ss << "auto __ret = ";
+		findConverter(ss, *(obj.type));
+		ss << "().toManagedType(__temp_ret);\n";
 	}
 }
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
 {
-	return NATIVEINTERFACECONVERTER_CPP;
+	return "";
 }
 
 

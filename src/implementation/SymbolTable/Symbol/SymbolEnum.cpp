@@ -79,6 +79,11 @@ std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getCppName() 
 	return value;
 }
 
+std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getManagedName() const
+{
+	return "int32_t";
+}
+
 std::string LibraryInterfaceGenerator::Implementation::SymbolEnum::getKotlinName() const
 {
 	/*

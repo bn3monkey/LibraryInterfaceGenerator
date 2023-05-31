@@ -43,6 +43,19 @@ namespace Bn3Monkey
 		using ManagedType = void;
 	};
 
+	struct MBool : ManagedTypeConverter
+	{
+		using NativeType = bool;
+		using ManagedType = bool;
+
+		NativeType toNativeType(const ManagedType& value) {
+			return static_cast<NativeType>(value);
+		}
+		ManagedType toManagedType(const NativeType& value) {
+			return static_cast<ManagedType>(value);
+		}
+	};
+
 	struct MInt8 : ManagedTypeConverter
 	{
 		using NativeType = int8_t;

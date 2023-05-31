@@ -48,7 +48,10 @@ namespace LibraryInterfaceGenerator
                 std::vector<std::weak_ptr<HasSymbolType>>& hasTypes);
 
             Tag getTag() const override { return Tag::Class; }
+            
             std::string getCppName() const override;
+            std::string getManagedName() const override;
+
             std::string getKotlinName() const override;
 
             Result collectBaseClass(SymbolObjectTable& objectTable);

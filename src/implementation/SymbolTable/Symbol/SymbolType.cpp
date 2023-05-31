@@ -1,7 +1,7 @@
 #include "SymbolType.hpp"
 #include <sstream>
 
-std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::makeType(
+std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryInterfaceGenerator::Implementation::makeType(
 	const std::string& type,
 	const SymbolObjectTable& objectTable,
 	const SymbolEnumTable& enumTable,
@@ -12,39 +12,39 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 {
 	using namespace LibraryInterfaceGenerator::Implementation;
 	if (type == "void") {
-		return std::make_unique<SymbolTypeVoid>();
+		return std::make_shared<SymbolTypeVoid>();
 	}
 	else if (type == "bool")
 	{
-		return std::make_unique<SymbolTypeBool>();
+		return std::make_shared<SymbolTypeBool>();
 	}
 	else if (type == "int8")
 	{
-		return std::make_unique<SymbolTypeInt8>();
+		return std::make_shared<SymbolTypeInt8>();
 	}
 	else if (type == "int16")
 	{
-		return std::make_unique<SymbolTypeInt16>();
+		return std::make_shared<SymbolTypeInt16>();
 	}
 	else if (type == "int32")
 	{
-		return std::make_unique<SymbolTypeInt32>();
+		return std::make_shared<SymbolTypeInt32>();
 	}
 	else if (type == "int64")
 	{
-		return std::make_unique<SymbolTypeInt64>();
+		return std::make_shared<SymbolTypeInt64>();
 	}
 	else if (type == "float")
 	{
-		return std::make_unique<SymbolTypeFloat>();
+		return std::make_shared<SymbolTypeFloat>();
 	}
 	else if (type == "double")
 	{
-		return std::make_unique<SymbolTypeDouble>();
+		return std::make_shared<SymbolTypeDouble>();
 	}
 	else if (type == "string")
 	{
-		return std::make_unique<SymbolTypeString>();
+		return std::make_shared<SymbolTypeString>();
 	}
 	else
 	{
@@ -60,35 +60,35 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 
 			if (inner_type == "bool")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeBool>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeBool>>(size);
 			}
 			else if (inner_type == "int8")
 			{
-				return std::make_unique<SymbolTypeArray<SymbolTypeInt8>>(size);
+				return std::make_shared<SymbolTypeArray<SymbolTypeInt8>>(size);
 			}
 			else if (inner_type == "int16")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt16>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeInt16>>(size);
 			}
 			else if (inner_type == "int32")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt32>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeInt32>>(size);
 			}
 			else if (inner_type == "int64")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeInt64>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeInt64>>(size);
 			}
 			else if (inner_type == "float")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeFloat>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeFloat>>(size);
 			}
 			else if (inner_type == "double")
 			{
-				return std::make_unique<SymbolTypeArray<SymbolTypeDouble>>(size);
+				return std::make_shared<SymbolTypeArray<SymbolTypeDouble>>(size);
 			}
 			else if (inner_type == "string")
 			{
-				return std::make_unique< SymbolTypeArray<SymbolTypeString>>(size);
+				return std::make_shared< SymbolTypeArray<SymbolTypeString>>(size);
 			}
 			else
 			{
@@ -101,7 +101,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						objectReferenceSet->insert(object);
 					}
 
-					return std::make_unique<SymbolTypeArray<SymbolTypeObject>>(object, size);
+					return std::make_shared<SymbolTypeArray<SymbolTypeObject>>(object, size);
 				}
 				auto enum_iter = enumTable.find(inner_type);
 				if (enum_iter != enumTable.end())
@@ -112,7 +112,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						enumReferenceSet->insert(object);
 					}
 
-					return std::make_unique< SymbolTypeArray<SymbolTypeEnum>>(object, size);
+					return std::make_shared< SymbolTypeArray<SymbolTypeEnum>>(object, size);
 				}
 				auto callback_iter = callbackTable.find(inner_type);
 				if (callback_iter != callbackTable.end())
@@ -123,7 +123,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						callbackReferenceSet->insert(callback);
 					}
 
-					return std::make_unique< SymbolTypeArray<SymbolTypeCallback>>(callback, size);
+					return std::make_shared< SymbolTypeArray<SymbolTypeCallback>>(callback, size);
 				}
 			}
 		}
@@ -132,35 +132,35 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 			auto inner_type = std::string(type.begin() + sizeof("vector<") - 1, type.end() - 1);
 			if (inner_type == "bool")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeBool>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeBool>>();
 			}
 			else if (inner_type == "int8")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeInt8>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeInt8>>();
 			}
 			else if (inner_type == "int16")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeInt16>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeInt16>>();
 			}
 			else if (inner_type == "int32")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeInt32>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeInt32>>();
 			}
 			else if (inner_type == "int64")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeInt64>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeInt64>>();
 			}
 			else if (inner_type == "float")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeFloat>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeFloat>>();
 			}
 			else if (inner_type == "double")
 			{
-				return std::make_unique<SymbolTypeVector<SymbolTypeDouble>>();
+				return std::make_shared<SymbolTypeVector<SymbolTypeDouble>>();
 			}
 			else if (inner_type == "string")
 			{
-				return std::make_unique< SymbolTypeVector<SymbolTypeString>>();
+				return std::make_shared< SymbolTypeVector<SymbolTypeString>>();
 			}
 			else
 			{
@@ -172,7 +172,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 					{
 						objectReferenceSet->insert(object);
 					}
-					return std::make_unique< SymbolTypeVector<SymbolTypeObject>>(object);
+					return std::make_shared< SymbolTypeVector<SymbolTypeObject>>(object);
 				}
 				auto enum_iter = enumTable.find(inner_type);
 				if (enum_iter != enumTable.end())
@@ -182,7 +182,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 					{
 						enumReferenceSet->insert(object);
 					}
- 					return std::make_unique< SymbolTypeVector<SymbolTypeEnum>>(object);
+ 					return std::make_shared< SymbolTypeVector<SymbolTypeEnum>>(object);
 				}
 
 				auto callback_iter = callbackTable.find(inner_type);
@@ -194,7 +194,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 						callbackReferenceSet->insert(callback);
 					}
 
-					return std::make_unique< SymbolTypeVector<SymbolTypeCallback>>(callback);
+					return std::make_shared< SymbolTypeVector<SymbolTypeCallback>>(callback);
 				}
 			}
 		}
@@ -208,7 +208,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				{
 					objectReferenceSet->insert(object);
 				}
-				return std::make_unique<SymbolTypeObject>(object);
+				return std::make_shared<SymbolTypeObject>(object);
 			}
 			auto enum_iter = enumTable.find(type);
 			if (enum_iter != enumTable.end())
@@ -218,7 +218,7 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				{
 					enumReferenceSet->insert(object);
 				}
-				return std::make_unique<SymbolTypeEnum>(object);
+				return std::make_shared<SymbolTypeEnum>(object);
 			}
 
 			auto callback_iter = callbackTable.find(type);
@@ -230,11 +230,11 @@ std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 					callbackReferenceSet->insert(callback);
 				}
 
-				return std::make_unique< SymbolTypeCallback>(callback);
+				return std::make_shared< SymbolTypeCallback>(callback);
 			}
 		}
 	}
-	return std::make_unique<SymbolType>();
+	return std::make_shared<SymbolType>();
 }
 
 LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Implementation::HasSymbolType::change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable, SymbolCallbackTable& callbackTable)

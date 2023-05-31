@@ -120,7 +120,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				return ret;
 		}
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "ManagedTypeConverter", "ManagedTypeConverter.vpp", MANAGEDTYPECONVERTER_CPP);
+			auto ret = createExternalToolInternal(_lib_dir_path, "ManagedTypeConverter", "ManagedTypeConverter.cpp", MANAGEDTYPECONVERTER_CPP);
 			if (!ret)
 				return ret;
 		}
@@ -137,7 +137,7 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				return ret;
 		}
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "KotlinTypeConverter", "KotlinTypeConverter.vpp", KOTLINTYPECONVERTER_CPP);
+			auto ret = createExternalToolInternal(_lib_dir_path, "KotlinTypeConverter", "KotlinTypeConverter.cpp", KOTLINTYPECONVERTER_CPP);
 			if (!ret)
 				return ret;
 		}
@@ -163,8 +163,10 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 		break;
 	case ExternalTool::ManagedTypeConverter:
 		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+		break;
 	case ExternalTool::KotlinTypeConverter:
 		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
+		break;
 	}
 	return path;
 }
@@ -188,8 +190,10 @@ std::string LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDire
 		break;
 	case ExternalTool::ManagedTypeConverter:
 		path += "ManagedTypeConverter/ManagedTypeConverter.hpp";
+		break;
 	case ExternalTool::KotlinTypeConverter:
 		path += "KotlinTypeConverter/KotlinTypeConverter.hpp";
+		break;
 	}
 	return path;
 }

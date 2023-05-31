@@ -64,6 +64,7 @@ TEST(NativeInterface, NativeInterface)
 	nativeExternalLibraryDirectory.createLibraryDirectory();
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log);
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
+	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter);
 
 	/*
 	Environment environment, 

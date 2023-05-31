@@ -26,8 +26,12 @@ namespace LibraryInterfaceGenerator
             };
 
             virtual Tag getTag() const = 0;
+
             virtual std::string getCppName() const = 0;
+            virtual std::string getManagedName() const = 0;
+
             virtual std::string getKotlinName() const = 0;
+
         };
 
 

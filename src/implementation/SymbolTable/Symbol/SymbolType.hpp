@@ -66,6 +66,15 @@ namespace LibraryInterfaceGenerator
             virtual std::string toJNIType() { return ""; }
             virtual std::string toKotlinType() { return ""; }
 
+            virtual std::vector<SymbolType*>  toElementTypes() { return std::vector<SymbolType*>(); }
+        };
+
+
+        class HasSubSymbolTypes
+        {
+        public:
+            virtual std::weak_ptr<SymbolType> returnType() = 0;
+            virtual std::vector<std::weak_ptr<SymbolType>> parameterTypes() = 0;
         };
 
         class SymbolTypeVoid : public SymbolType
@@ -207,7 +216,14 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toManagedType() override { return "int32_t"; }
+            std::string toManagedType() override { 
+                if (auto object = _obj.lock())
+                {
+                    auto ret = object->getManagedName();
+                    return ret;
+                }
+                return "";
+            }
             std::string toJNIType() override {
                 return "jint";
             }
@@ -232,6 +248,18 @@ namespace LibraryInterfaceGenerator
             Name getTypeName() override {return Name::OBJECT;}
             SymbolTypeObject(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
 
+            std::string toNativeName() {
+                if (auto object = _obj.lock())
+                {
+                    return object->getCppName();
+                }
+                return "";
+            }
+            std::string toJNIName() {
+                // @TODO
+                return "";
+            }
+
             std::string toNativeType() override {
                 if (auto object = _obj.lock())
                 {
@@ -242,7 +270,14 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
-            std::string toManagedType() override { return "void*"; }
+            std::string toManagedType() override { 
+                if (auto object = _obj.lock())
+                {
+                    auto ret = object->getManagedName();
+                    return ret;
+                }
+                return "";
+            }
             std::string toJNIType() override {
                 return "jlong";
             }
@@ -268,6 +303,32 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override { return Name::CALLBACK; }
             SymbolTypeCallback(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
+
+            std::vector<SymbolType*>  toElementTypes() override { 
+                std::vector<SymbolType*> ret;
+                if (auto& object = _obj.lock())
+                {
+                    auto* callback = dynamic_cast<HasSubSymbolTypes*>(object.get());
+                    if (callback)
+                    {
+                        auto wReturnType = callback->returnType();
+                         if (auto pReturnType = wReturnType.lock())
+                         {
+                             ret.push_back(pReturnType.get());
+                         }
+                         auto wParameterTypes = callback->parameterTypes();
+                         for (auto& wParameterType : callback->parameterTypes())
+                         {
+                             if (auto pParameterType = wParameterType.lock())
+                             {
+                                 ret.push_back(pParameterType.get());
+                             }
+                         }
+                    }
+                }
+                return ret;
+            }
+
             std::string toNativeType() override {
                 if (auto object = _obj.lock())
                 {
@@ -280,8 +341,7 @@ namespace LibraryInterfaceGenerator
                 // return "void*";
                 if (auto object = _obj.lock())
                 {
-                    std::string ret{ "_" };
-                    ret += object->getCppName();
+                    auto ret = object->getManagedName();
                     return ret;
                 }
                 return "";
@@ -357,20 +417,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -408,20 +475,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -459,20 +533,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -510,20 +591,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -561,20 +649,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -612,20 +707,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -663,20 +765,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -710,20 +819,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -737,7 +853,7 @@ namespace LibraryInterfaceGenerator
             Name getTypeName() override {return Name::ENUMARRAY;}
 
             SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
-                _obj(obj), SymbolTypeBaseArray(size) {};
+                _obj(obj), SymbolTypeBaseArray(size), elementType(obj) {};
 
             using ElementType = SymbolTypeEnum;
             std::string toNativeType() override 
@@ -761,22 +877,28 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
+            ElementType elementType;
         };
 
         template<>
@@ -790,7 +912,7 @@ namespace LibraryInterfaceGenerator
             Name getTypeName() override {return Name::OBJECTARRAY;}
 
             SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
-                _obj(obj), SymbolTypeBaseArray(size) {};
+                _obj(obj), SymbolTypeBaseArray(size), elementType(obj) {};
 
             using ElementType = SymbolTypeObject;
             std::string toNativeType() override 
@@ -814,22 +936,28 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
+            ElementType elementType;
         };
 
         template<>
@@ -843,9 +971,9 @@ namespace LibraryInterfaceGenerator
             Name getTypeName() override { return Name::CALLBACKARRAY; }
 
             SymbolTypeArray(std::weak_ptr<SymbolObject> obj, size_t size) :
-                _obj(obj), SymbolTypeBaseArray(size) {};
+                _obj(obj), SymbolTypeBaseArray(size), elementType(obj) {};
 
-            using ElementType = SymbolTypeObject;
+            using ElementType = SymbolTypeCallback;
             std::string toNativeType() override 
             {
                 char buffer[256] {0};
@@ -867,22 +995,28 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
             std::weak_ptr<SymbolObject> _obj;
+            ElementType elementType;
         };
 
         class SymbolTypeBaseVector: public SymbolType
@@ -932,20 +1066,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -980,20 +1121,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1028,20 +1176,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1075,20 +1230,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1122,20 +1284,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1169,20 +1338,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1217,20 +1393,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1265,20 +1448,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType().toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType().toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType().toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType().toKotlinType();
+                return elementType.toKotlinType();
             }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
+            }
+        private:
+            ElementType elementType;
         };
 
         template<>
@@ -1290,7 +1480,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return true; }
 
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
-                _obj(obj) {};
+                _obj(obj), elementType(obj) {};
 
             Name getTypeName() override {return Name::ENUMVECTOR;}
             using ElementType = SymbolTypeEnum;            
@@ -1315,21 +1505,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
+            ElementType elementType;
             std::weak_ptr<SymbolObject> _obj;
         };
 
@@ -1342,7 +1538,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return true; }
 
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) :
-                _obj(obj) {};
+                _obj(obj), elementType(obj) {};
 
             Name getTypeName() override {return Name::OBJECTVECTOR;}
 
@@ -1368,21 +1564,27 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
+            ElementType elementType;
             std::weak_ptr<SymbolObject> _obj;
         };
 
@@ -1395,7 +1597,7 @@ namespace LibraryInterfaceGenerator
             bool requiredDeclaration() override { return true; }
 
             Name getTypeName() override { return Name::CALLBACKVECTOR; }
-            SymbolTypeVector(std::weak_ptr<SymbolObject> obj) : _obj(obj) {};
+            SymbolTypeVector(std::weak_ptr<SymbolObject> obj) : _obj(obj), elementType(obj) {};
             
             using ElementType = SymbolTypeEnum;            
             std::string toNativeType() override 
@@ -1419,25 +1621,31 @@ namespace LibraryInterfaceGenerator
             }
             std::string toNativeElementType() override
             {
-                return ElementType(_obj).toNativeType();
+                return elementType.toNativeType();
             }
             std::string toManagedElementType() override
             {
-                return ElementType(_obj).toManagedType();
+                return elementType.toManagedType();
             }
             std::string toJNIElementType() override
             {
-                return ElementType(_obj).toJNIType();
+                return elementType.toJNIType();
             }
             std::string toKotlinElementType() override
             {
-                return ElementType(_obj).toKotlinType();
+                return elementType.toKotlinType();
+            }
+            std::vector<SymbolType*>  toElementTypes() override {
+                std::vector<SymbolType*> ret;
+                ret.push_back(&elementType);
+                return ret;
             }
         private:
+            ElementType elementType;
             std::weak_ptr<SymbolObject> _obj;
         };
 
-        std::unique_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> makeType(
+        std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> makeType(
             const std::string& type,
             const SymbolObjectTable& objectTable,
             const SymbolEnumTable& enumTable,
@@ -1450,7 +1658,7 @@ namespace LibraryInterfaceGenerator
         class HasSymbolType
         {
         public:
-            std::unique_ptr<SymbolType> type;
+            std::shared_ptr<SymbolType> type;
             Result change(SymbolObjectTable& objectTable, SymbolEnumTable& enumTable, SymbolCallbackTable& callbackTable);
             void registerReferenceSet(ObjectReferenceSet* objectReferenceSet, EnumReferenceSet* enumReferenceSet, CallbackReferenceSet* callbackReferenceSet);
         
@@ -1460,6 +1668,7 @@ namespace LibraryInterfaceGenerator
             EnumReferenceSet* _enumReferenceSet{ nullptr };
             CallbackReferenceSet* _callbackReferenceSet{ nullptr };
         };
+
 
     }
 }
