@@ -1542,7 +1542,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::OBJECTVECTOR;}
 
-            using ElementType = SymbolTypeEnum;            
+            using ElementType = SymbolTypeObject;            
             std::string toNativeType() override 
             {
                 char buffer[128] {0};
@@ -1599,7 +1599,7 @@ namespace LibraryInterfaceGenerator
             Name getTypeName() override { return Name::CALLBACKVECTOR; }
             SymbolTypeVector(std::weak_ptr<SymbolObject> obj) : _obj(obj), elementType(obj) {};
             
-            using ElementType = SymbolTypeEnum;            
+            using ElementType = SymbolTypeCallback;
             std::string toNativeType() override 
             {
                 char buffer[256] {0};

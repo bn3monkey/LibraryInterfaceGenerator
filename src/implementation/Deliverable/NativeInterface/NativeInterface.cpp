@@ -356,7 +356,10 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
 		}
 		else
 		{
-			io = ParameterNode::REFERENCE_IN;
+			if (parameter.type->getTypeName() == SymbolType::Name::OBJECT)
+				io = ParameterNode::VALUE;
+			else
+				io = ParameterNode::REFERENCE_IN;
 		}
 	}
 	return ParameterNode(io, parameter.type->toManagedType(), parameter.name);
@@ -887,10 +890,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputPro
 	}
 }
 
-std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createNativeInterfaceConverter()
-{
-	return "";
-}
 
 
 // Return Value (Create)
