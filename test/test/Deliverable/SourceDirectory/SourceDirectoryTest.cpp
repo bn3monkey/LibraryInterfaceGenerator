@@ -75,7 +75,7 @@ TEST(SourceDirectory, SourceDirectory)
 		root_dir_path
 	};
 
-	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeInterface, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
 	
 	LibraryInterfaceGenerator::Implementation::SourceDirectory sourceDirectory{ Environment::Kotlin_Android, wrapper, symbolTable, root_dir_path };
 

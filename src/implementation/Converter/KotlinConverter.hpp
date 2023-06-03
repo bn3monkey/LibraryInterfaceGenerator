@@ -69,6 +69,43 @@ namespace LibraryInterfaceGenerator
             }
         }
 
+        inline std::string createKotlinClassName(const SymbolClass& clazz)
+        {
+            std::string scope;
+            auto& moduleNames = clazz.parentModules;
+            auto& objectNames = clazz.parentObjects;
+            for (size_t i = 1; i < moduleNames.size(); i++)
+            {
+                scope += moduleNames[i];
+                scope += "/";
+            }
+            for (auto& objectName : objectNames)
+            {
+                scope += objectName;
+                scope += "/";
+            }
+            scope += clazz.name;
+            return scope;
+        }
+        inline std::string createKotlinClassName(const SymbolEnum& enumm)
+        {
+            std::string scope;
+            auto& moduleNames = enumm.parentModules;
+            auto& objectNames = enumm.parentObjects;
+            for (size_t i = 1; i < moduleNames.size(); i++)
+            {
+                scope += moduleNames[i];
+                scope += "/";
+            }
+            for (auto& objectName : objectNames)
+            {
+                scope += objectName;
+                scope += "/";
+            }
+            scope += enumm.name;
+            return scope;
+        }
+
 		inline std::string createKotlinWrapperScope(const SymbolClass& clazz)
 		{
 			std::string scope;

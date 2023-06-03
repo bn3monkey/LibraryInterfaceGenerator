@@ -766,11 +766,14 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPara
 
 void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
 {
-	if (obj.type)
+	if (obj.io == SymbolParameter::IO::OUT)
 	{
-		ss << obj.name << " = ";
-		findConverter(ss, *(obj.type));
-		ss << "().toManagedType(i_" << obj.name << ");\n";
+		if (obj.type)
+		{
+			ss << obj.name << " = ";
+			findConverter(ss, *(obj.type));
+			ss << "().toManagedType(i_" << obj.name << ");\n";
+		}
 	}
 }
 

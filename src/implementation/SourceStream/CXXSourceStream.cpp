@@ -174,7 +174,7 @@ LibraryInterfaceGenerator::Implementation::ClassCXXSourceScopedStream::ClassCXXS
 	sourceStream << "class " << name;
 	if (!base_names.empty())
 	{
-		sourceStream << " : ";
+		sourceStream << " : public ";
 		for (auto& base_name : base_names)
 		{
 			sourceStream << base_name << ", ";

@@ -64,6 +64,8 @@ TEST(Wrapper, Wrapper)
 	nativeExternalLibraryDirectory.createLibraryDirectory();
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log);
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
+	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter);
+	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::KotlinTypeConverter);
 
 	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, root_dir_path };
 
@@ -82,7 +84,7 @@ TEST(Wrapper, Wrapper)
 		std::string root_dir_path = ".",
 		*/
 
-	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeInterface, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
 	auto result = wrapper.make();
 	if (!result)
 	{

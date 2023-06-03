@@ -26,6 +26,7 @@ namespace LibraryInterfaceGenerator
             static constexpr char* DEFAULT_DIRECTORY_NAME = "wrapper";
             explicit Wrapper(
                 Environment environment, 
+                const NativeExternalLibraryDirectory& libDirectory,
                 const NativeInterface& interfaceDirectory, 
                 const SymbolTable& symbolTable, 
                 std::string root_dir_path = ".", 
@@ -49,6 +50,7 @@ namespace LibraryInterfaceGenerator
         private:
             constexpr static char* JNIEXPORT = "extern \"C\" JNIEXPORT";
 
+            const NativeExternalLibraryDirectory& _libDirectory;
             const NativeInterface& _infDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
@@ -56,11 +58,17 @@ namespace LibraryInterfaceGenerator
             std::string _wrapper_dir_path;
             std::string _kotlin_package_name;
             std::string _kotlin_wrapper_class_name;
+            std::string _kotlin_class_prefix;
 
             Result createWrapperFile(const SymbolPackage& symbolObject, std::string& parent_include_path);
             
             SourceStream createNativeWrapperContent(const SymbolPackage& symbolObject);
             SourceStream createKotlinWrapperContent(const SymbolPackage& symbolObject);
+
+            void createWrapperConverterHelper(SourceStream& ss, const SymbolPackage& symbolObject);
+            void createWrapperConverterHelper(SourceStream& ss, const SymbolModule& object);
+            void createWrapperConverterHelper(SourceStream& ss, const SymbolClass& object);
+            void createWrapperConverterHelper(SourceStream& ss, const SymbolEnum& object);
 
             void createNativePackageDefinition(SourceStream& ss, const SymbolPackage& symbolObject);
             void createNativeModuleDefinition(SourceStream& ss, const std::string& prefix, const SymbolModule& mod);
@@ -81,8 +89,9 @@ namespace LibraryInterfaceGenerator
             void createNativeStaticMethodDefinition(SourceStream& ss, const std::string& prefix, const SymbolMethod& object, int number);
             void callNativeStaticMethod(SourceStream& ss, const SymbolMethod& object);
 
-            void createNativeCallbackChanger(SourceStream& ss);
-            void createNativeHandleChanger(SourceStream& ss);
+            void findConverter(SourceStream& ss, SymbolType& type);
+            void createNativeReleaserChanger(SourceStream& ss);
+            void createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz);
             void createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
             void createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
             void createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
@@ -97,9 +106,6 @@ namespace LibraryInterfaceGenerator
 
             void createNativeInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
             void createNativeOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
-
-            void createChangerFunction(SourceStream& ss);
-
 
             void createWrapperPackageDeclaration(SourceStream& ss, const SymbolPackage& symbolObject);
             void createWrapperModuleDeclaration(SourceStream& ss, const SymbolModule& mod);
