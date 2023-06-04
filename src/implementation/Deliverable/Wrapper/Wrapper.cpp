@@ -330,9 +330,9 @@ static std::vector<ParameterNode> createJNIParameters()
 	return ret;
 }
 
-static ParameterNode createNativeHandleParameters()
+static ParameterNode createNativeSelfParameters()
 {
-	return ParameterNode(ParameterNode::VALUE, "jlong", "handle");
+	return ParameterNode(ParameterNode::VALUE, "jobject", "self");
 }
 
 static std::vector<ParameterNode> createNativeStaticParameters(const SymbolMethod& object)
@@ -348,17 +348,17 @@ static std::vector<ParameterNode> createNativeConstructorParameters(const Symbol
 	return createNativeStaticParameters(object);
 }
 
-static std::vector<ParameterNode> createNativeDestructorParameters(const SymbolMethod& object)
+static std::vector<ParameterNode> createNativeDestructorParameters()
 {
 	auto ret = createJNIParameters();
-	ret.push_back(createNativeHandleParameters());
+	ret.push_back(createNativeSelfParameters());
 	return ret;
 }
 
 static std::vector<ParameterNode> createNativeMemberParameters(const SymbolMethod& object)
 {
 	auto ret = createJNIParameters();
-	ret.push_back(createNativeHandleParameters());
+	ret.push_back(createNativeSelfParameters());
 	auto parameters = createNativeParameters(object);
 	ret.insert(ret.end(), parameters.begin(), parameters.end());
 	return ret;
@@ -374,13 +374,13 @@ static std::vector<ParameterNode> createNativeReleaserParameters()
 static std::vector<ParameterNode> createNativePropertyGetterParameters(const SymbolProperty& obj)
 {
 	auto ret = createJNIParameters();
-	ret.push_back(createNativeHandleParameters());
+	ret.push_back(createNativeSelfParameters());
 	return ret;
 }
 static std::vector<ParameterNode> createNativePropertySetterParameters(const SymbolProperty& obj)
 {
 	auto ret = createJNIParameters();
-	ret.push_back(createNativeHandleParameters());
+	ret.push_back(createNativeSelfParameters());
 	ret.push_back(
 		ParameterNode(
 			ParameterNode::REFERENCE_IN,
@@ -394,7 +394,7 @@ static std::vector<ParameterNode> createJNIInputParameter()
 {
 	std::vector<ParameterNode> ret;
 	ret.push_back(ParameterNode(
-		ParameterNode::VALUE, "void*", "i_handle"
+		ParameterNode::VALUE, "void*", "i_self"
 	));
 	return ret;
 }
@@ -509,7 +509,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructor
 			"jlong",
 			{ },
 			method_name,
-			createNativeMemberParameters(constructor)
+			createNativeConstructorParameters(constructor)
 		};
 
 		for (auto& parameter : constructor.parameters)
@@ -554,7 +554,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeDestructorD
 			"void",
 			{ },
 			method_name,
-			
+			createNativeDestructorParameters()
 		};
 
 		createNativeHandleChanger(ss, clazz);
@@ -593,7 +593,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeAddReleaser
 			"void",
 			{},
 			method_name,
-			createNativeInputReleaserParameters()
+			createNativeReleaserParameters()
 		};
 
 		createNativeReleaserChanger(ss);
@@ -822,7 +822,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReleaserCha
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz)
 {
-	ss << "auto i_handle = K" << clazz.name << "().toManagedType(handle)\n";
+	ss << "auto i_self = K" << clazz.name << "().toManagedType(self)\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
@@ -1075,7 +1075,7 @@ static std::vector<ParameterNode> createWrapperParameters(const SymbolMethod& ob
 static std::vector<ParameterNode> createWrapperHandleParameters()
 {
 	std::vector<ParameterNode> ret;
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "Long", "handle"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "Any", "self"));
 	return ret;
 }
 

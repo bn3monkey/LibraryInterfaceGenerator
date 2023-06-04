@@ -115,7 +115,6 @@ namespace LibraryInterfaceGenerator
             void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& obj);
             void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& obj);
 
-            std::string createNativeInterfaceConverter();
         };
     }
 }

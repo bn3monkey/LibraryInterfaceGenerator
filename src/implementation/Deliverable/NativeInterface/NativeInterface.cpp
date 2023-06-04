@@ -276,8 +276,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createPackageDe
 		ss << "using namespace " << root_namespace << ";\n";
 		ss << "\n";
 
-		ss << createNativeInterfaceConverter() << "\n";
-
 		for (auto& module_ : obj.modules)
 		{
 			createModuleDefinition(ss, *module_);

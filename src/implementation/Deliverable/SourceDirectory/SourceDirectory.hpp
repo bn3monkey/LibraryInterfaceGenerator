@@ -76,6 +76,7 @@ namespace LibraryInterfaceGenerator
             std::string createMethodName(const SymbolClass& clazz, const std::string& method_name, int number);
             std::string createMethodName(const SymbolMethod& method, const std::string& method_name, int number);
             void createNativeHandle(SourceStream& ss);
+            void createReleaser(SourceStream& ss);
             void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
 
@@ -88,13 +89,6 @@ namespace LibraryInterfaceGenerator
             void callAddReleaser(SourceStream& ss, const SymbolClass& clazz);
             void callClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
             void callStaticMethod(SourceStream& ss, const SymbolMethod& object, int number);
-
-            void createReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
-            void createInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
-            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
-
-            void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
-            void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
 
             std::string createPropertyName(const SymbolProperty& object);
             void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
