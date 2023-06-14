@@ -5,7 +5,7 @@
 #include "MemoryPool/MemoryPool_cpp.h"
 #include "MemoryPool/MemoryPool_hpp.h"
 #include "MemoryPool/MemoryPoolImpl_hpp.h"
-#include "MemoryPool/Tag_hpp.h"
+#include "Tag/Tag_hpp.h"
 #include "ManagedTypeConverter/ManagedTypeConverter_hpp.h"
 #include "ManagedTypeConverter/ManagedTypeConverter_cpp.h"
 #include "KotlinTypeConverter/KotlinTypeConverter_hpp.h"
@@ -103,7 +103,12 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 				return ret;
 		}
 		{
-			auto ret = createExternalToolInternal(_lib_dir_path, "MemoryPool", "Tag.hpp", TAG_HPP);
+			auto ret = createExternalToolDirectory(_lib_dir_path, "Tag");
+			if (!ret)
+				return ret;
+		}
+		{
+			auto ret = createExternalToolInternal(_lib_dir_path, "Tag", "Tag.hpp", TAG_HPP);
 			if (!ret)
 				return ret;
 		}

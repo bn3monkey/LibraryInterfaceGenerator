@@ -12,7 +12,7 @@ static constexpr char* MEMORYPOOLIMPL_HPP =
 "#include <sstream>\n"
 "#include <cstdint>\n"
 "\n"
-"#include \"Tag.hpp\"\n"
+"#include \"../Tag/Tag.hpp\"\n"
 "#include \"../Log/Log.hpp\"\n"
 "\n"
 "#define BN3MONKEY_DEBUG\n"

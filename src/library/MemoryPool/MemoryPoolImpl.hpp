@@ -9,7 +9,7 @@
 #include <sstream>
 #include <cstdint>
 
-#include "Tag.hpp"
+#include "../Tag/Tag.hpp"
 #include "../Log/Log.hpp"
 
 #define BN3MONKEY_DEBUG
