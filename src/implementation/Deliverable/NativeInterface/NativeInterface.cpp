@@ -394,7 +394,7 @@ static std::vector<ParameterNode> createPropertyParameters(const SymbolProperty&
 	ret.push_back(
 
 		ParameterNode(
-			ParameterNode::REFERENCE_IN,
+			obj.type->getTypeName() == SymbolType::Name::OBJECT ? ParameterNode::VALUE : ParameterNode::REFERENCE_IN,
 			obj.type->toManagedType(),
 			"value")
 	);
