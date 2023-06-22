@@ -548,7 +548,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
             createPropertyDefinition(ss, object, *property_object);
         }
 
-        for (auto& property_object : properties)
+        for (auto& property_object : base_properties)
         {
             createPropertyDefinition(ss, object, *property_object);
         }

@@ -60,9 +60,17 @@ macro(importExternalLibrary library_path target_dirpath)
 	message("header guard : ${header_guard}")
 
 	file(READ "${library_path}" library_content)
-	string(REPLACE "\"" "\\\"" processed_library_content "${library_content}")
+	set(processed_library_content "${library_content}")
+	
+	string(REPLACE "\\" "\\\\" processed_library_content "${processed_library_content}")
+	string(REPLACE "\t" "\\t" processed_library_content "${processed_library_content}")
+	string(REPLACE "\"" "\\\"" processed_library_content "${processed_library_content}")
 	string(REPLACE "\n" "\\n\"\n\"" processed_library_content "${processed_library_content}")
+	# string(REPLACE "\n" "\\n" processed_library_content ${processed_library_content})
+
+
 	set(processed_library_content "\"${processed_library_content}\\n\"")
+	# message("${processed_library_content}")
 
 	set(output_library_content
 		"#if !defined(${header_guard})\n#define ${header_guard}\nstatic constexpr char* ${variable_name} = \n${processed_library_content};\n#endif //${header_guard}\n"
