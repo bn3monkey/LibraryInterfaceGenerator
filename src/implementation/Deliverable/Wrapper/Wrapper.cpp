@@ -94,9 +94,9 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 		ExternalIncludeCXXSourceStream exclude{ ss,  "android/log.h" };
 	}
 	{
-		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter))
+		if (_libDirectory.existsExternalTool(NativeExternalLibraryDirectory::ExternalTool::KotlinTypeConverter))
 		{
-			auto poolPath = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter);
+			auto poolPath = _libDirectory.getRelativeHeaderPath(NativeExternalLibraryDirectory::ExternalTool::KotlinTypeConverter);
 			InternalIncludeCXXSourceStream poolInclude{ ss, poolPath };
 		}
 	}
@@ -175,7 +175,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterH
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolClass& object)
 {
 	{
-		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, {"KObject"});
+		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, {"Kotlin::KObject"});
 
 		auto class_name = createKotlinClassName(object);
 		{
@@ -183,7 +183,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterH
 			ss << "return \"" << _kotlin_class_prefix << "/" << class_name << "\";\n";
 		}
 		{
-			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signautre" };
+			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signature" };
 			ss << "return \"L" << _kotlin_class_prefix << "/" << class_name << ";\";\n";
 		}
 	}
@@ -192,7 +192,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterH
 void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolEnum& object)
 {
 	{
-		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, { "KEnum" });
+		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, { "Kotlin::KEnum" });
 
 		auto class_name = createKotlinClassName(object);
 		{
@@ -200,7 +200,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterH
 			ss << "return \"" << _kotlin_class_prefix << "/" << class_name << "\";\n";
 		}
 		{
-			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signautre" };
+			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signature" };
 			ss << "return \"L" << _kotlin_class_prefix << "/" << class_name << ";\";\n";
 		}
 	}
@@ -722,31 +722,31 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 	switch (type.getTypeName())
 	{
 	case SymbolType::Name::VOID:
-		ss << "KVoid";
+		ss << "Kotlin::KVoid";
 		break;
 	case SymbolType::Name::BOOL:
-		ss << "KBool";
+		ss << "Kotlin::KBoolean";
 		break;
 	case SymbolType::Name::INT8:
-		ss << "KInt8";
+		ss << "Kotlin::KInt8";
 		break;
 	case SymbolType::Name::INT16:
-		ss << "KInt16";
+		ss << "Kotlin::KInt16";
 		break;
 	case SymbolType::Name::INT32:
-		ss << "KInt32";
+		ss << "Kotlin::KInt32";
 		break;
 	case SymbolType::Name::INT64:
-		ss << "KInt64";
+		ss << "Kotlin::KInt64";
 		break;
 	case SymbolType::Name::FLOAT:
-		ss << "KFloat";
+		ss << "Kotlin::KFloat";
 		break;
 	case SymbolType::Name::DOUBLE:
-		ss << "KDouble";
+		ss << "Kotlin::KDouble";
 		break;
 	case SymbolType::Name::STRING:
-		ss << "KString";
+		ss << "Kotlin::KString";
 		break;
 	case SymbolType::Name::ENUM:
 		ss << "K" << type.toKotlinType();
@@ -756,7 +756,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 		break;
 	case SymbolType::Name::CALLBACK:
 	{
-		ss << "KCallback<";
+		ss << "Kotlin::KCallback<";
 		auto types = type.toElementTypes();
 		if (!types.empty())
 		{
@@ -781,7 +781,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 	case SymbolType::Name::ENUMARRAY:
 	case SymbolType::Name::OBJECTARRAY:
 	case SymbolType::Name::CALLBACKARRAY:
-		ss << "KArray<";
+		ss << "Kotlin::KArray<";
 		for (auto& type : type.toElementTypes())
 		{
 			findConverter(ss, *type);
@@ -802,7 +802,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 	case SymbolType::Name::ENUMVECTOR:
 	case SymbolType::Name::OBJECTVECTOR:
 	case SymbolType::Name::CALLBACKVECTOR:
-		ss << "KVector<";
+		ss << "Kotlin::KVector<";
 		for (auto& type : type.toElementTypes())
 		{
 			findConverter(ss, *type);
@@ -817,21 +817,25 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReleaserChanger(SourceStream& ss)
 {
-	ss << "auto i_releaser = KCallback<KVoid>().toManagedType(releaser);\n";
+	ss << "auto i_releaser = Bn3Monkey::Kotlin::KCallback<Bn3Monkey::Kotlin::KVoid>().toManagedType(env, releaser);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz)
 {
-	ss << "auto i_self = K" << clazz.name << "().toManagedType(self)\n";
+	ss << "auto i_self = Bn3Monkey::K" << clazz.name << "().toManagedType(env, self);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
 {
 	if (object.type)
 	{
-		ss << "auto __ret = ";
-		findConverter(ss, *(object.type));
-		ss << "().toKotlinType(env, __temp_ret);\n";
+		if (object.type->getTypeName() != SymbolType::Name::VOID)
+		{
+			ss << "auto __ret = ";
+			findConverter(ss, *(object.type));
+			ss << "().toKotlinType(env, __temp_ret);\n";
+			ss << "return __ret;\n";
+		}
 	}
 }
 
@@ -1139,7 +1143,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperDestructor
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			"Long",
+			"",
 			method_name,
 			createWrapperHandleParameters()
 		};

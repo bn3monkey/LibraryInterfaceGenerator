@@ -872,7 +872,9 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callPropertyGet
 			"",
 			{},
 			createMethodName(clazz, "get" + propertyName, 0),
-			{}
+			{
+				createInputHandleParameter()
+			}
 		};
 	}
 }

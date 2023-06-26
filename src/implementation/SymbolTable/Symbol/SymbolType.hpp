@@ -225,7 +225,7 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
             std::string toJNIType() override {
-                return "jint";
+                return "jobject";
             }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
@@ -279,7 +279,7 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
             std::string toJNIType() override {
-                return "jlong";
+                return "jobject";
             }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
