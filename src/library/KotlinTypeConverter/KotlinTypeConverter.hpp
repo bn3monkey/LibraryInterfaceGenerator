@@ -72,7 +72,6 @@ namespace Bn3Monkey
         class KVoid : public KotlinTypeConverter
         {
         public:
-            using NativeType = void;
             using ManagedType = void;
             using KotlinType = void;
             using KotlinWrapperType = void;
@@ -84,8 +83,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "Z"; }
 
-            using NativeType = bool;
-            using ManagedType = NativeType;
+            using ManagedType = bool;
             using KotlinType = jboolean;
             using KotlinWrapperType = jobject;
 
@@ -108,8 +106,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "B"; }
 
-            using NativeType = int8_t;
-            using ManagedType = NativeType;
+            using ManagedType = int8_t;
             using KotlinType = jbyte;
             using KotlinWrapperType = jobject;
 
@@ -131,8 +128,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "S"; }
 
-            using NativeType = int16_t;
-            using ManagedType = NativeType;
+            using ManagedType = int16_t;
             using KotlinType = jshort;
             using KotlinWrapperType = jobject;
 
@@ -154,8 +150,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "I"; }
 
-            using NativeType = int32_t;
-            using ManagedType = NativeType;
+            using ManagedType = int32_t;
             using KotlinType = jint;
             using KotlinWrapperType = jobject;
 
@@ -177,8 +172,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "J"; }
 
-            using NativeType = int64_t;
-            using ManagedType = NativeType;
+            using ManagedType = int64_t;
             using KotlinType = jlong;
             using KotlinWrapperType = jobject;
 
@@ -200,8 +194,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "F"; }
 
-            using NativeType = float;
-            using ManagedType = NativeType;
+            using ManagedType = float;
             using KotlinType = jfloat;
             using KotlinWrapperType = jobject;
 
@@ -223,8 +216,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "D"; }
 
-            using NativeType = double;
-            using ManagedType = NativeType;
+            using ManagedType = double;
             using KotlinType = jdouble;
             using KotlinWrapperType = jobject;
 
@@ -246,8 +238,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "Ljava/lang/String;"; }
 
-            using NativeType = std::string;
-            using ManagedType = NativeType;
+            using ManagedType = std::string;
             using KotlinType = jstring;
             using KotlinWrapperType = jobject;
 
@@ -270,37 +261,24 @@ namespace Bn3Monkey
         class KEnum : public KotlinTypeConverter
         {
         public:
-            enum Dummy
-            {
-                A
-            };
-            virtual const char* className() = 0;
-            virtual const char* signature() = 0;
+            const char* signature() override { return "I"; }
 
-            using NativeType = Dummy;
             using ManagedType = int32_t;
-            using KotlinType = jobject;
+            using KotlinType = jint;
+            // Kotlin.Int
             using KotlinWrapperType = jobject;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto _Enum = env->FindClass(className());
-                auto _Enum_Value = env->GetFieldID(_Enum, "value", "I");
-                return static_cast<ManagedType>(env->GetIntField(value, _Enum_Value));
+                return static_cast<ManagedType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                 auto _Enum = env->FindClass(className());
-
-                 char sig[256]{ 0 };
-                 sprintf(sig, "(I)%s", signature());
-
-                 auto _Enum_toEnum = env->GetStaticMethodID(_Enum, "toEnum", sig);
-                 return env->CallStaticObjectMethod(_Enum, _Enum_toEnum, static_cast<jint>(value));
+                return static_cast<KotlinType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return value;
+                return env->CallIntMethod(value, helper._KInt_intValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return value;
+                return env->NewObject(helper._KInt, helper._KInt_init, value);
             }
         };
 
@@ -309,29 +287,24 @@ namespace Bn3Monkey
         class KObject : public KotlinTypeConverter
         {
         public:
-            virtual const char* className() = 0;
-            virtual const char* signature() = 0;
+            const char* signature() override { return "J"; }
 
-            using NativeType = KObject;
             using ManagedType = void*;
-            using KotlinType = jobject;
+            using KotlinType = jlong;
+            // Kotlin.Long
             using KotlinWrapperType = jobject;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
-                auto _Object = env->FindClass(className());
-                auto _Object_nativeHandle = env->GetMethodID(_Object, "nativeHandle", "()J");
-                return reinterpret_cast<ManagedType>(env->CallLongMethod(value, _Object_nativeHandle));
+                return reinterpret_cast<ManagedType>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                auto _Object = env->FindClass(className());
-                auto _Object_init = env->GetMethodID(_Object, "<init>", "(J)V");
-                return env->NewObject(_Object, _Object_init, reinterpret_cast<jlong>(value));
+                return reinterpret_cast<jlong>(value);
             }
             KotlinType toKotlinType(JNIEnv* env, const KotlinWrapperType& value) {
-                return value;
+                return env->CallLongMethod(value, helper._KLong_longValue);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return value;
+                return env->NewObject(helper._KLong, helper._KLong_init, value);
             }
         };
 
@@ -348,7 +321,6 @@ namespace Bn3Monkey
             static_assert(std::is_base_of<KotlinTypeConverter, KotlinReturnType>::value, "KotlinReturnType must be derived from KotlinTypeConverter");
             static_assert(std::conjunction<std::is_base_of<KotlinTypeConverter, KotlinArgumentType>...>::value, "All KotlinArgumentType must be derived from KotlinTypeConverter");
 
-            using NativeType = std::function<typename KotlinReturnType::NativeType(typename KotlinArgumentType::NativeType...)>;
             using ManagedType = std::function<typename KotlinReturnType::ManagedType(typename KotlinArgumentType::ManagedType...)>;
             using KotlinType = jobject;
             using KotlinWrapperType = jobject;
@@ -449,8 +421,7 @@ namespace Bn3Monkey
         class KArray<KBoolean, size> : public KotlinTypeConverter
         {
         public:
-            using NativeType = std::array<bool, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<bool, size>;
             using KotlinType = jbooleanArray;
 
             const char* signature() override { return "[Z"; };
@@ -497,8 +468,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[B"; };
 
-            using NativeType = std::array<int8_t, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<int8_t, size>;
             using KotlinType = jbyteArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -543,8 +513,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[S"; };
 
-            using NativeType = std::array<int16_t, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<int16_t, size>;
             using KotlinType = jshortArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -589,8 +558,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[I"; };
 
-            using NativeType = std::array<int32_t, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<int32_t, size>;
             using KotlinType = jintArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -635,8 +603,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[J"; };
 
-            using NativeType = std::array<int64_t, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<int64_t, size>;
             using KotlinType = jlongArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -681,8 +648,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[F"; };
 
-            using NativeType = std::array<float, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<float, size>;
             using KotlinType = jfloatArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -727,8 +693,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[D"; };
 
-            using NativeType = std::array<double, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<double, size>;
             using KotlinType = jdoubleArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -773,8 +738,7 @@ namespace Bn3Monkey
         public:
             const char* signature() override { return "[Ljava/lang/String;"; };
 
-            using NativeType = std::array<std::string, size>;
-            using ManagedType = NativeType;
+            using ManagedType = std::array<std::string, size>;
             using KotlinType = jobjectArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
@@ -819,51 +783,42 @@ namespace Bn3Monkey
             }
         };
 
-        template<typename KDerivedEnum, size_t size>
-        class KArray<KDerivedEnum, size, typename std::enable_if<std::is_base_of<KEnum, KDerivedEnum>::value>::type> : public KotlinTypeConverter
+        template<size_t size>
+        class KArray<KEnum, size> : public KotlinTypeConverter
         {
         public:
             const char* signature() override {
-                static char sig[256];
-                sprintf(sig, "[%s", KDerivedEnum().signature());
-                return sig;
+                return "[I";
             }
 
-            using NativeType = std::array<typename KDerivedEnum::NativeType, size>;
             using ManagedType = std::array<int32_t, size>;
-            using KotlinType = jobjectArray;
+            using KotlinType = jintArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
+                auto src = env->GetIntArrayElements(value, nullptr);
                 size_t length = env->GetArrayLength(value);
-                
                 ManagedType ret;
-                for (size_t i = 0; i < length; i++)
-                {
-                    auto element = env->GetObjectArrayElement(value, i);
-                    auto new_element = KDerivedEnum().toManagedType(env, element);
-                    ret[i] = new_element;
-                }
-                
+                std::copy(src, src + length, ret.data());
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                auto clazz = env->FindClass(KDerivedEnum().className());
-                KotlinType ret = env->NewObjectArray(value.size(), clazz, nullptr);
-                for (size_t i =0;i<value.size();i++)
-                {
-                    auto element = value[i];
-                    auto new_element = KDerivedEnum().toKotlinType(env, element);
-                    env->SetObjectArrayElement(ret, i, new_element);
-                }
+                KotlinType ret = env->NewIntArray(value.size());
+                auto* arr = env->GetIntArrayElements(ret, nullptr);
+                if (!arr)
+                    return nullptr;
+
+                std::copy(value.begin(), value.end(), arr);
+                env->ReleaseIntArrayElements(ret, arr, 0);
                 return ret;
             }
             void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
             {
-                for (size_t i =0;i<src.size();i++) {
-                    auto element = src[i];
-                    auto new_element = KDerivedEnum().toKotlinType(env, element);
-                    env->SetObjectArrayElement(dest, i, new_element);
-                }
+                auto* arr = env->GetIntArrayElements(dest, nullptr);
+                if (!arr)
+                    return;
+
+                std::copy(src.begin(), src.end(), arr);
+                env->ReleaseIntArrayElements(dest, arr, 0);
             }
 
             using KotlinWrapperType = jobject;
@@ -871,56 +826,53 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return static_cast<KotlinWrapperType>(value);
+                return static_cast<jobject>(value);
             }
         };
         
-        template<typename KDerivedObject, size_t size>
-        class KArray<KDerivedObject, size, typename std::enable_if<std::is_base_of<KObject, KDerivedObject>::value>::type> : public KotlinTypeConverter
+        template<typename KObject, size_t size>
+        class KArray<KObject, size> : public KotlinTypeConverter
         {
         public:
             const char* signature() override {
-                static char sig[256];
-                sprintf(sig, "[%s", KDerivedObject().signature());
-                return sig;
+                return "[J";
             }
 
-            using NativeType = std::array<typename KDerivedObject::NativeType, size>;
             using ManagedType = std::array<void*, size>;
-            using KotlinType = jobjectArray;
+            using KotlinType = jlongArray;
 
             ManagedType toManagedType(JNIEnv* env, const KotlinType& value) {
+                auto src = env->GetLongArrayElements(value, nullptr);
                 size_t length = env->GetArrayLength(value);
-
                 ManagedType ret;
-                for (size_t i = 0; i < length; i++)
-                {
-                    auto element = env->GetObjectArrayElement(value, i);
-                    auto new_element = KDerivedObject().toManagedType(env, element);
-                    ret[i] = new_element;
-                }
+
+                for (size_t i=0;i<length;i++)
+                    ret[i]= KObject().toManagedType(env, src[i]);
 
                 return ret;
             }
             KotlinType toKotlinType(JNIEnv* env, const ManagedType& value) {
-                auto clazz = env->FindClass(KDerivedObject().className());
-                KotlinType ret = env->NewObjectArray(value.size(), clazz, nullptr);
-                for (size_t i =0;i<value.size();i++)
-                {
-                    auto element = value[i];
-                    auto new_element = KDerivedObject().toKotlinType(env, element);
-                    env->SetObjectArrayElement(ret, i, new_element);
-                }
+                KotlinType ret = env->NewLongArray(value.size());
+                auto* arr = env->GetLongArrayElements(ret, nullptr);
+                if (!arr)
+                    return nullptr;
+
+                for (size_t i =0; i <value.size(); i++)
+                    arr[i] = KObject().toKotlinType(env, value[i]);
+
+                env->ReleaseLongArrayElements(ret, arr, 0);
                 return ret;
             }
-            void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest)
-            {
-                for (size_t i =0;i<src.size();i++)
-                {
-                    auto element = src[i];
-                    auto new_element = KDerivedObject().toKotlinType(env, element);
-                    env->SetObjectArrayElement(dest, i, new_element);
+            void copy(JNIEnv* env, const ManagedType& src, KotlinType& dest) {
+                auto *arr = env->GetLongArrayElements(dest, nullptr);
+                if (!arr)
+                    return;
+
+                for (size_t i = 0; i < src.size(); i++) {
+                    arr[i] = KObject().toKotlinType(env, src[i]);
                 }
+
+                env->ReleaseLongArrayElements(dest, arr, 0);
             }
 
             using KotlinWrapperType = jobject;
@@ -928,7 +880,7 @@ namespace Bn3Monkey
                 return static_cast<KotlinType>(value);
             }
             KotlinWrapperType toKotlinWrapperType(JNIEnv* env, const KotlinType& value) {
-                return static_cast<KotlinWrapperType>(value);
+                return static_cast<jobject>(value);
             }
         };
 
@@ -938,7 +890,6 @@ namespace Bn3Monkey
         public:
 
             using Callback = KCallback<KotlinReturnType, KotlinArgumentType...>;
-            using NativeType = std::vector<typename Callback::NativeType>;
             using ManagedType = std::vector<void*>;
             using KotlinType = jobjectArray;
 
@@ -1003,8 +954,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KBoolean> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<bool>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<bool>;
             using KotlinType = jobject;
             using KotlinElementType = KBoolean;
             const char* signature() override {
@@ -1056,8 +1006,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KInt8> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<int8_t>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<int8_t>;
             using KotlinType = jobject;
             using KotlinElementType = KInt8;
 
@@ -1111,8 +1060,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KInt16> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<int16_t>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<int16_t>;
             using KotlinType = jobject;
             using KotlinElementType = KInt16;
 
@@ -1166,8 +1114,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KInt32> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<int32_t>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<int32_t>;
             using KotlinType = jobject;
             using KotlinElementType = KInt32;
 
@@ -1221,8 +1168,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KInt64> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<int64_t>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<int64_t>;
             using KotlinType = jobject;
             using KotlinElementType = KInt64;
 
@@ -1276,8 +1222,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KFloat> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<float>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<float>;
             using KotlinType = jobject;
             using KotlinElementType = KFloat;
 
@@ -1331,8 +1276,7 @@ namespace Bn3Monkey
         template<>
         struct KVector<KDouble> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<double>;
-            using ManagedType = NativeType;
+            using ManagedType = std::vector<double>;
             using KotlinType = jobject;
             using KotlinElementType = KDouble;
 
@@ -1440,7 +1384,6 @@ namespace Bn3Monkey
         template<typename KDerivedEnum>
         struct KVector<KDerivedEnum, typename std::enable_if<std::is_base_of<KEnum, KDerivedEnum>::value>::type> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<typename KDerivedEnum::NativeType>;
             using ManagedType = std::vector<int32_t>;
             using KotlinType = jobject;
             using KotlinElementType = KDerivedEnum;
@@ -1495,7 +1438,6 @@ namespace Bn3Monkey
         template<typename KDerivedObject>
         struct KVector<KDerivedObject, typename std::enable_if<std::is_base_of<KObject, KDerivedObject>::value>::type> : public KotlinTypeConverter
         {
-            using NativeType = std::vector<typename KDerivedObject::NativeType>;
             using ManagedType = std::vector<void*>;
             using KotlinType = jobject;
             using KotlinElementType = KDerivedObject;
@@ -1550,8 +1492,6 @@ namespace Bn3Monkey
         template<class KotlinReturnType, class... KotlinArgumentType>
         struct KVector<KCallback<KotlinReturnType, KotlinArgumentType...>> : public KotlinTypeConverter
         {
-            using Callback = KCallback<KotlinReturnType, KotlinArgumentType...>;
-            using NativeType = std::vector<Callback>;
             using ManagedType = std::vector<void*>;
             using KotlinType = jobject;
 

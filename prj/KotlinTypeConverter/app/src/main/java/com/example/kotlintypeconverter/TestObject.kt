@@ -1,29 +1,32 @@
 package com.example.kotlintypeconverter
 
-class TestObject : AutoCloseable {
-    constructor(value : Int)
+class TestObject : WrapperTypeObject {
+    constructor(handle : NativeHandle) : super(handle)
     {
-        _nativeHandle = TestLibrary().createNativeHandle(value)
+        TestLibrary().TestObject_addReleaser(releaser)
     }
-    internal constructor(handle : Long)
+    constructor(value : Int) : this(NativeHandle(TestLibrary().TestObject_construct(value)))
     {
-       _nativeHandle = handle
+        TestLibrary().TestObject_addReleaser(releaser)
     }
 
-    private var _nativeHandle : Long = 0
-
-    fun nativeHandle() : Long {
-        return _nativeHandle
+    override fun release(value: Long) {
+        TestLibrary().TestObject_release(value)
     }
 
-    fun sum(value1 : TestObject, value2 : TestObject) : TestObject = TestLibrary().TestObject_sum(_nativeHandle, value1, value2)
-    fun getValue() : Int = TestLibrary().TestObject_getValue(_nativeHandle)
 
-    override fun close() {
-        if (_nativeHandle != 0L)
-        {
-            TestLibrary().releaseNativeHandle(_nativeHandle)
-            _nativeHandle = 0L
-        }
+    fun sum(value1 : TestObject, value2 : TestObject) : TestObject
+    {
+        val __value1 = toKotlinWrapperType(value1)
+        val __value2 = toKotlinWrapperType(value2)
+        val __temp_ret = TestLibrary().TestObject_sum(toWrapperType(), __value1, __value2)
+        val __ret = toKotlinType<TestObject>(__temp_ret)
+        return __ret
     }
+
+    fun getValue() : Int {
+        return TestLibrary().TestObject_getValue(toWrapperType())
+    }
+
+
 }

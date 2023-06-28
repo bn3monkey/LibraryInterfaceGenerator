@@ -577,18 +577,11 @@ Java_com_example_kotlintypeconverter_TestLibrary_primitiveVectorTest(JNIEnv *env
     return env->NewStringUTF("");
 }
 
-class KTestEnum : public Bn3Monkey::Kotlin::KEnum
-{
-public:
-    const char* className() override { return "com/example/kotlintypeconverter/TestEnum";}
-    const char* signature() override { return "Lcom/example/kotlintypeconverter/TestEnum;"; }
-};
-
 extern "C"
-JNIEXPORT jobject JNICALL
+JNIEXPORT jint JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject thiz,
-                                                                  jobject value1,
-                                                                  jobjectArray value2,
+                                                                  jint value1,
+                                                                  jintArray value2,
                                                                   jobject value3) {
 
     Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
@@ -597,22 +590,22 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
 
 
 
-    jobject ret;
+    jint ret;
     do {
         {
-            using Converter = KTestEnum;
+            using Converter = KEnum;
             auto mvalue = Converter().toManagedType(env, value1);
             auto kvalue = Converter().toKotlinType(env, mvalue);
             auto new_mvalue = Converter().toManagedType(env, kvalue);
 
             if (mvalue != new_mvalue) {
-                ret = KTestEnum().toKotlinType(env, 8);
+                ret = Converter().toKotlinType(env, 8);
                 break;
             }
             ret = kvalue;
         }
         {
-            using Converter = KArray<KTestEnum, 3>;
+            using Converter = KArray<KEnum, 3>;
             auto mvalue = Converter().toManagedType(env, value2);
             auto kvalue = Converter().toKotlinType(env, mvalue);
             auto new_mvalue = Converter().toManagedType(env, kvalue);
@@ -620,7 +613,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
             bool isError = false;
             for (size_t i=0 ;i<3; i++) {
                 if (mvalue[i] != new_mvalue[i]) {
-                    ret = KTestEnum().toKotlinType(env, 8);
+                    ret = KEnum().toKotlinType(env, 8);
                     isError= true;
                     break;
                 }
@@ -635,7 +628,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
             Converter().copy(env, mvalue, value2);
         }
         {
-            using Converter = KVector<KTestEnum>;
+            using Converter = KVector<KEnum>;
             auto mvalue = Converter().toManagedType(env, value3);
             auto kvalue = Converter().toKotlinType(env, mvalue);
             auto new_mvalue = Converter().toManagedType(env, kvalue);
@@ -643,7 +636,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_enumTest(JNIEnv *env, jobject t
             bool isError = false;
             for (size_t i=0 ;i<3; i++) {
                 if (mvalue[i] != new_mvalue[i]) {
-                    ret = KTestEnum().toKotlinType(env, 8);
+                    ret = KEnum().toKotlinType(env, 8);
                     isError= true;
                     break;
                 }
@@ -677,34 +670,48 @@ private:
     int _value;
 };
 
+static std::vector<std::function<void()>> releasers;
 
+
+inline int Managed_getValue(void* handle)
+{
+    auto self = *(reinterpret_cast<std::shared_ptr<TestObject>*>(handle));
+    auto ret = self->getValue();
+    return ret;
+}
+
+inline void* Managed_sum(void* handle, void* v1, void* v2)
+{
+    auto self = *(reinterpret_cast<std::shared_ptr<TestObject>*>(handle));
+    auto _v1 = *(reinterpret_cast<std::shared_ptr<TestObject>*>(v1));
+    auto _v2 = *(reinterpret_cast<std::shared_ptr<TestObject>*>(v2));
+    auto* ret = new std::shared_ptr<TestObject>();
+    *ret = self->sum(_v1, _v2);
+    return reinterpret_cast<void*>(ret);
+}
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_example_kotlintypeconverter_TestLibrary_createNativeHandle(JNIEnv *env, jobject thiz, int value) {
+Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1construct(JNIEnv *env, jobject thiz, int value) {
     return reinterpret_cast<jlong>(new std::shared_ptr<TestObject>(new TestObject(value)));
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_kotlintypeconverter_TestLibrary_releaseNativeHandle(JNIEnv *env, jobject thiz, jlong ptr) {
+Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1release(JNIEnv *env, jobject thiz, jlong ptr) {
     delete reinterpret_cast<std::shared_ptr<TestObject>*>(ptr);
 }
 
-class KTestObject : public Bn3Monkey::Kotlin::KObject
-{
-public:
-    using NativeType = std::shared_ptr<TestObject>*;
-    const char* className() override { return "com/example/kotlintypeconverter/TestObject"; }
-    const char* signature() override { return "Lcom/example/kotlintypeconverter/TestObject;"; }
-};
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1addReleaser(JNIEnv *env, jobject thiz,
+                                                             jobject releaser) {
+    using namespace Bn3Monkey::Kotlin;
+    auto _releaser = KCallback<KVoid>().toManagedType(env, releaser);
+    releasers.push_back(_releaser);
 
-inline int Managed_getValue(void* handle)
-{
-    auto self = reinterpret_cast<KTestObject::NativeType>(handle);
-    auto ret = (*self)->getValue();
-    return ret;
 }
+
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -719,38 +726,25 @@ Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1getValue(JNIEnv *en
     return ret;
 }
 
-inline void* Managed_sum(void* handle, void* value1, void* value2)
-{
-    auto _handle = reinterpret_cast<KTestObject::NativeType>(handle);
-    auto _value1 = reinterpret_cast<KTestObject::NativeType>(value1);
-    auto _value2 = reinterpret_cast<KTestObject::NativeType>(value2);
-
-    auto ret = (*_handle)->sum(*_value1, *_value2);
-    auto new_handle = new std::shared_ptr<TestObject>();
-    *new_handle = ret;
-    return reinterpret_cast<void*>(new_handle);
-}
-
 extern "C"
-JNIEXPORT jobject JNICALL
+JNIEXPORT jlong JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_TestObject_1sum(JNIEnv *env, jobject thiz,
-                                                                 jlong handle, jobject value1, jobject value2) {
+                                                                 jlong handle, jlong value1, jlong value2) {
 
     using namespace Bn3Monkey::Kotlin;
 
-    auto _value1 = KTestObject().toManagedType(env, value1);
-    auto _value2 = KTestObject().toManagedType(env, value2);
+    auto _value1 = KObject().toManagedType(env, value1);
+    auto _value2 = KObject().toManagedType(env, value2);
 
     auto _ret = Managed_sum((void *)handle, _value1, _value2);
-    auto ret = KTestObject().toKotlinType(env, _ret);
-
+    auto ret = KObject().toKotlinType(env, _ret);
     return ret;
 }
 
 extern "C"
-JNIEXPORT jobject JNICALL
+JNIEXPORT jlong JNICALL
 Java_com_example_kotlintypeconverter_TestLibrary_objectTest(JNIEnv *env, jobject thiz,
-                                                            jobject value1, jobjectArray value2,
+                                                            jlong value1, jlongArray value2,
                                                             jobject value3) {
 
     Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env);
@@ -759,7 +753,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_objectTest(JNIEnv *env, jobject
 
     using namespace Bn3Monkey::Kotlin;
     {
-        using Converter = KArray<KTestObject, 3>;
+        using Converter = KArray<KObject, 3>;
         auto mvalue = Converter().toManagedType(env, value2);
         auto jvalue = Converter().toKotlinType(env, mvalue);
         auto new_value = Converter().toManagedType(env, jvalue);
@@ -781,7 +775,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_objectTest(JNIEnv *env, jobject
     }
 
     {
-        using Converter = KVector<KTestObject>;
+        using Converter = KVector<KObject>;
         auto mvalue = Converter().toManagedType(env, value3);
         auto jvalue = Converter().toKotlinType(env, mvalue);
         auto new_value = Converter().toManagedType(env, jvalue);
@@ -842,7 +836,7 @@ Java_com_example_kotlintypeconverter_TestLibrary_callbackTest(JNIEnv *env, jobje
     */
 
     {
-        auto mvoid_callback = KCallback<KVoid, KInt32, KString, KTestObject, KVector<KString>>().toManagedType(env, void_callback);
+        auto mvoid_callback = KCallback<KVoid, KInt32, KString, KObject, KVector<KString>>().toManagedType(env, void_callback);
 
         auto new_object = new std::shared_ptr<TestObject>(
                 new TestObject(2));
@@ -899,13 +893,13 @@ Java_com_example_kotlintypeconverter_TestLibrary_callbackTest(JNIEnv *env, jobje
             return false;
     }
     {
-        auto mcallback = KCallback<KTestEnum, KInt32, KFloat>().toManagedType(env, enum_callback);
+        auto mcallback = KCallback<KEnum, KInt32, KFloat>().toManagedType(env, enum_callback);
         auto ret = mcallback(1, 1.0f);
         if (ret != 4)
             return false;
     }
     {
-        auto mcallback = KCallback<KTestObject, KInt32, KFloat>().toManagedType(env, object_callback);
+        auto mcallback = KCallback<KObject, KInt32, KFloat>().toManagedType(env, object_callback);
         auto ret = mcallback(1, 1.0f);
         auto ref = reinterpret_cast<std::shared_ptr<TestObject>*>(ret);
         auto value = (*ref)->getValue();

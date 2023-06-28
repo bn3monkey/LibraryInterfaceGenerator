@@ -3,6 +3,20 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+task makeKotlinTypeConverter {
+    doLast {
+        def packageName = "com.example.kotlintypeconverter"
+
+        def sourceFile = file("../../../src/library/KotlinTypeConverter/KotlinTypeConverter.kt")
+        def destFile = file("src/main/java/com/example/kotlintypeconverter/KotlinTypeConverter.kt")
+
+        destFile.text = "package ${packageName}\n\n"
+        destFile << sourceFile.text
+    }
+}
+
+preBuild.dependsOn(makeKotlinTypeConverter)
+
 android {
     namespace 'com.example.kotlintypeconverter'
     compileSdk 33
@@ -26,14 +40,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            debuggable true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -48,7 +65,7 @@ android {
         viewBinding true
     }
 
-    ndkVersion '23.1.7779620'
+    ndkVersion '25.2.9519653'
 }
 
 dependencies {

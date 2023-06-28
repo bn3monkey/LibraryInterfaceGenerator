@@ -89,7 +89,7 @@ class ExampleInstrumentedTest {
         assertEquals(value5, mutableListOf<Float>(1.0f, 1.0f, 1.0f, 2.0f, 2.0f))
         assertEquals(value6, mutableListOf<Double>(1.0, 1.0, 1.0, 2.0, 2.0))
         assertEquals(value7, mutableListOf<Boolean>(false, false, false, true, true))
-        assertEquals(value8, mutableListOf<String>("SANS", "SANS", "SANS", "PAYPRUS", "PAPYRUS"))
+        assertEquals(value8, mutableListOf<String>("SANS", "SANS", "SANS", "PAPYRUS", "PAPYRUS"))
 
     }
 
@@ -97,14 +97,22 @@ class ExampleInstrumentedTest {
     fun enumTest()
     {
         val value1 = TestEnum.A;
-        val value2 = arrayOf(TestEnum.A, TestEnum.B, TestEnum.C);
-        val value3= mutableListOf(TestEnum.A, TestEnum.B, TestEnum.C);
+        var value2 = arrayOf(TestEnum.A, TestEnum.B, TestEnum.C);
+        var value3= mutableListOf(TestEnum.A, TestEnum.B, TestEnum.C);
 
-        val ret = TestLibrary().enumTest(
-            value1,
-            value2,
-            value3
+        val _value1 = toKotlinWrapperType(value1)
+        val _value2 = toKotlinWrapperType(value2)
+        val _value3 = toKotlinWrapperType(value3)
+
+        val _ret = TestLibrary().enumTest(
+            _value1,
+            _value2,
+            _value3
         )
+
+        val ret = toKotlinType<TestEnum>(_ret)
+        value2 = toKotlinType(_value2)
+        value3 = toKotlinType(_value3)
 
         assertEquals(TestEnum.A, ret)
         assertArrayEquals(arrayOf(TestEnum.C, TestEnum.C, TestEnum.C), value2)
@@ -138,28 +146,39 @@ class ExampleInstrumentedTest {
     fun ObjectTest()
     {
         val value1 = TestObject(1)
-        val value2 = arrayOf(TestObject(2), TestObject(3), TestObject(4))
-        val value3 = mutableListOf(TestObject(5), TestObject(6), TestObject(7))
+        var value2 = arrayOf(TestObject(2), TestObject(3), TestObject(4))
+        var value3 = mutableListOf(TestObject(5), TestObject(6), TestObject(7))
 
-        val ret = TestLibrary().objectTest(value1, value2, value3)
+        val _value1 = toKotlinWrapperType(value1)
+        val _value2 = toKotlinWrapperType(value2)
+        val _value3 = toKotlinWrapperType(value3)
+
+        val _ret = TestLibrary().objectTest(_value1, _value2, _value3)
+
+        val ret = toKotlinType<TestObject>(_ret)
+        value2 = toKotlinType(_value2)
+        value3 = toKotlinType(_value3)
 
         assertEquals(value2[0].getValue(), 10)
         assertEquals(value2[1].getValue(), 20)
         assertEquals(value2[2].getValue(), 30)
 
-        assertEquals(value3[3].getValue(), 10)
-        assertEquals(value3[4].getValue(), 10)
+        assertEquals(value3[3].getValue(), 20)
+        assertEquals(value3[4].getValue(), 20)
     }
 
     @Test
     fun callbackTest()
     {
         val voidCallback = {
-            value1 : Int, value2 : String, value3 : TestObject, value4 : MutableList<String> ->
+            value1 : Int, value2 : String, value3 : Long, value4 : MutableList<String> ->
 
             assertEquals(value1, 1)
             assertEquals(value2, "SANS")
-            assertEquals(value3.getValue(), 2)
+
+            val _value3 = toKotlinType<TestObject>(value3)
+            assertEquals(_value3.getValue(), 2)
+
             assertEquals(value4, mutableListOf("PAPYRUS", "PAPYRUS"))
         }
 
@@ -232,16 +251,18 @@ class ExampleInstrumentedTest {
 
             assertEquals(value1, 1)
             assertEquals(value2, 1.0f)
-            TestEnum.B
+            toKotlinWrapperType(TestEnum.B)
         }
 
-
+        var obj : TestObject = TestObject(1)
         val objectCallback = {
                 value1 : Int, value2 : Float ->
 
             assertEquals(value1, 1)
             assertEquals(value2, 1.0f)
-            TestObject(1)
+
+            // Do not create and return objects in callbacks.
+            toKotlinWrapperType(obj)
         }
 
         val ret = TestLibrary().callbackTest(voidCallback, booleanCallback, byteCallback, shortCallback, intCallback, longCallback, floatCallback, doubleCallback, stringCallback, enumCallback, objectCallback)
