@@ -204,7 +204,6 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
-		ImportKotlinSourceStream autoClosableImport(ss, "", { "java", "lang", "AutoCloseable" });
 		createForwardDeclaration(ss, object);
 	}
 		
@@ -212,7 +211,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 	{
 		createKotlinComment(ss, object);
 		
-		std::vector<std::string> base_classes = { "AutoClosable" };
+		std::vector<std::string> base_classes = { "WrapperTypeObject" };
 		for (auto& base : object.bases)
 		{
 			if (auto& pBase = base.lock())
@@ -222,16 +221,26 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 		}		
 		ClassKotlinSourceScopedStream clazz(ss, object.name, base_classes);
 
-		createNativeHandle(ss);
-		createReleaser(ss);
-
+		createPrimaryConstructorDefinition(ss, object);
 		for (auto& constructor : object.constructors)
 		{
 			auto method = constructor.first;
 			auto method_number = constructor.second;
 			{
-				createKotlinComment(ss, *method);
-				createConstructorDefinition(ss, object, *method, method_number);
+				createSecondaryConstructorDefinition(ss, object, *method);
+			}
+		}
+		
+		{
+			CompanionObjectKotlinSourceScopedStream co{ss};
+			for (auto& constructor : object.constructors)
+			{
+				auto method = constructor.first;
+				auto method_number = constructor.second;
+				{
+					createKotlinComment(ss, *method);
+					createConstructorDefinition(ss, object, *method, method_number);
+				}
 			}
 		}
 
@@ -452,7 +461,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 	if (object.keys_to_names.empty())
 	{	
 		EnumKotlinSourceScopedStream s{
-			ss, object.name
+			ss, object.name, {"WrapperTypeEnum"}
 		};
 		for (auto& element : object.keys_to_values)
 		{
@@ -461,11 +470,24 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 
 			s.addElement(key, value);
 		}
+		{
+			MethodKotlinSourceScopedStream toWrapperType{
+				ss,
+				false,
+				KotlinAccess::PUBLIC,
+				"override",
+				"",
+				"Int",
+				"toWrapperType",
+				{}
+			};
+			ss << "return value\n";
+		}
 	}
 	else
 	{
 		AdvancedEnumKotlinSourceScopedStream s{
-			ss, object.name
+			ss, object.name, {"WrapperTypeEnum"}
 		};
 		for (auto& element : object.keys_to_values)
 		{
@@ -475,34 +497,23 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 
 			s.addElement(key, value, name);
 		}
-	}
-}
-
-
-
-void LibraryInterfaceGenerator::Implementation::SourceDirectory::createNativeHandle(SourceStream& ss)
-{
-	{
-		ss << "private var _nativeHandle : Long = 0\n";
-		PropertyKotlinSourceScopedStream nativeHandle{
-			ss,
-			KotlinAccess::INTERNAL,
-			"",
-			"Long",
-			"nativeHandle",
-			true
-		};
 		{
-			auto getter = nativeHandle.createGetter();
-			ss << "return _nativeHandle\n";
+			MethodKotlinSourceScopedStream toWrapperType{
+				ss,
+				false,
+				KotlinAccess::PUBLIC,
+				"override",
+				"",
+				"Int",
+				"toWrapperType",
+				{}
+			};
+			ss << "return value\n";
 		}
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::SourceDirectory::createReleaser(SourceStream& ss)
-{
-	ss << "private val releaser : (() -> Unit) = close()\n";
-}
+
 
 static ParameterNode createParameter(const SymbolParameter& parameter)
 {
@@ -533,30 +544,38 @@ static std::vector<ParameterNode> createParameters(const SymbolMethod& method)
 	}
 	return ret;
 }
-static ParameterNode createHandleParameter()
-{
-	return ParameterNode(ParameterNode::VALUE, "Long", "handle");
-}
 
 static ParameterNode createInputHandleParameter()
 {
-	return ParameterNode(ParameterNode::VALUE, "Any", "this");
+	return ParameterNode(ParameterNode::VALUE, "Long", "self");
 }
+
+static std::vector<ParameterNode> createPrimaryConstructorParameters() {
+	return { ParameterNode(ParameterNode::VALUE, "NativeHandle", "handle") };
+}
+static std::vector<ParameterNode> createInputPrimaryConstructorParameters() {
+	return { ParameterNode(ParameterNode::VALUE, "Long", "handle.get()") };
+}
+
 static std::vector<ParameterNode> createInputConstructorParameter(const SymbolMethod& method)
 {
 	std::vector<ParameterNode> ret;
+	ret.push_back(createInputHandleParameter());
 	for (auto& param : method.parameters)
 	{
-		std::string method_name = "i_" + method.name;
-		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), method_name));
+		std::string param_name = "i_" + param->name;
+		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), param_name));
 	}
 	return ret;
 }
+
+static std::vector<ParameterNode> createDestructorParameter()
+{
+	return { ParameterNode(ParameterNode::VALUE, "NativeHandle", "handle") };
+}
 static std::vector<ParameterNode> createInputDestructorParameter()
 {
-	std::vector<ParameterNode> ret;
-	ret.push_back(createInputHandleParameter());
-	return ret;
+	return { ParameterNode(ParameterNode::VALUE, "Long", "handle.get()") };
 }
 static std::vector<ParameterNode> createInputAddReleaserParameter()
 {
@@ -585,8 +604,53 @@ static std::vector<ParameterNode> createInputPropertyParameter()
 {
 	std::vector<ParameterNode> ret;
 	ret.push_back(createInputHandleParameter());
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "", "value"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "", "i_value"));
 	return ret;
+}
+
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createPrimaryConstructorDefinition(SourceStream& ss, const SymbolClass& clazz)
+{
+	{
+		MethodKotlinSourceScopedStream method{
+			ss,
+			false,
+			KotlinAccess::INTERNAL,
+			"",
+			": super(handle)",
+			"",
+			"constructor",
+			createPrimaryConstructorParameters()
+		};
+
+		callAddReleaser(ss, clazz);
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createSecondaryConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor)
+{
+	{
+		MethodKotlinSourceScopedStream method{
+			ss,
+			true,
+			KotlinAccess::PUBLIC,
+			"",
+			"",
+			"",
+			"constructor",
+			createParameters(constructor)
+		};
+		ss << " : this(";
+		CallKotlinSourceScopedStream construct {
+			ss,
+			"",
+			{},
+			"construct",
+			createParameters(constructor)
+		};
+		ss.pop(1);
+		ss << ")\n";
+	}
 }
 
 
@@ -600,32 +664,20 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstruct
 			"",
 			"",
 			"",
-			"constructor",
+			"construct",
 			createParameters(constructor)
 		};
 
+		for (auto& parameter : constructor.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
 		callConstructor(ss, clazz, constructor, number);
-
-		ss << "require(_nativeHandle != 0L)\n";
-
-		callAddReleaser(ss, clazz);
-	}
-
-	{
-		MethodKotlinSourceScopedStream method{
-			ss,
-			false,
-			KotlinAccess::INTERNAL,
-			"",
-			"",
-			"",
-			"constructor",
-			{createHandleParameter()}
-		};
-
-		ss << "_nativeHandle = handle\n";
-		ss << "require(_nativeHandle != 0L)\n";
-		callAddReleaser(ss, clazz);
+		for (auto& parameter : constructor.parameters)
+		{
+			createOutputParameterChanger(ss, *parameter);
+		}
+		ss << "return NativeHandle(ret)\n";
 	}
 }
 
@@ -639,30 +691,11 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createDestructo
 			"override",
 			"",
 			"",
-			"close",
-			{}
+			"release",
+			{ParameterNode(ParameterNode::VALUE, "NativeHandle", "handle")}
 		};
 
-		ss << "if (_handle != 0L)\n";
-		{
-			SourceScopedStream if_scope(ss, CodeStyle::Kotlin);
-
-			callDestructor(ss, clazz);
-
-			ss << "_handle = 0L\n";
-		}
-	}
-	{
-		MethodKotlinSourceScopedStream method{
-			ss,
-			true,
-			KotlinAccess::PROTECTED,
-			"",
-			"= close()",
-			"",
-			"finalize",
-			{}
-		};
+		callDestructor(ss, clazz);
 	}
 }
 
@@ -695,8 +728,16 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassMeth
 			createParameters(object)
 		};
 
-		
+		for (auto& parameter : object.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
 		callClassMethod(ss, clazz, object, number);
+		for (auto& parameter : object.parameters)
+		{
+			createOutputParameterChanger(ss, *parameter);
+		}
+		createReturnValueChanger(ss, object);
 	}
 }
 void LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMethodDefinition(SourceStream& ss, const SymbolMethod& object, int number)
@@ -713,9 +754,16 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMet
 			createParameters(object)
 		};
 
-		
+		for (auto& parameter : object.parameters)
+		{
+			createInputParameterChanger(ss, *parameter);
+		}
 		callStaticMethod(ss, object, number);
-		
+		for (auto& parameter : object.parameters)
+		{
+			createOutputParameterChanger(ss, *parameter);
+		}
+		createReturnValueChanger(ss, object);
 	}
 }
 
@@ -739,14 +787,13 @@ std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::createMe
 
 void LibraryInterfaceGenerator::Implementation::SourceDirectory::callConstructor(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number)
 {
-	{		
-		ss << "_nativeHandle = ";
-		
+	{	
+		ss << "val ret = ";
 		CallKotlinSourceScopedStream call{
 			ss,
 			"",
 			{},
-			createMethodName(clazz, "consturctor", number),
+			createMethodName(clazz, "consturct", number),
 			createInputConstructorParameter(object)
 		};
 	}
@@ -783,7 +830,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callClassMethod
 	{
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
-			ss << "return ";
+			ss << "val temp_ret = ";
 		}
 		CallKotlinSourceScopedStream call{
 			ss,
@@ -800,7 +847,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callStaticMetho
 	{
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
-			ss << "return ";
+			ss << "val temp_ret = ";
 		}
 
 		CallKotlinSourceScopedStream call{
@@ -810,6 +857,37 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callStaticMetho
 			createMethodName(object, object.name, number),
 			createInputStaticParamter(object)
 		};
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
+{
+	if (object.type)
+	{
+		if (object.type->getTypeName() != SymbolType::Name::VOID)
+		{
+			ss << "val ret = toKotlinType<" << object.type->toKotlinType() << ">(temp_ret)\n";
+			ss << "return ret;\n";
+		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createInputParameterChanger(SourceStream& ss, const SymbolParameter& object)
+{
+	if (object.type)
+	{
+		ss << "val i_" << object.name << " = toKotlinWrapperType(" << object.name << ")\n";
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object)
+{
+	if (object.io == SymbolParameter::IO::OUT)
+	{
+		if (object.type)
+		{
+			ss <<  object.name << " = toKotlinType<" << object.type->toKotlinType() << ">(i_" << object.name << ")\n";
+		}
 	}
 }
 
@@ -854,19 +932,38 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassProp
 		{
 			auto getter = prop.createGetter();
 			callPropertyGetter(ss, propertyName, clazz, object);
+			createOutputPropertyChanger(ss, object);
 		}
 		if (!object.readonly)
 		{
 			auto setter = prop.createSetter();
+			createInputPropertyChanger(ss, object);
 			callPropertySetter(ss, propertyName, clazz, object);
 		}
 	}
 }
 
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createInputPropertyChanger(SourceStream& ss, const SymbolProperty& object)
+{
+	if (object.type)
+	{
+		ss << "val i_value = toKotlinWrapperType(" << object.name << ")\n";
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object)
+{
+	if (object.type)
+	{
+		ss << "val ret = toKotlinType<" << object.type->toKotlinType() << ">(temp_ret)\n";
+		ss << "return ret\n";
+	} 
+}
+
 void LibraryInterfaceGenerator::Implementation::SourceDirectory::callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
 {
 	{
-		ss << "return ";
+		ss << "val temp_ret = ";
 		CallKotlinSourceScopedStream call {
 			ss,
 			"",

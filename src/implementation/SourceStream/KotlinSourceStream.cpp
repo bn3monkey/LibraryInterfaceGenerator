@@ -96,9 +96,19 @@ void LibraryInterfaceGenerator::Implementation::CompanionObjectKotlinSourceScope
 	*_stream << "System.loadLibrary(\"" << library_name << "\")\n";
 }
 
-LibraryInterfaceGenerator::Implementation::EnumKotlinSourceScopedStream::EnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name)
+LibraryInterfaceGenerator::Implementation::EnumKotlinSourceScopedStream::EnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_classes)
 {
-	sourceStream << "enum class " << name << "(val value : Int)\n";
+	sourceStream << "enum class " << name << "(val value : Int)";
+	if (base_classes.size() != 0)
+	{
+		sourceStream << " : ";
+		for (auto& base_class : base_classes)
+		{
+			sourceStream << base_class << ", ";
+		}
+		sourceStream.pop(2);
+	}
+	sourceStream << "\n";
 	_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
 }
 
@@ -113,9 +123,19 @@ void LibraryInterfaceGenerator::Implementation::EnumKotlinSourceScopedStream::ad
 	*_stream << key << "(" << value << ".toInt()),\n";
 }
 
-LibraryInterfaceGenerator::Implementation::AdvancedEnumKotlinSourceScopedStream::AdvancedEnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name)
+LibraryInterfaceGenerator::Implementation::AdvancedEnumKotlinSourceScopedStream::AdvancedEnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_classes)
 {
-	sourceStream << "enum class " << name << "(val value : Int, val fullname : String)\n";
+	sourceStream << "enum class " << name << "(val value : Int, val fullname : String)";
+	if (base_classes.size() != 0)
+	{
+		sourceStream << " : ";
+		for (auto& base_class : base_classes)
+		{
+			sourceStream << base_class << ", ";
+		}
+		sourceStream.pop(2);
+	}
+	sourceStream << "\n";
 	_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
 }
 
@@ -162,7 +182,9 @@ LibraryInterfaceGenerator::Implementation::MethodKotlinSourceScopedStream::Metho
 		sourceStream << accessor << " ";
 	if (prefix != "")
 		sourceStream << prefix << " ";
-	sourceStream << "fun " << name << "(";
+	if (name != "constructor")
+		sourceStream << "fun ";
+	sourceStream << name << "(";
 
 	if (!parameters.empty())
 	{

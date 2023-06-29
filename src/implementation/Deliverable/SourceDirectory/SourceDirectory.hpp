@@ -75,8 +75,10 @@ namespace LibraryInterfaceGenerator
             // Method Block »ý¼º
             std::string createMethodName(const SymbolClass& clazz, const std::string& method_name, int number);
             std::string createMethodName(const SymbolMethod& method, const std::string& method_name, int number);
-            void createNativeHandle(SourceStream& ss);
-            void createReleaser(SourceStream& ss);
+
+            void createPrimaryConstructorDefinition(SourceStream& ss, const SymbolClass& clazz);
+            void createSecondaryConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor);
+            
             void createConstructorDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& constructor, int number);
             void createDestructorDefinition(SourceStream& ss, const SymbolClass& clazz);
 
@@ -90,9 +92,17 @@ namespace LibraryInterfaceGenerator
             void callClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
             void callStaticMethod(SourceStream& ss, const SymbolMethod& object, int number);
 
+            void findConverter(SourceStream& ss, SymbolType& type);
+            void createReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
+            void createInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
+
             std::string createPropertyName(const SymbolProperty& object);
             void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);
             void createClassPropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object, bool is_overrided);
+
+            void createInputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
+            void createOutputPropertyChanger(SourceStream& ss, const SymbolProperty& object);
 
             void callPropertyGetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);
             void callPropertySetter(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object);

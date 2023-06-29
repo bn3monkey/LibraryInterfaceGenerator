@@ -69,7 +69,9 @@ TEST(Wrapper, Wrapper)
 
 	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, root_dir_path };
 
-	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{
+	LibraryInterfaceGenerator::Implementation::KotlinExternalLibraryDirectory kotlinExternalLibraryDirectory{};
+
+	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface {
 		Environment::Kotlin_Android,
 		nativeExternalLibraryDirectory,
 		nativeSourceDirectory,
@@ -84,7 +86,8 @@ TEST(Wrapper, Wrapper)
 		std::string root_dir_path = ".",
 		*/
 
-	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory,
+		kotlinExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
 	auto result = wrapper.make();
 	if (!result)
 	{

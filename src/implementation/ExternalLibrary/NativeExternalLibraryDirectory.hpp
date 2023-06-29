@@ -47,6 +47,7 @@ namespace LibraryInterfaceGenerator
             std::string getRelativeHeaderPath(ExternalTool tool, const SymbolEnum& enumm) const;
             std::string getRelativeHeaderPath(ExternalTool tool, const SymbolClass& clazz) const;
 
+
         private:
             Result _result;
 

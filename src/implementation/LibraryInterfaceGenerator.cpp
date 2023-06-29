@@ -47,6 +47,8 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::KotlinTypeConverter);
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::ManagedTypeConverter);
 
+	LibraryInterfaceGenerator::Implementation::KotlinExternalLibraryDirectory kotlinExternalLibraryDirectory{};
+
 	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, root_dir_path };
 	auto result = nativeSourceDirectory.make();
 	if (!result)
@@ -64,7 +66,8 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 	}
 
 	
-	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
+
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, kotlinExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
 	result = wrapper.make();
 	if (!result)
 	{

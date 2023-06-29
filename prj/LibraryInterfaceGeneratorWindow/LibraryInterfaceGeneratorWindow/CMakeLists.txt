@@ -89,6 +89,7 @@ endmacro()
 file(GLOB_RECURSE external_library_files
 	${library_dir}/*.hpp
 	${library_dir}/*.cpp
+	${library_dir}/*.kt
 )
 
 message("external_library_files : ${external_library_files}")

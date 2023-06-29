@@ -76,10 +76,11 @@ namespace LibraryInterfaceGenerator
         class EnumKotlinSourceScopedStream
         {
         public:
-            explicit EnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name);
+            explicit EnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_classes);
             virtual ~EnumKotlinSourceScopedStream();
 
             void addElement(const std::string& key, const std::string& value);
+
         private:
             SourceScopedStream* _stream{nullptr};
         };
@@ -87,7 +88,7 @@ namespace LibraryInterfaceGenerator
         class AdvancedEnumKotlinSourceScopedStream
         {
         public:
-            explicit AdvancedEnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name);
+            explicit AdvancedEnumKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_classes);
             virtual ~AdvancedEnumKotlinSourceScopedStream();
 
             void addElement(const std::string& key, const std::string& value, const std::string& fullname);

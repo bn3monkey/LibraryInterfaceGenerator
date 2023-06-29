@@ -15,6 +15,7 @@
 #include "../../Environment.hpp"
 #include "../../Converter/CXXConverter.hpp"
 #include "../../Converter/KotlinConverter.hpp"
+#include "../../ExternalLibrary/KotlinExternalLibraryDirectory.hpp"
 
 namespace LibraryInterfaceGenerator 
 {
@@ -27,6 +28,7 @@ namespace LibraryInterfaceGenerator
             explicit Wrapper(
                 Environment environment, 
                 const NativeExternalLibraryDirectory& libDirectory,
+                const KotlinExternalLibraryDirectory& klibDirectory,
                 const NativeInterface& interfaceDirectory, 
                 const SymbolTable& symbolTable, 
                 std::string root_dir_path = ".", 
@@ -51,6 +53,7 @@ namespace LibraryInterfaceGenerator
             constexpr static char* JNIEXPORT = "extern \"C\" JNIEXPORT";
 
             const NativeExternalLibraryDirectory& _libDirectory;
+            const KotlinExternalLibraryDirectory& _klibDirectory;
             const NativeInterface& _infDirectory;
             const SymbolTable& _symbolTable;
             Result _result;
@@ -64,11 +67,6 @@ namespace LibraryInterfaceGenerator
             
             SourceStream createNativeWrapperContent(const SymbolPackage& symbolObject);
             SourceStream createKotlinWrapperContent(const SymbolPackage& symbolObject);
-
-            void createWrapperConverterHelper(SourceStream& ss, const SymbolPackage& symbolObject);
-            void createWrapperConverterHelper(SourceStream& ss, const SymbolModule& object);
-            void createWrapperConverterHelper(SourceStream& ss, const SymbolClass& object);
-            void createWrapperConverterHelper(SourceStream& ss, const SymbolEnum& object);
 
             void createNativePackageDefinition(SourceStream& ss, const SymbolPackage& symbolObject);
             void createNativeModuleDefinition(SourceStream& ss, const std::string& prefix, const SymbolModule& mod);

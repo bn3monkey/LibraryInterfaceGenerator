@@ -63,7 +63,10 @@ namespace LibraryInterfaceGenerator
 
             virtual std::string toNativeType() { return ""; }
             virtual std::string toManagedType() { return ""; }
+
             virtual std::string toJNIType() { return ""; }
+            virtual std::string toKotlinWrapperType() { return ""; }
+            
             virtual std::string toKotlinType() { return ""; }
 
             virtual std::vector<SymbolType*>  toElementTypes() { return std::vector<SymbolType*>(); }
@@ -88,6 +91,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override {return "void";}
             std::string toManagedType() override { return "void"; }
             std::string toJNIType() override {return "void";}
+            std::string toKotlinWrapperType() override { return "Unit"; }
             std::string toKotlinType() override {return "Unit"; }
         };
 
@@ -102,6 +106,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "bool"; }
             std::string toManagedType() override {return "bool"; }
             std::string toJNIType() override { return "jboolean"; }
+            std::string toKotlinWrapperType() override { return "Boolean"; }
             std::string toKotlinType() override { return "Boolean"; }
         };
 
@@ -116,6 +121,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "int8_t"; }
             std::string toManagedType() override {return "int8_t"; }
             std::string toJNIType() override { return "jbyte"; }
+            std::string toKotlinWrapperType() override { return "Byte"; }
             std::string toKotlinType() override { return "Byte"; }
 
         };
@@ -130,6 +136,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "int16_t"; }
             std::string toManagedType() override {return "int16_t"; }
             std::string toJNIType() override { return "jshort"; }
+            std::string toKotlinWrapperType() override { return "Short"; }
             std::string toKotlinType() override { return "Short"; }
         };
         class SymbolTypeInt32 : public SymbolType
@@ -143,6 +150,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "int32_t"; }
             std::string toManagedType() override {return "int32_t"; }
             std::string toJNIType() override { return "jint"; }
+            std::string toKotlinWrapperType() override { return "Int"; }
             std::string toKotlinType() override { return "Int"; }
         };
         class SymbolTypeInt64 : public SymbolType
@@ -156,6 +164,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "int64_t"; }
             std::string toManagedType() override {return "int64_t"; }
             std::string toJNIType() override { return "jlong"; }
+            std::string toKotlinWrapperType() override { return "Long"; }
             std::string toKotlinType() override { return "Long"; }
         };
         class SymbolTypeDouble : public SymbolType
@@ -169,6 +178,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "double"; }
             std::string toManagedType() override {return "double"; }
             std::string toJNIType() override { return "jdouble"; }
+            std::string toKotlinWrapperType() override { return "Double"; }
             std::string toKotlinType() override { return "Double"; }
         };
         class SymbolTypeFloat : public SymbolType
@@ -182,6 +192,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "float"; }
             std::string toManagedType() override {return "float"; }
             std::string toJNIType() override { return "jfloat"; }
+            std::string toKotlinWrapperType() override { return "Float"; }
             std::string toKotlinType() override { return "Float"; }
         };
         class SymbolTypeString : public SymbolType
@@ -195,6 +206,7 @@ namespace LibraryInterfaceGenerator
             std::string toNativeType() override { return "std::string"; }
             std::string toManagedType() override {return "std::string"; }
             std::string toJNIType() override { return "jstring"; }
+            std::string toKotlinWrapperType() override { return "String"; }
             std::string toKotlinType() override { return "String"; }
         };
        
@@ -225,8 +237,9 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
             std::string toJNIType() override {
-                return "jobject";
+                return "jint";
             }
+            std::string toKotlinWrapperType() override { return "Int"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -279,8 +292,9 @@ namespace LibraryInterfaceGenerator
                 return "";
             }
             std::string toJNIType() override {
-                return "jobject";
+                return "jlong";
             }
+            std::string toKotlinWrapperType() override { return "Long"; }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -349,6 +363,14 @@ namespace LibraryInterfaceGenerator
             std::string toJNIType() override {
                 return "jobject";
             }
+            std::string toKotlinWrapperType() override {
+                if (auto object = _obj.lock())
+                {
+                    auto ret = object->getKotlinName();
+                    return ret;
+                }
+                return "";
+            }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())
                 {
@@ -369,7 +391,8 @@ namespace LibraryInterfaceGenerator
             SymbolTypeBaseArray(size_t size) : size(size) {}
             virtual std::string toNativeElementType() = 0;
             virtual std::string toManagedElementType() = 0;
-            virtual std::string toJNIElementType() = 0;
+            virtual std::string toJNIElementType() = 0; 
+            virtual std::string toKotlinWrapperElementType() = 0;
             virtual std::string toKotlinElementType() = 0;
         protected:
             size_t size;
@@ -410,6 +433,11 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "%sArray", toJNIType().c_str());
                 return std::string(buffer);
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
             std::string toKotlinType() override {
                 char buffer[256] {0};
                 sprintf(buffer, "%sArray", toKotlinElementType().c_str());
@@ -426,6 +454,10 @@ namespace LibraryInterfaceGenerator
             std::string toJNIElementType() override
             {
                 return elementType.toJNIType();
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::string toKotlinElementType() override
             {
@@ -489,6 +521,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -546,6 +587,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -605,6 +655,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -662,6 +721,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -721,6 +789,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -779,6 +856,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "%sArray", toKotlinWrapperElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -833,6 +919,13 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                return "Array<String>";
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -868,7 +961,7 @@ namespace LibraryInterfaceGenerator
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                return "jobjectArray";
+                return "jintArray";
             }
             std::string toKotlinType() override {
                 char buffer[256] {0};
@@ -890,6 +983,13 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                return "IntArray";
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -927,7 +1027,7 @@ namespace LibraryInterfaceGenerator
                 return std::string(buffer);
             }
             std::string toJNIType() override { 
-                return "jobjectArray";
+                return "jlongArray";
             }
             std::string toKotlinType() override {
                 char buffer[256] {0};
@@ -949,6 +1049,13 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                return "LongArray";
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1009,6 +1116,13 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                return "Array<Any>";
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1025,6 +1139,7 @@ namespace LibraryInterfaceGenerator
             virtual std::string toNativeElementType() = 0;
             virtual std::string toManagedElementType() = 0;
             virtual std::string toJNIElementType() = 0;
+            virtual std::string toKotlinWrapperElementType() = 0;
             virtual std::string toKotlinElementType() = 0;
         };
 
@@ -1079,6 +1194,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1135,6 +1259,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1190,6 +1323,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1243,6 +1385,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1298,6 +1449,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1351,6 +1511,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1407,6 +1576,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1461,6 +1639,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1518,6 +1705,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
@@ -1578,6 +1774,15 @@ namespace LibraryInterfaceGenerator
             {
                 return elementType.toKotlinType();
             }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
+            }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;
                 ret.push_back(&elementType);
@@ -1634,6 +1839,15 @@ namespace LibraryInterfaceGenerator
             std::string toKotlinElementType() override
             {
                 return elementType.toKotlinType();
+            }
+            std::string toKotlinWrapperType() override {
+                char buffer[256]{ 0 };
+                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                return std::string(buffer);
+            }
+            std::string toKotlinWrapperElementType() override
+            {
+                return elementType.toKotlinWrapperType();
             }
             std::vector<SymbolType*>  toElementTypes() override {
                 std::vector<SymbolType*> ret;

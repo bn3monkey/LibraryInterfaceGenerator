@@ -8,8 +8,9 @@ static char* delimeter = "\\";
 static char* delimeter = "/";
 #endif
 
-LibraryInterfaceGenerator::Implementation::Wrapper::Wrapper(Environment environment, const NativeExternalLibraryDirectory& libDirectory, const NativeInterface& interfaceDirectory, const SymbolTable& symbolTable, std::string root_dir_path, const char* directory_name)
-	: _libDirectory(libDirectory), _infDirectory(interfaceDirectory), _symbolTable(symbolTable)
+LibraryInterfaceGenerator::Implementation::Wrapper::Wrapper(Environment environment, const NativeExternalLibraryDirectory& libDirectory,
+	const KotlinExternalLibraryDirectory& klibDirectory, const NativeInterface& interfaceDirectory, const SymbolTable& symbolTable, std::string root_dir_path, const char* directory_name)
+	: _libDirectory(libDirectory), _klibDirectory(klibDirectory), _infDirectory(interfaceDirectory), _symbolTable(symbolTable)
 {
 	_wrapper_dir_path = root_dir_path;
 	_wrapper_dir_path += delimeter;
@@ -108,16 +109,6 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 
 	ss << "\n";
 
-	{
-		ss << "using namespace " << _infDirectory.getRootNamespace() << ";\n\n";
-	}
-
-	{
-		createWrapperConverterHelper(ss, symbolObject);
-		ss << "\n";
-	}
-
-
 	createNativePackageDefinition(ss, symbolObject);
 
 	return ss;
@@ -130,7 +121,13 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 	{
 		PackageKotlinSourceStream package(ss, _kotlin_package_name, {});
 	}
+	{
+		ImportKotlinSourceStream autoClosableImport(ss, "", { "java", "lang", "AutoCloseable" });
+	}
 
+	{
+		ss << _klibDirectory.createExternalToolCode(KotlinExternalLibraryDirectory::ExternalTool::KotlinTypeConverter);
+	}
 	
 	{
 		ClassKotlinSourceScopedStream wrapper_class{ ss, _kotlin_wrapper_class_name, {} };
@@ -149,63 +146,6 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 
 	return ss;
 }
-
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolPackage& symbolObject)
-{
-	NamespaceCXXSourceScopedStream converterHelper {ss,  "Bn3Monkey" };
-	for (auto& mod : symbolObject.modules)
-	{
-		createWrapperConverterHelper(ss, *mod);
-	}
-}
-
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolModule& object)
-{
-	for (auto& enumm : object.enums)
-	{
-		createWrapperConverterHelper(ss, *enumm);
-	}
-
-	for (auto& clazz : object.classes)
-	{
-		createWrapperConverterHelper(ss, *clazz);
-	}
-}
-
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolClass& object)
-{
-	{
-		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, {"Kotlin::KObject"});
-
-		auto class_name = createKotlinClassName(object);
-		{
-			MethodCXXSourceScopedStream className{ ss, false, "", "override", "const char*", {}, "className"};
-			ss << "return \"" << _kotlin_class_prefix << "/" << class_name << "\";\n";
-		}
-		{
-			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signature" };
-			ss << "return \"L" << _kotlin_class_prefix << "/" << class_name << ";\";\n";
-		}
-	}
-}
-
-void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperConverterHelper(SourceStream& ss, const SymbolEnum& object)
-{
-	{
-		ClassCXXSourceScopedStream enumHelper(ss, false, "K" + object.name, { "Kotlin::KEnum" });
-
-		auto class_name = createKotlinClassName(object);
-		{
-			MethodCXXSourceScopedStream className{ ss, false, "", "override", "const char*", {}, "className" };
-			ss << "return \"" << _kotlin_class_prefix << "/" << class_name << "\";\n";
-		}
-		{
-			MethodCXXSourceScopedStream signautre{ ss, false, "", "override", "const char*", {}, "signature" };
-			ss << "return \"L" << _kotlin_class_prefix << "/" << class_name << ";\";\n";
-		}
-	}
-}
-
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativePackageDefinition(SourceStream& ss, const SymbolPackage& symbolObject)
 {
@@ -332,7 +272,7 @@ static std::vector<ParameterNode> createJNIParameters()
 
 static ParameterNode createNativeSelfParameters()
 {
-	return ParameterNode(ParameterNode::VALUE, "jobject", "self");
+	return ParameterNode(ParameterNode::VALUE, "jlong", "self");
 }
 
 static std::vector<ParameterNode> createNativeStaticParameters(const SymbolMethod& object)
@@ -718,45 +658,45 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::callNativeStaticMethod(
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStream& ss, SymbolType& type)
 {
-	ss << "Bn3Monkey::";
+	ss << "Bn3Monkey::Kotlin::";
 	switch (type.getTypeName())
 	{
 	case SymbolType::Name::VOID:
-		ss << "Kotlin::KVoid";
+		ss << "KVoid";
 		break;
 	case SymbolType::Name::BOOL:
-		ss << "Kotlin::KBoolean";
+		ss << "KBoolean";
 		break;
 	case SymbolType::Name::INT8:
-		ss << "Kotlin::KInt8";
+		ss << "KInt8";
 		break;
 	case SymbolType::Name::INT16:
-		ss << "Kotlin::KInt16";
+		ss << "KInt16";
 		break;
 	case SymbolType::Name::INT32:
-		ss << "Kotlin::KInt32";
+		ss << "KInt32";
 		break;
 	case SymbolType::Name::INT64:
-		ss << "Kotlin::KInt64";
+		ss << "KInt64";
 		break;
 	case SymbolType::Name::FLOAT:
-		ss << "Kotlin::KFloat";
+		ss << "KFloat";
 		break;
 	case SymbolType::Name::DOUBLE:
-		ss << "Kotlin::KDouble";
+		ss << "KDouble";
 		break;
 	case SymbolType::Name::STRING:
-		ss << "Kotlin::KString";
+		ss << "KString";
 		break;
 	case SymbolType::Name::ENUM:
-		ss << "K" << type.toKotlinType();
+		ss << "KEnum";
 		break;
 	case SymbolType::Name::OBJECT:	
-		ss << "K" << type.toKotlinType();
+		ss << "KObject";
 		break;
 	case SymbolType::Name::CALLBACK:
 	{
-		ss << "Kotlin::KCallback<";
+		ss << "KCallback<";
 		auto types = type.toElementTypes();
 		if (!types.empty())
 		{
@@ -781,7 +721,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 	case SymbolType::Name::ENUMARRAY:
 	case SymbolType::Name::OBJECTARRAY:
 	case SymbolType::Name::CALLBACKARRAY:
-		ss << "Kotlin::KArray<";
+		ss << "KArray<";
 		for (auto& type : type.toElementTypes())
 		{
 			findConverter(ss, *type);
@@ -802,7 +742,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 	case SymbolType::Name::ENUMVECTOR:
 	case SymbolType::Name::OBJECTVECTOR:
 	case SymbolType::Name::CALLBACKVECTOR:
-		ss << "Kotlin::KVector<";
+		ss << "KVector<";
 		for (auto& type : type.toElementTypes())
 		{
 			findConverter(ss, *type);
@@ -822,7 +762,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReleaserCha
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz)
 {
-	ss << "auto i_self = Bn3Monkey::K" << clazz.name << "().toManagedType(env, self);\n";
+	ss << "auto i_self = Bn3Monkey::KObject().toManagedType(env, self);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
@@ -1063,7 +1003,7 @@ static ParameterNode createWrapperParameter(const SymbolParameter& parameter)
 			io = ParameterNode::REFERENCE_IN;
 		}
 	}
-	return ParameterNode(io, parameter.type->toKotlinType(), parameter.name);
+	return ParameterNode(io, parameter.type->toKotlinWrapperType(), parameter.name);
 }
 
 static std::vector<ParameterNode> createWrapperParameters(const SymbolMethod& object)
@@ -1079,7 +1019,7 @@ static std::vector<ParameterNode> createWrapperParameters(const SymbolMethod& ob
 static std::vector<ParameterNode> createWrapperHandleParameters()
 {
 	std::vector<ParameterNode> ret;
-	ret.push_back(ParameterNode(ParameterNode::VALUE, "Any", "self"));
+	ret.push_back(ParameterNode(ParameterNode::VALUE, "Long", "self"));
 	return ret;
 }
 
@@ -1095,7 +1035,7 @@ static std::vector<ParameterNode> createWrapperPropertyParameters(const SymbolPr
 {
 	auto ret = createWrapperHandleParameters();
 	ret.push_back(
-		ParameterNode( ParameterNode::REFERENCE_IN, obj.type->toKotlinType(), "value")
+		ParameterNode( ParameterNode::REFERENCE_IN, obj.type->toKotlinWrapperType(), "value")
 	);
 	return ret;
 }
@@ -1185,7 +1125,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperClassMetho
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinType(),
+			object.type->toKotlinWrapperType(),
 			method_name,
 			createWrapperMemberParameters(object)
 		};
@@ -1208,7 +1148,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperStaticMeth
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinType(),
+			object.type->toKotlinWrapperType(),
 			method_name,
 			createWrapperParameters(object)
 		};
@@ -1248,7 +1188,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createWrapperPropertyGe
 			KotlinAccess::EXTERNAL,
 			"",
 			"",
-			object.type->toKotlinType(),
+			object.type->toKotlinWrapperType(),
 			method_name,
 			createWrapperHandleParameters()
 		};

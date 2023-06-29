@@ -1,3 +1,4 @@
+
 interface WrapperTypeEnum
 {
     fun toWrapperType() : Int
@@ -30,27 +31,36 @@ inline fun <reified T> toKotlinType(value : MutableList<Int>) : MutableList<T>  
 }
 
 
-abstract class WrapperTypeObject constructor(protected val nativeHandle : NativeHandle) : AutoCloseable {
+abstract class WrapperTypeObject(private val nativeHandle : NativeHandle) : AutoCloseable {
 
-    data class NativeHandle(var value : Long)
-    init {
-        require(nativeHandle.value != 0L)
+    class NativeHandle(private var value : Long) {
+        fun isValid() : Boolean = value != 0L
+        fun invalidate() { value = 0L }
+        fun get() : Long { return value }
     }
+    init {
+        require(nativeHandle.isValid())
+    }
+    abstract fun release(handle : NativeHandle)
 
-    fun toWrapperType() : Long = nativeHandle.value
+    fun toWrapperType() : Long = nativeHandle.get()
+    protected var self = nativeHandle.get()
 
     protected val releaser = { close() }
     override fun close() {
-        if (0L != nativeHandle.value)
+        if (nativeHandle.isValid())
         {
-            release(nativeHandle.value)
-            nativeHandle.value = 0L
+            release(nativeHandle)
+            nativeHandle.invalidate()
         }
     }
 
-    abstract fun release(value : Long)
 }
 
+inline fun <reified T> toKotlinWrapperType(value : T) : T {
+    return value
+}
+@JvmName("toKotlinWrapperObject")
 inline fun <reified T> toKotlinWrapperType(value : T) : Long where T : WrapperTypeObject {
     return value.toWrapperType()
 }
@@ -63,6 +73,10 @@ inline fun <reified T> toKotlinWrapperType(value : MutableList<T>) : MutableList
     return value.map { toKotlinWrapperType(it) }.toMutableList()
 }
 
+inline fun <reified T> toKotlinType(value : T) : T {
+    return value
+}
+@JvmName("toKotlinObject")
 inline fun <reified T> toKotlinType(value : Long) : T  where T : WrapperTypeObject {
     val constructor = T::class.java.getDeclaredConstructor(WrapperTypeObject.NativeHandle::class.java)
     return constructor.newInstance(WrapperTypeObject.NativeHandle(value))
