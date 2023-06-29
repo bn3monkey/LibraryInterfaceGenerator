@@ -92,6 +92,14 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 			return result;
 	}
 
+	auto& callbacks = object.callbacks;
+	for (auto& callback : callbacks)
+	{
+		auto result = createCallbackFile(*callback, module_path);
+		if (!result)
+			return result;
+	}
+
 	return result;
 }
 
@@ -155,6 +163,25 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	return Result();
 }
 
+Result LibraryInterfaceGenerator::Implementation::SourceDirectory::createCallbackFile(const SymbolCallback& object, std::string& parent_path)
+{
+	std::string header_path{ parent_path };
+	header_path += delimeter;
+	header_path += object.name;
+	header_path += ".kt";
+
+	Result result;
+
+	auto ss = createCallbackFileContent(object);
+	auto header_content = ss.str();
+
+	result = FileSystem::createFile(header_path, header_content);
+	if (!result)
+		return result;
+
+	return Result();
+}
+
 SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterfaceFileContent(const SymbolClass& object)
 {
 	SourceStream ss;
@@ -164,6 +191,8 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createI
 	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+	}
+	{
 		createForwardDeclaration(ss, object);
 	}
 
@@ -204,6 +233,8 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+	}
+	{
 		createForwardDeclaration(ss, object);
 	}
 		
@@ -313,6 +344,8 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createM
 	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
+	}
+	{
 		createForwardDeclaration(ss, object);
 	}
 
@@ -324,6 +357,23 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createM
 		createStaticMethodDefinition(ss, *method, method_count);
 	}
 
+	return ss;
+}
+
+SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createCallbackFileContent(const SymbolCallback& callback)
+{
+	SourceStream ss;
+
+	{
+		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), callback.parentModules);
+	}
+	{
+		createForwardDeclaration(ss, callback);
+	}
+	{		
+		createKotlinComment(ss, callback);
+		createCallbackDefinition(ss, callback);
+	}
 	return ss;
 }
 
@@ -456,6 +506,79 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createForwardDe
 	ss << "\n";
 }
 
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createForwardDeclaration(SourceStream& ss, const SymbolCallback& object)
+{
+	{
+		auto used_classes = object.collectAllClassReference();
+		for (auto& wclass : used_classes)
+		{
+			if (auto& pclass = wclass.lock())
+			{
+				auto clazz = std::dynamic_pointer_cast<SymbolClass>(pclass);
+				std::vector<std::string> paths;
+				{
+					auto& parent_modules = clazz->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
+				}
+				{
+					auto& parent_objects = clazz->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
+				}
+				paths.push_back(clazz->name);
+
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
+			}
+		}
+	}
+	{
+		auto used_enums = object.collectAllEnumReference();
+		for (auto& wenum : used_enums)
+		{
+			if (auto& penum = wenum.lock())
+			{
+				auto enumm = std::dynamic_pointer_cast<SymbolEnum>(penum);
+				std::vector<std::string> paths;
+				{
+					auto& parent_modules = enumm->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
+				}
+				{
+					auto& parent_objects = enumm->parentObjects;
+					paths.insert(paths.end(), parent_objects.begin(), parent_objects.end());
+				}
+				paths.push_back(enumm->name);
+
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
+			}
+		}
+	}
+
+	{
+		auto callback_objects = object.collectAllCallbackReference();
+		for (auto& w_callback_object : callback_objects)
+		{
+			if (auto callback_object = w_callback_object.lock())
+			{
+				auto callback = std::dynamic_pointer_cast<SymbolCallback>(callback_object);
+				std::vector<std::string> paths;
+				{
+					auto& parent_modules = callback->parentModules;
+					paths.insert(paths.end(), parent_modules.begin(), parent_modules.end());
+				}
+				paths.push_back(callback->name);
+
+				ImportKotlinSourceStream importClass{
+					ss, _wrapperDirectory.getKotlinPackageName(), paths
+				};
+			}
+		}
+	}
+}
+
 void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefinition(SourceStream& ss, const SymbolEnum& object)
 {
 	if (object.keys_to_names.empty())
@@ -510,6 +633,24 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 			};
 			ss << "return value\n";
 		}
+	}
+}
+
+void LibraryInterfaceGenerator::Implementation::SourceDirectory::createCallbackDefinition(SourceStream& ss, const SymbolCallback& callback)
+{
+	std::vector<std::string> param_types;
+	for (auto& param : callback.parameters)
+	{
+		param_types.push_back(param->type->toKotlinType());
+	}
+
+	{
+		CallbackKotlinSourceStream callback_scope{
+			ss,
+			callback.name,
+			callback.type->toKotlinType(),
+			param_types
+		};
 	}
 }
 

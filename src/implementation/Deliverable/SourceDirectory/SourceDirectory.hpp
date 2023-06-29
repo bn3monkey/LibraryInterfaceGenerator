@@ -52,6 +52,7 @@ namespace LibraryInterfaceGenerator
             Result createClassFile(const SymbolClass& object, std::string& parent_path);
             Result createEnumFile(const SymbolEnum& object, std::string& parent_path);
             Result createMethodFile(const SymbolModule& object, std::string& parent_path);
+            Result createCallbackFile(const SymbolCallback& object, std::string& parent_path);
             
             // 2. Interface 傈巩 力累
             SourceStream createInterfaceFileContent(const SymbolClass& object);
@@ -65,12 +66,16 @@ namespace LibraryInterfaceGenerator
             // 5. Method 傈巩 力累
             SourceStream createMethodFileContent(const SymbolModule& object);
 
+            SourceStream createCallbackFileContent(const SymbolCallback& callback);
+
             // 7. Code Block 力累
             void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
+            void createForwardDeclaration(SourceStream& ss, const SymbolCallback& object);
 
             // Enum Block 积己
             void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
+            void createCallbackDefinition(SourceStream& ss, const SymbolCallback& callback);
 
             // Method Block 积己
             std::string createMethodName(const SymbolClass& clazz, const std::string& method_name, int number);

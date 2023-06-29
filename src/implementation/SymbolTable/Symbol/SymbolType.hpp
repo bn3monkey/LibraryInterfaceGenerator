@@ -364,12 +364,7 @@ namespace LibraryInterfaceGenerator
                 return "jobject";
             }
             std::string toKotlinWrapperType() override {
-                if (auto object = _obj.lock())
-                {
-                    auto ret = object->getKotlinName();
-                    return ret;
-                }
-                return "";
+                return "Any";
             }
             std::string toKotlinType() override {
                 if (auto object = _obj.lock())

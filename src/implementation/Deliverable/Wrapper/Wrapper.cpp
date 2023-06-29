@@ -122,7 +122,7 @@ LibraryInterfaceGenerator::Implementation::SourceStream LibraryInterfaceGenerato
 		PackageKotlinSourceStream package(ss, _kotlin_package_name, {});
 	}
 	{
-		ImportKotlinSourceStream autoClosableImport(ss, "", { "java", "lang", "AutoCloseable" });
+		ImportKotlinSourceStream autoClosableImport(ss, "java.lang.AutoCloseable");
 	}
 
 	{
