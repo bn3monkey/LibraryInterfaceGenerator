@@ -148,7 +148,7 @@ namespace LibraryInterfaceGenerator
             void addDescription(const std::string& description);
             void addBrief(const std::string& brief);
             void addReturn(const std::string& return_value);
-            void addParameter(bool isInputParameter, const std::string& name, const std::string& description);
+            void addParameter(const std::string& name, const std::string& description);
 
 
         private:

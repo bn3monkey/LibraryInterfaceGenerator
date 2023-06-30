@@ -68,6 +68,7 @@ namespace LibraryInterfaceGenerator
 
             SourceStream createCallbackFileContent(const SymbolCallback& callback);
 
+
             // 7. Code Block ¡¶¿€
             void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
@@ -97,10 +98,9 @@ namespace LibraryInterfaceGenerator
             void callClassMethod(SourceStream& ss, const SymbolClass& clazz, const SymbolMethod& object, int number);
             void callStaticMethod(SourceStream& ss, const SymbolMethod& object, int number);
 
-            void findConverter(SourceStream& ss, SymbolType& type);
+            std::string findConverter(SymbolType& type);
             void createReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
             void createInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
-            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
 
             std::string createPropertyName(const SymbolProperty& object);
             void createInterfacePropertyDefinition(SourceStream& ss, const SymbolClass& clazz, const SymbolProperty& object);

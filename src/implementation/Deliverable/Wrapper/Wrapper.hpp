@@ -92,7 +92,6 @@ namespace LibraryInterfaceGenerator
             void createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz);
             void createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object);
             void createNativeInputParameterChanger(SourceStream& ss, const SymbolParameter& object);
-            void createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object);
 
             std::string createPropertyName(const SymbolProperty& object);
             

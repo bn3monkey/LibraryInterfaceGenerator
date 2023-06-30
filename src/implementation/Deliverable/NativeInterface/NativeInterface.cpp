@@ -348,17 +348,10 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
 	}
 	else
 	{
-		if (parameter.io == SymbolParameter::IO::OUT)
-		{
-			io = ParameterNode::REFERENCE_OUT;
-		}
+		if (parameter.type->getTypeName() == SymbolType::Name::OBJECT)
+			io = ParameterNode::VALUE;
 		else
-		{
-			if (parameter.type->getTypeName() == SymbolType::Name::OBJECT)
-				io = ParameterNode::VALUE;
-			else
-				io = ParameterNode::REFERENCE_IN;
-		}
+			io = ParameterNode::REFERENCE_IN;
 	}
 	return ParameterNode(io, parameter.type->toManagedType(), parameter.name);
 }
@@ -433,10 +426,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createConstruct
 			createInputParameterChanger(ss, *parameter);
 		}
 		allocate(ss, clazz, constructor);
-		for (auto& parameter : constructor.parameters)
-		{
-			createOutputParameterChanger(ss, *parameter);
-		}
 	}
 }
 
@@ -535,13 +524,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createClassMeth
 			createInputParameterChanger(ss, *parameter);
 		}
 		callClassMethod(ss, obj);
-		for (auto& parameter : obj.parameters)
-		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-			{
-				createOutputParameterChanger(ss, *parameter);
-			}
-		}
 
 		if (obj.type->getTypeName() != SymbolType::Name::VOID)
 		{
@@ -593,13 +575,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 			createInputParameterChanger(ss, *parameter);
 		}
 		callStaticMethod(ss, obj);
-		for (auto& parameter : obj.parameters)
-		{
-			if (parameter->io == SymbolParameter::IO::OUT)
-			{
-				createOutputParameterChanger(ss, *parameter);
-			}
-		}
 
 		if (obj.type->getTypeName() != SymbolType::Name::VOID)
 		{
@@ -765,18 +740,6 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createInputPara
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::NativeInterface::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj)
-{
-	if (obj.io == SymbolParameter::IO::OUT)
-	{
-		if (obj.type)
-		{
-			ss << obj.name << " = ";
-			findConverter(ss, *(obj.type));
-			ss << "().toManagedType(i_" << obj.name << ");\n";
-		}
-	}
-}
 
 std::string LibraryInterfaceGenerator::Implementation::NativeInterface::createPropertyName(const SymbolProperty& object)
 {

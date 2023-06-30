@@ -244,28 +244,24 @@
                             "order" : "parameter",
                             "name" : "current_image",
                             "description" : "Image currently being sent",
-                            "io" : "in",
                             "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage"
                         },
                         {
                             "order" : "parameter",
                             "name" : "num_of_total_images",
                             "description" : "The number of images in all queues that are currently sending",
-                            "io" : "in",
                             "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "num_of_sent_images",
                             "description" : "number of images sent",
-                            "io" : "in",
                             "type" : "int32"
                         },
                         {
                             "order" : "parameter",
                             "name" : "result",
                             "description" : "result of current progress",
-                            "io" : "in",
                             "type" : "HsnUltrasoundDICOM/Type/Result"
                         }
                     ]
@@ -286,14 +282,12 @@
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "name" : "server",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ServerConfiguration",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to be verifed the connection"
                                 }
                             ]
@@ -317,21 +311,18 @@
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/StorageServerConfiguration",
                                     "name" : "server",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to which user want to send images"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                                     "name" : "images",
-                                    "io" : "in",
                                     "description" : "ultrasound images to put in the queue"
                                 }
                             ]
@@ -355,7 +346,6 @@
                                     "order":"parameter",
                                     "type" : "bool",
                                     "name" : "isSync",
-                                    "io" : "in",
                                     "description" : "If this parameter is set to true, this function waits for the current image transmission to finish."
                                 }
                             ]
@@ -404,6 +394,62 @@
                 },
                 {
                     "order" : "class",
+                    "name" : "StorageCommitmentResult",
+                    "base" : [],
+                    "description" : "A Data class that results from storage commitment check function",
+                    "childs" : [
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "name" : "constructor",
+                            "description" : "",
+                            "return" : "",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "result",
+                                    "type" : "HsnUltrasoundDICOM/Type/Result",
+                                    "description" : "result messages"
+                                },
+                                { 
+                                    "order" : "parameter",
+                                    "name" : "success_images",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                                    "description" : "ultrasound images that store successfully in the server"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "name" : "failed_images",
+                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                                    "description" : "ultrasound images that fail to store in the server"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "readonly" : true,
+                            "description" : "result messages"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "success_images",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                            "readonly" : true,
+                            "description" : "ultrasound images that store successfully in the server"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "failed_images",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
+                            "readonly" : true,
+                            "description" : "ultrasound images that fail to store in the server"
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
                     "name" : "StorageCommitment",
                     "base" : [],
                     "description" : "A class that provides the function to commit images to a DICOM server.",
@@ -413,44 +459,83 @@
                             "name" : "check",
                             "description" : "Check that the sent image is saved on the server.",
                             "return" : "code for use result",
-                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "type" : "HsnUltrasoundDICOM/Service/StorageCommitmentResult",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/StorageCommitmentServerConfiguration",
                                     "name" : "server",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to which user want to check if the image is committed"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
                                     "name" : "image",
-                                    "io" : "in",
                                     "description" : "ultrasound images to check the images"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
-                                    "name" : "success_images",
-                                    "io" : "out",
-                                    "description" : "ultrasound images that store successfully in the server"
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/IE/UltrasoundImage>",
-                                    "name" : "failed_images",
-                                    "io" : "out",
-                                    "description" : "ultrasound images that fail to store in the server"
                                 }
                             ]
+                        }
+                    ]
+                },
+                {
+                    "order" : "class",
+                    "name" : "ModalityWorklistResult",
+                    "base" : [],
+                    "description" : "Results from worklist query",
+                    "childs" :[
+                        {
+                            "order" : "method",
+                            "type" : "void",
+                            "name" : "constructor",
+                            "description" : "",
+                            "return" : "",
+                            "parameters" : [
+                                {
+                                    "order" : "parameter",
+                                    "name" : "result",
+                                    "type" : "HsnUltrasoundDICOM/Type/Result",
+                                    "description" : "result messages"
+                                },
+                                { 
+                                    "order" : "parameter",
+                                    "name" : "patients",
+                                    "type" : "HsnUltrasoundDICOM/IE/Patient",
+                                    "description" : "patients from query results"
+                                },
+                                {
+                                    "order" : "parameter",
+                                    "name" : "studies",
+                                    "type" : "HsnUltrasoundDICOM/IE/Study",
+                                    "description" : "patients from query results"
+                                }
+                            ]
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "result",
+                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "readonly" : true,
+                            "description" : "result messages"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "patients",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/Patient>",
+                            "readonly" : true,
+                            "description" : "patients from query results"
+                        },
+                        {
+                            "order" : "property",
+                            "name" : "studies",
+                            "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
+                            "readonly" : true,
+                            "description" : "patients from query results"
                         }
                     ]
                 },
@@ -465,7 +550,7 @@
                             "name" : "listPatients",
                             "description" : "Get patient information  that meets the filter query",
                             "return" : "code for use result",
-                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "type" : "HsnUltrasoundDICOM/Service/ModalityWorklistResult",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
@@ -487,13 +572,6 @@
                                     "name" : "filter",
                                     "io" : "in",
                                     "description" : "query"
-                                },
-                                {
-                                   "order" : "parameter",
-                                   "type" : "vector<HsnUltrasoundDICOM/IE/Patient>",
-                                   "name" : "patients",
-                                   "io" : "out",
-                                   "description" : "query results"
                                 }
                             ]
                         },
@@ -502,49 +580,31 @@
                             "name" : "listStudies",
                             "description" : "Get studies information that meets the filter query.",
                             "return" : "code for use result",
-                            "type" : "HsnUltrasoundDICOM/Type/Result",
+                            "type" : "HsnUltrasoundDICOM/Service/ModalityWorklistResult",
                             "parameters" : [
                                 {
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ModalityWorklistServerConfiguration",
                                     "name" : "server",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to which user want to query"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Filter/PatientFilter",
                                     "name" : "patientFilter",
-                                    "io" : "in",
                                     "description" : "query"
                                 },
                                 {
                                   "order" : "parameter",
                                   "type" : "vector<HsnUltrasoundDICOM/Filter/ScheduledProcedureStepFilter>",
                                   "name" : "scheduledProcedureStepFilters",
-                                  "io" : "in",
                                   "description" : "query"  
-                                },
-                                {
-                                    "order" : "parameter",
-                                    "type" : "vector<HsnUltrasoundDICOM/IE/Patient>",
-                                    "name" : "patients",
-                                    "io" : "out",
-                                    "description" : "query results"
-                                },
-                                {
-                                   "order" : "parameter",
-                                   "type" : "vector<HsnUltrasoundDICOM/IE/Study>",
-                                   "name" : "studies",
-                                   "io" : "out",
-                                   "description" : "query results"
                                 }
                             ]
                         }
@@ -567,21 +627,18 @@
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/MPPSServerConfiguration",
                                     "name" : "server",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to which user want to query"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "name" : "study",
-                                    "io" : "in",
                                     "description" : "query"
                                 }
                             ]
@@ -597,21 +654,18 @@
                                     "order" : "parameter",
                                     "name" : "client",
                                     "type" : "HsnUltrasoundDICOM/Configuration/ClientConfiguration",
-                                    "io" : "in",
                                     "description" : "The client configuration for communication"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Configuration/MPPSServerConfiguration",
                                     "name" : "server",
-                                    "io" : "in",
                                     "description" : "The configuration of the server to which user want to query"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
                                     "name" : "study",
-                                    "io" : "in",
                                     "description" : "query"
                                 }
                             ]
@@ -642,42 +696,36 @@
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "year",
-                                    "io" : "in",
                                     "description" : "year"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "month",
-                                    "io" : "in",
                                     "description" : "month"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "day",
-                                    "io" : "in",
                                     "description" : "day"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "hour",
-                                    "io" : "in",
                                     "description" : "hour"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "minute",
-                                    "io" : "in",
                                     "description" : "minute"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "int32",
                                     "name" : "second",
-                                    "io" : "in",
                                     "description" : "second"
                                 }
                             ]
@@ -960,7 +1008,7 @@
                     "description" : "The spatial organization of the data within the region.\n Doppler mode correspond to SPECTRAL",
                     "values" : [
                         "NONE/0",
-                        "2D/1",
+                        "TWO_D/1",
                         "M_MODE/2",
                         "SPECTRAL/3",
                         "WAVE_FORM/4",
@@ -1247,7 +1295,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Study",
-                                    "io" : "in",
                                     "name" : "study",
                                     "description" : "study that added to the patient"                                    
                                 }
@@ -1338,7 +1385,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Type/DiscontinuedReason",
-                                    "io" : "in",
                                     "name" : "discontinuedReason",
                                     "description" : "discontinued reason that added to the patient"                                    
                                 }
@@ -1379,7 +1425,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/Series",
-                                    "io" : "in",
                                     "name" : "series",
                                     "description" : "series that are hold by this patient"                                    
                                 }
@@ -1454,7 +1499,6 @@
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Type/SequenceItem",
                                     "name" : "value",
-                                    "io" : "in",
                                     "description" : "Protocol Code Sequence Item to be added" 
                                 }
                             ]
@@ -1571,7 +1615,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/ScheduledProcedureStep",
-                                    "io" : "in",
                                     "name" : "value",
                                     "description" : "scheduled procedure step to be added"
                                 }
@@ -1625,7 +1668,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/IE/UltrasoundImage",
-                                    "io" : "in",
                                     "name" : "ultrasoundImage",
                                     "description" : "ultrasound Image that are hold by this series"                                    
                                 }
@@ -1787,7 +1829,6 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "vector<string>",
-                                    "io" : "in",
                                     "name" : "imagePaths",
                                     "description" : "ultrasound Image path that is saved in the local machine"                                    
                                 }
@@ -1804,21 +1845,18 @@
                                 {
                                     "order" : "parameter",
                                     "type" : "string",
-                                    "io" : "in",
                                     "name" : "path",
                                     "description" : "the path where the local DICOM file will be saved"
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Type/ImageMode",
-                                    "io" : "in",
                                     "name" : "imageMode",
                                     "description" : "the image mode of the local DICOM file"                                    
                                 },
                                 {
                                     "order" : "parameter",
                                     "type" : "HsnUltrasoundDICOM/Type/CodePage",
-                                    "io" : "in",
                                     "name" : "codePage",
                                     "description" : "the code page of the local DICOM file"  
                                 }

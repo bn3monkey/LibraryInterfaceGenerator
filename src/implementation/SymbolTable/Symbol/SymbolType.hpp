@@ -1192,7 +1192,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1256,7 +1256,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1320,7 +1320,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1383,7 +1383,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1446,7 +1446,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1509,7 +1509,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1573,7 +1573,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1637,7 +1637,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1703,7 +1703,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1771,7 +1771,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override
@@ -1837,7 +1837,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toKotlinWrapperType() override {
                 char buffer[256]{ 0 };
-                sprintf(buffer, "MutableList<%s>", toKotlinElementType().c_str());
+                sprintf(buffer, "MutableList<%s>", toKotlinWrapperElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperElementType() override

@@ -255,9 +255,9 @@ void LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::addRe
 	_stream << " * @return : " << return_value << "\n";
 }
 
-void LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::addParameter(bool isInputParameter, const std::string& name, const std::string& description)
+void LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::addParameter(const std::string& name, const std::string& description)
 {
-	_stream << " * @param[" << (isInputParameter ? "in" : "out") << "]  " << name << "  " << description << "\n";
+	_stream << " * @param " << name << "  " << description << "\n";
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentKotlinSourceStream::tokenize(const std::string& description)
@@ -391,9 +391,18 @@ LibraryInterfaceGenerator::Implementation::PropertyKotlinSourceScopedStream::Set
 	}
 }
 
-LibraryInterfaceGenerator::Implementation::InterfaceKotlinSourceScopedStream::InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name)
+LibraryInterfaceGenerator::Implementation::InterfaceKotlinSourceScopedStream::InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_interfaces)
 {
-	sourceStream << "interface " << name << "\n";
+	sourceStream << "interface " << name;
+	if (!base_interfaces.empty())
+	{
+		sourceStream << " : ";
+		for (size_t i = 0; i < base_interfaces.size(); i++)
+		{
+			sourceStream << base_interfaces[i] << ", ";
+		}
+		sourceStream.pop(2);
+	}
 	_stream = new SourceScopedStream(sourceStream, CodeStyle::Kotlin);
 }
 

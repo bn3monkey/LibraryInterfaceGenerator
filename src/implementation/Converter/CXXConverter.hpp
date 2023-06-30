@@ -45,7 +45,7 @@ namespace LibraryInterfaceGenerator
                 comment.addBrief(object.description);
                 for (auto& parameter : object.parameters)
                 {
-                    comment.addParameter((parameter->io == SymbolParameter::IO::IN ? true : false), parameter->name, parameter->name);
+                    comment.addParameter(parameter->name, parameter->description);
                 }
                 comment.addReturn(object.return_description);
             }
@@ -65,7 +65,7 @@ namespace LibraryInterfaceGenerator
                 comment.addBrief(object.description);
                 for (auto& parameter : object.parameters)
                 {
-                    comment.addParameter((parameter->io == SymbolParameter::IO::IN ? true : false), parameter->name, parameter->name);
+                    comment.addParameter(parameter->name, parameter->description);
                 }
             }
         }

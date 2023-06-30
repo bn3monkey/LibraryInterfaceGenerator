@@ -97,7 +97,6 @@ namespace LibraryInterfaceGenerator
             void findConverter(SourceStream& ss, SymbolType& type);
             void createReturnValueChanger(SourceStream& ss, const SymbolMethod& obj);
             void createInputParameterChanger(SourceStream& ss, const SymbolParameter& obj);
-            void createOutputParameterChanger(SourceStream& ss, const SymbolParameter& obj);
 
             // Property Block ����
             std::string createPropertyName(const SymbolProperty& object);

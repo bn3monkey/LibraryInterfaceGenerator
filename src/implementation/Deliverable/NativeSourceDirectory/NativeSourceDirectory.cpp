@@ -875,14 +875,7 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
     }
     else
     {
-        if (parameter.io == SymbolParameter::IO::OUT)
-        {
-            io = ParameterNode::REFERENCE_OUT;
-        }
-        else
-        {
-            io = ParameterNode::REFERENCE_IN;
-        }
+        io = ParameterNode::REFERENCE_IN;
     }
     return ParameterNode(io, parameter.type->toNativeType(), parameter.name);
 }
@@ -1032,8 +1025,9 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
 {
     auto name = createPropertyName(object);
 
-    createClassPropertyGetterDeclaration(ss, name, object);    
-    createClassPropertySetterDeclaration(ss, name, object);
+    createClassPropertyGetterDeclaration(ss, name, object);
+    if (!object.readonly)
+        createClassPropertySetterDeclaration(ss, name, object);
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInterfacePropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object)
@@ -1074,7 +1068,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
     auto name = createPropertyName(object);
 
     createInterfacePropertyGetterDeclaration(ss, name, object);
-    createInterfacePropertySetterDeclaration(ss, name, object);
+    if (!object.readonly)
+        createInterfacePropertySetterDeclaration(ss, name, object);
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDerivedPropertySetterDeclaration(SourceStream& ss, const std::string& propertyName, const SymbolProperty& object)
@@ -1115,7 +1110,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
     auto name = createPropertyName(object);
 
     createDerivedPropertyGetterDeclaration(ss, name, object);
-    createDerivedPropertySetterDeclaration(ss, name, object);
+    if (!object.readonly)
+        createDerivedPropertySetterDeclaration(ss, name, object);
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyGetterDefinition(SourceStream& ss, const std::string& propertyName, const SymbolClass& clazz, const SymbolProperty& object)
@@ -1162,7 +1158,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     auto name = createPropertyName(object);
 
     createPropertyGetterDefinition(ss, name, clazz, object);
-    createPropertySetterDefinition(ss, name, clazz, object);
+    if (!object.readonly)
+        createPropertySetterDefinition(ss, name, clazz, object);
 }
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyField(SourceStream& ss, const SymbolProperty& object)

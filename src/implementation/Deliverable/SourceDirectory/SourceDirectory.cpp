@@ -31,9 +31,17 @@ LibraryInterfaceGenerator::Implementation::Result LibraryInterfaceGenerator::Imp
 	if (!result)
 		return result;
 
+	std::string package_path{ _src_dir_path };
+	package_path += delimeter;
+	package_path += package.name;
+
+	result = FileSystem::createDirectory(package_path);
+	if (!result)
+		return result;
+
 	for (auto& submodule : modules)
 	{
-		result = createModule(*submodule, _src_dir_path);
+		result = createModule(*submodule, package_path);
 		if (!result)
 			return result;
 	}
@@ -190,6 +198,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createI
 		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
 	}
 	{
+		ImportKotlinSourceStream functionImport(ss, _wrapperDirectory.getKotlinPackageName(), {"*"});
+	}
+	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
 	}
 	{
@@ -198,7 +209,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createI
 
 	{
 		createKotlinComment(ss, object);
-		InterfaceKotlinSourceScopedStream interfaze(ss, object.name);
+		InterfaceKotlinSourceScopedStream interfaze(ss, object.name, {"WrapperTypeObject"});
 		
 		for (auto& member_method : object.methods)
 		{
@@ -231,6 +242,10 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 	{
 		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
 	}
+
+	{
+		ImportKotlinSourceStream functionImport(ss, _wrapperDirectory.getKotlinPackageName(), { "*" });
+	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
 	}
@@ -242,7 +257,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createC
 	{
 		createKotlinComment(ss, object);
 		
-		std::vector<std::string> base_classes = { "WrapperTypeObject" };
+		std::vector<std::string> base_classes = { "WrapperTypeObjectImpl" };
 		for (auto& base : object.bases)
 		{
 			if (auto& pBase = base.lock())
@@ -324,6 +339,10 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createE
 	{
 		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.parentModules);
 	}
+
+	{
+		ImportKotlinSourceStream functionImport(ss, _wrapperDirectory.getKotlinPackageName(), { "*" });
+	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
 	}
@@ -341,6 +360,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::SourceDirectory::createM
 
 	{
 		PackageKotlinSourceStream package(ss, _wrapperDirectory.getKotlinPackageName(), object.moduleNames);
+	}
+	{
+		ImportKotlinSourceStream functionImport(ss, _wrapperDirectory.getKotlinPackageName(), { "*" });
 	}
 	{
 		ImportKotlinSourceStream wrapperImport(ss, _wrapperDirectory.getKotlinPackageName(), { _wrapperDirectory.getKotlinWrapperClassName() });
@@ -593,6 +615,10 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 
 			s.addElement(key, value);
 		}
+		ss.pop(2);
+		ss << ";\n\n";
+
+
 		{
 			MethodKotlinSourceScopedStream toWrapperType{
 				ss,
@@ -620,6 +646,9 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createEnumDefin
 
 			s.addElement(key, value, name);
 		}
+		ss.pop(2);
+		ss << ";\n\n";
+
 		{
 			MethodKotlinSourceScopedStream toWrapperType{
 				ss,
@@ -665,14 +694,7 @@ static ParameterNode createParameter(const SymbolParameter& parameter)
 	}
 	else
 	{
-		if (parameter.io == SymbolParameter::IO::OUT)
-		{
-			io = ParameterNode::REFERENCE_OUT;
-		}
-		else
-		{
-			io = ParameterNode::REFERENCE_IN;
-		}
+		io = ParameterNode::REFERENCE_IN;
 	}
 	return ParameterNode(io, parameter.type->toKotlinType(), parameter.name);
 }
@@ -698,10 +720,18 @@ static std::vector<ParameterNode> createInputPrimaryConstructorParameters() {
 	return { ParameterNode(ParameterNode::VALUE, "Long", "handle.get()") };
 }
 
+static std::vector<ParameterNode> createConstructorParameter(const SymbolMethod& method)
+{
+	std::vector<ParameterNode> ret;
+	for (auto& param : method.parameters)
+	{
+		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), param->name));
+	}
+	return ret;
+}
 static std::vector<ParameterNode> createInputConstructorParameter(const SymbolMethod& method)
 {
 	std::vector<ParameterNode> ret;
-	ret.push_back(createInputHandleParameter());
 	for (auto& param : method.parameters)
 	{
 		std::string param_name = "i_" + param->name;
@@ -729,7 +759,7 @@ static std::vector<ParameterNode> createInputStaticParamter(const SymbolMethod& 
 	std::vector<ParameterNode> ret;
 	for (auto& param : method.parameters)
 	{
-		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), param->name));
+		ret.push_back(ParameterNode(ParameterNode::VALUE, param->type->toKotlinType(), "i_" + param->name));
 	}
 	return ret;
 }
@@ -804,9 +834,9 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstruct
 			KotlinAccess::PUBLIC,
 			"",
 			"",
-			"",
+			"NativeHandle",
 			"construct",
-			createParameters(constructor)
+			createConstructorParameter(constructor)
 		};
 
 		for (auto& parameter : constructor.parameters)
@@ -814,10 +844,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createConstruct
 			createInputParameterChanger(ss, *parameter);
 		}
 		callConstructor(ss, clazz, constructor, number);
-		for (auto& parameter : constructor.parameters)
-		{
-			createOutputParameterChanger(ss, *parameter);
-		}
+
 		ss << "return NativeHandle(ret)\n";
 	}
 }
@@ -849,7 +876,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createInterface
 			KotlinAccess::PUBLIC,
 			"",
 			"",
-			"",
+			object.type->toKotlinType(),
 			object.name,
 			createParameters(object)
 		};
@@ -874,10 +901,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createClassMeth
 			createInputParameterChanger(ss, *parameter);
 		}
 		callClassMethod(ss, clazz, object, number);
-		for (auto& parameter : object.parameters)
-		{
-			createOutputParameterChanger(ss, *parameter);
-		}
+
 		createReturnValueChanger(ss, object);
 	}
 }
@@ -900,10 +924,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMet
 			createInputParameterChanger(ss, *parameter);
 		}
 		callStaticMethod(ss, object, number);
-		for (auto& parameter : object.parameters)
-		{
-			createOutputParameterChanger(ss, *parameter);
-		}
+
 		createReturnValueChanger(ss, object);
 	}
 }
@@ -934,7 +955,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callConstructor
 			ss,
 			"",
 			{},
-			createMethodName(clazz, "consturct", number),
+			createMethodName(clazz, "construct", number),
 			createInputConstructorParameter(object)
 		};
 	}
@@ -1001,13 +1022,61 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::callStaticMetho
 	}
 }
 
+std::string LibraryInterfaceGenerator::Implementation::SourceDirectory::findConverter(SymbolType& type)
+{
+	switch (type.getTypeName())
+	{
+		case SymbolType::Name::VOID:
+		case SymbolType::Name::BOOL:
+		case SymbolType::Name::INT8:
+		case SymbolType::Name::INT16:
+		case SymbolType::Name::INT32:
+		case SymbolType::Name::INT64:
+		case SymbolType::Name::FLOAT:
+		case SymbolType::Name::DOUBLE:
+		case SymbolType::Name::STRING:
+		case SymbolType::Name::ENUM:
+		case SymbolType::Name::OBJECT:
+		case SymbolType::Name::CALLBACK:
+			return type.toKotlinType();
+		case SymbolType::Name::BOOLARRAY:
+		case SymbolType::Name::INT8ARRAY:
+		case SymbolType::Name::INT16ARRAY:
+		case SymbolType::Name::INT32ARRAY:
+		case SymbolType::Name::INT64ARRAY:
+		case SymbolType::Name::FLOATARRAY:
+		case SymbolType::Name::DOUBLEARRAY:
+		case SymbolType::Name::STRINGARRAY:
+		case SymbolType::Name::ENUMARRAY:
+		case SymbolType::Name::OBJECTARRAY:
+		case SymbolType::Name::CALLBACKARRAY:			
+		case SymbolType::Name::BOOLVECTOR:
+		case SymbolType::Name::INT8VECTOR:
+		case SymbolType::Name::INT16VECTOR:
+		case SymbolType::Name::INT32VECTOR:
+		case SymbolType::Name::INT64VECTOR:
+		case SymbolType::Name::FLOATVECTOR:
+		case SymbolType::Name::DOUBLEVECTOR:
+		case SymbolType::Name::STRINGVECTOR:
+		case SymbolType::Name::ENUMVECTOR:
+		case SymbolType::Name::OBJECTVECTOR:
+		case SymbolType::Name::CALLBACKVECTOR:
+		{
+			auto element_types = type.toElementTypes();
+			auto element_type = element_types[0];
+			return element_type->toKotlinType();
+		}
+	}
+	return "";
+}
+
 void LibraryInterfaceGenerator::Implementation::SourceDirectory::createReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
 {
 	if (object.type)
 	{
 		if (object.type->getTypeName() != SymbolType::Name::VOID)
 		{
-			ss << "val ret = toKotlinType<" << object.type->toKotlinType() << ">(temp_ret)\n";
+			ss << "val ret = toKotlinType<" << findConverter(*object.type) << ">(temp_ret)\n";
 			ss << "return ret;\n";
 		}
 	}
@@ -1018,17 +1087,6 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createInputPara
 	if (object.type)
 	{
 		ss << "val i_" << object.name << " = toKotlinWrapperType(" << object.name << ")\n";
-	}
-}
-
-void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputParameterChanger(SourceStream& ss, const SymbolParameter& object)
-{
-	if (object.io == SymbolParameter::IO::OUT)
-	{
-		if (object.type)
-		{
-			ss <<  object.name << " = toKotlinType<" << object.type->toKotlinType() << ">(i_" << object.name << ")\n";
-		}
 	}
 }
 
@@ -1096,7 +1154,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createOutputPro
 {
 	if (object.type)
 	{
-		ss << "val ret = toKotlinType<" << object.type->toKotlinType() << ">(temp_ret)\n";
+		ss << "val ret = toKotlinType<" << findConverter(*object.type) << ">(temp_ret)\n";
 		ss << "return ret\n";
 	} 
 }

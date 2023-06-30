@@ -30,8 +30,12 @@ inline fun <reified T> toKotlinType(value : MutableList<Int>) : MutableList<T>  
     return value.map { toKotlinType<T>(it) }.toMutableList()
 }
 
+interface WrapperTypeObject
+{
+    fun toWrapperType() : Long
+}
 
-abstract class WrapperTypeObject(private val nativeHandle : NativeHandle) : AutoCloseable {
+abstract class WrapperTypeObjectImpl(private val nativeHandle : NativeHandle) : WrapperTypeObject, AutoCloseable {
 
     class NativeHandle(private var value : Long) {
         fun isValid() : Boolean = value != 0L
@@ -43,7 +47,7 @@ abstract class WrapperTypeObject(private val nativeHandle : NativeHandle) : Auto
     }
     abstract fun release(handle : NativeHandle)
 
-    fun toWrapperType() : Long = nativeHandle.get()
+    override fun toWrapperType() : Long = nativeHandle.get()
     protected var self = nativeHandle.get()
 
     protected val releaser = { close() }
@@ -57,9 +61,6 @@ abstract class WrapperTypeObject(private val nativeHandle : NativeHandle) : Auto
 
 }
 
-inline fun <reified T> toKotlinWrapperType(value : T) : T {
-    return value
-}
 @JvmName("toKotlinWrapperObject")
 inline fun <reified T> toKotlinWrapperType(value : T) : Long where T : WrapperTypeObject {
     return value.toWrapperType()
@@ -73,13 +74,10 @@ inline fun <reified T> toKotlinWrapperType(value : MutableList<T>) : MutableList
     return value.map { toKotlinWrapperType(it) }.toMutableList()
 }
 
-inline fun <reified T> toKotlinType(value : T) : T {
-    return value
-}
 @JvmName("toKotlinObject")
 inline fun <reified T> toKotlinType(value : Long) : T  where T : WrapperTypeObject {
-    val constructor = T::class.java.getDeclaredConstructor(WrapperTypeObject.NativeHandle::class.java)
-    return constructor.newInstance(WrapperTypeObject.NativeHandle(value))
+    val constructor = T::class.java.getDeclaredConstructor(WrapperTypeObjectImpl.NativeHandle::class.java)
+    return constructor.newInstance(WrapperTypeObjectImpl.NativeHandle(value))
 }
 
 @JvmName("toKotlinObjectArray")
@@ -89,4 +87,13 @@ inline fun <reified T> toKotlinType(value : LongArray) : Array<T>  where T : Wra
 @JvmName("toKotlinObjectVector")
 inline fun <reified T> toKotlinType(value : MutableList<Long>) : MutableList<T>  where T : WrapperTypeObject {
     return value.map { toKotlinType<T>(it) }.toMutableList()
+}
+
+
+
+inline fun <reified T> toKotlinWrapperType(value : T) : T {
+    return value
+}
+inline fun <reified T> toKotlinType(value : T) : T {
+    return value
 }

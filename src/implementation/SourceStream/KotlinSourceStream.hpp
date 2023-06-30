@@ -34,7 +34,7 @@ namespace LibraryInterfaceGenerator
         class InterfaceKotlinSourceScopedStream
         {
         public:
-            explicit InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name);
+            explicit InterfaceKotlinSourceScopedStream(SourceStream& sourceStream, const std::string& name, const std::vector<std::string>& base_interfaces);
             virtual ~InterfaceKotlinSourceScopedStream();
 
         private:
@@ -187,7 +187,7 @@ namespace LibraryInterfaceGenerator
             void addDescription(const std::string& description);
             void addBrief(const std::string& brief);
             void addReturn(const std::string& return_value);
-            void addParameter(bool isInputParameter, const std::string& name, const std::string& description);
+            void addParameter(const std::string& name, const std::string& description);
 
 
         private:

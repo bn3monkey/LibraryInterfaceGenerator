@@ -290,7 +290,7 @@ LibraryInterfaceGenerator::Implementation::MethodCXXSourceScopedStream::MethodCX
 				sourceStream << "const ";
 			}
 			sourceStream << parameter.type;
-			if (parameter.io == ParameterNode::REFERENCE_IN || parameter.io == ParameterNode::REFERENCE_OUT)
+			if (parameter.io == ParameterNode::REFERENCE_IN)
 			{
 				sourceStream << "&";
 			}
@@ -365,9 +365,9 @@ void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addRetur
 	_stream << " * @return : " << return_value << "\n";
 }
 
-void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addParameter(bool isInputParameter, const std::string& name, const std::string& description)
+void LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::addParameter(const std::string& name, const std::string& description)
 {
-	_stream << " * @param[" << (isInputParameter ? "in" : "out") << "]  " << name << "  " << description << "\n";
+	_stream << " * @param " <<  name << "  " << description << "\n";
 }
 
 std::vector<std::string> LibraryInterfaceGenerator::Implementation::CommentCXXSourceStream::tokenize(const std::string& description)

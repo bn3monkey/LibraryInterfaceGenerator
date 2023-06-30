@@ -230,26 +230,7 @@ using namespace LibraryInterfaceGenerator::Implementation;
 
 static ParameterNode createNativeParameter(const SymbolParameter& parameter)
 {
-	int io;
-	/*
-	if (parameter.type->isPrimitive())
-	{
-		io = ParameterNode::VALUE;
-	}
-	else
-	{
-		if (parameter.io == SymbolParameter::IO::OUT)
-		{
-			io = ParameterNode::REFERENCE_OUT;
-		}
-		else
-		{
-			io = ParameterNode::VALUE;
-		}
-	}
-	*/
-	io = ParameterNode::VALUE;
-	return ParameterNode(io, parameter.type->toJNIType(), parameter.name);
+	return ParameterNode(ParameterNode::VALUE, parameter.type->toJNIType(), parameter.name);
 }
 
 static std::vector<ParameterNode> createNativeParameters(const SymbolMethod& object)
@@ -323,7 +304,7 @@ static std::vector<ParameterNode> createNativePropertySetterParameters(const Sym
 	ret.push_back(createNativeSelfParameters());
 	ret.push_back(
 		ParameterNode(
-			ParameterNode::REFERENCE_IN,
+			ParameterNode::VALUE,
 			obj.type->toJNIType(),
 			"value")
 	);
@@ -347,14 +328,7 @@ static ParameterNode createNativeInputParameter(const SymbolParameter& parameter
 	}
 	else
 	{
-		if (parameter.io == SymbolParameter::IO::OUT)
-		{
-			io = ParameterNode::REFERENCE_OUT;
-		}
-		else
-		{
-			io = ParameterNode::REFERENCE_IN;
-		}
+		io = ParameterNode::REFERENCE_IN;
 	}
 	return ParameterNode(io, parameter.type->toJNIType(), "i_" + parameter.name);
 }
@@ -457,10 +431,6 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeConstructor
 			createNativeInputParameterChanger(ss, *parameter);
 		}
 		callNativeConstructor(ss, clazz, constructor);
-		for (auto& parameter : constructor.parameters)
-		{
-			createNativeOutputParameterChanger(ss, *parameter);
-		}
 	}
 }
 
@@ -583,10 +553,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeClassMethod
 			createNativeInputParameterChanger(ss, *parameter);
 		}
 		callNativeClassMethod(ss, clazz, object);
-		for (auto& parameter : object.parameters)
-		{
-			createNativeOutputParameterChanger(ss, *parameter);
-		}
+
 		createNativeReturnValueChanger(ss, object);
 	}
 }
@@ -632,10 +599,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeStaticMetho
 			createNativeInputParameterChanger(ss, *parameter);
 		}
 		callNativeStaticMethod(ss, object);
-		for (auto& parameter : object.parameters)
-		{
-			createNativeOutputParameterChanger(ss, *parameter);
-		}
+		
 		createNativeReturnValueChanger(ss, object);
 	}
 }
@@ -762,7 +726,7 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReleaserCha
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeHandleChanger(SourceStream& ss, const SymbolClass& clazz)
 {
-	ss << "auto i_self = Bn3Monkey::KObject().toManagedType(env, self);\n";
+	ss << "auto i_self = Bn3Monkey::Kotlin::KObject().toManagedType(env, self);\n";
 }
 
 void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeReturnValueChanger(SourceStream& ss, const SymbolMethod& object)
@@ -789,17 +753,6 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeInputParame
 	}
 }
 
-void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeOutputParameterChanger(SourceStream& ss, const SymbolParameter& object)
-{
-	if (object.io == SymbolParameter::IO::OUT)
-	{
-		if (object.type)
-		{
-			findConverter(ss, *(object.type));
-			ss << "().copy(env, i_" << object.name << ", " << object.name << ");\n";
-		}
-	}
-}
 
 std::string LibraryInterfaceGenerator::Implementation::Wrapper::createPropertyName(const SymbolProperty& object)
 {
@@ -994,14 +947,7 @@ static ParameterNode createWrapperParameter(const SymbolParameter& parameter)
 	}
 	else
 	{
-		if (parameter.io == SymbolParameter::IO::OUT)
-		{
-			io = ParameterNode::REFERENCE_OUT;
-		}
-		else
-		{
-			io = ParameterNode::REFERENCE_IN;
-		}
+		io = ParameterNode::REFERENCE_IN;
 	}
 	return ParameterNode(io, parameter.type->toKotlinWrapperType(), parameter.name);
 }

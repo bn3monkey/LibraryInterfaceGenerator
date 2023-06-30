@@ -102,8 +102,7 @@ namespace LibraryInterfaceGenerator
         struct ParameterNode
         {
             const static int REFERENCE_IN = 0;
-            const static int REFERENCE_OUT = 1;
-            const static int VALUE = 2;
+            const static int VALUE = 1;
 
             int io;
             std::string type;

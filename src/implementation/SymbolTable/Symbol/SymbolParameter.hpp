@@ -17,15 +17,9 @@ namespace LibraryInterfaceGenerator
         class SymbolParameter : public HasResult, public HasSymbolType
         {
         public:
-            enum class IO
-            {
-                IN,
-                OUT,
-            };
             // std::unique_ptr<SymbolType> type;
             std::string name;
             std::string description;
-            IO io;
 
             explicit SymbolParameter(const nlohmann::json& object,
                 ObjectReferenceSet& parentobjectReferenceSet,

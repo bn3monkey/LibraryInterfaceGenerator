@@ -43,27 +43,4 @@ LibraryInterfaceGenerator::Implementation::SymbolParameter::SymbolParameter
 
 		description = iter->get<std::string>();
 	}
-	{
-		auto iter = object.find(Field::IO);
-		if (iter == object.end())
-		{
-			_result = Result(Result::Code::JSON_OBJECT_HAS_NO_IO);
-			return;
-		}
-
-		auto value = iter->get<std::string>();
-		if (value == "in")
-		{
-			io = IO::IN;
-		}
-		else if (value == "out")
-		{
-			io = IO::OUT;
-		}
-		else
-		{
-			_result = Result(Result::Code::JSON_OBJECT_HAS_INVALID_VALUE);
-			return;
-		}
-	}
 }
