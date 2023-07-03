@@ -1016,7 +1016,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
         name += propertyName;
 
         std::string type = object.type->toNativeType();
-        if (!object.type->isPrimitive())
+        if (object.is_weak == false && !object.type->isPrimitive())
             type += "&";
 
         MethodCXXSourceScopedStream method_scope{ ss, true, "", "", type, {}, name,
@@ -1058,9 +1058,9 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createInt
         name += propertyName;
 
         std::string type = object.type->toNativeType();
-        if (!object.type->isPrimitive())
+        if (object.is_weak == false && !object.type->isPrimitive())
             type += "&";
-
+        
         MethodCXXSourceScopedStream method_scope{ ss, true, "virtual", "= 0", type, {}, name,
             {}
         };
