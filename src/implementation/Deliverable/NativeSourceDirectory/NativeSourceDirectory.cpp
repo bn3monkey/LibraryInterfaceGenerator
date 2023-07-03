@@ -1128,7 +1128,10 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     {
         MethodCXXSourceScopedStream method_scope{ ss, false, "", "", type, scopes, name, {} };
 
-        ss << "return _" << object.name << ";\n";
+        ss << "return _" << object.name;
+        if (object.is_weak)
+            ss << ".lock()";
+        ss << ";\n";
     }
 }
 
@@ -1164,5 +1167,9 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
 
 void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPropertyField(SourceStream& ss, const SymbolProperty& object)
 {
-    ss << object.type->toNativeType() << " _" << object.name << ";\n";
+    if (object.is_weak)
+        ss << object.type->toNativeWeakType();
+    else
+        ss << object.type->toNativeType();
+    ss << " _" << object.name << ";\n";
 }

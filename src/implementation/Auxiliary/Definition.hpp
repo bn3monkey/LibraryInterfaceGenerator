@@ -24,6 +24,7 @@ namespace LibraryInterfaceGenerator
                 static const char* IO = "io";
                 static const char* Return = "return";
                 static const char* Base = "base";
+                static const char* IsWeak = "is_weak";
             }
             namespace Order
             {

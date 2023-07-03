@@ -48,6 +48,7 @@ std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 	}
 	else
 	{
+		// @TODO : array<weak<Object>> array<array<..>> array<vector<..>> 
 		if (hasPrefix(type, "array<") && hasPostfix(type, ">"))
 		{
 			auto array_info = std::string(type.begin() + sizeof("array<") - 1, type.end() - 1);
@@ -127,6 +128,7 @@ std::shared_ptr<LibraryInterfaceGenerator::Implementation::SymbolType> LibraryIn
 				}
 			}
 		}
+		// @TODO : vector<weak<Object>> vector<array<..>> vector<vector<..>> 
 		else if (hasPrefix(type, "vector<") && hasPostfix(type, ">"))
 		{
 			auto inner_type = std::string(type.begin() + sizeof("vector<") - 1, type.end() - 1);

@@ -62,6 +62,8 @@ namespace LibraryInterfaceGenerator
             virtual bool requiredDeclaration() { return false; }
 
             virtual std::string toNativeType() { return ""; }
+            virtual std::string toNativeWeakType() { return ""; }
+
             virtual std::string toManagedType() { return ""; }
 
             virtual std::string toJNIType() { return ""; }
@@ -89,6 +91,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::VOID;}
             std::string toNativeType() override {return "void";}
+            std::string toNativeWeakType() override { return "void"; }
             std::string toManagedType() override { return "void"; }
             std::string toJNIType() override {return "void";}
             std::string toKotlinWrapperType() override { return "Unit"; }
@@ -104,6 +107,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::BOOL;}
             std::string toNativeType() override { return "bool"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "bool"; }
             std::string toJNIType() override { return "jboolean"; }
             std::string toKotlinWrapperType() override { return "Boolean"; }
@@ -119,6 +123,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::INT8;}
             std::string toNativeType() override { return "int8_t"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "int8_t"; }
             std::string toJNIType() override { return "jbyte"; }
             std::string toKotlinWrapperType() override { return "Byte"; }
@@ -134,6 +139,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::INT16;}
             std::string toNativeType() override { return "int16_t"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "int16_t"; }
             std::string toJNIType() override { return "jshort"; }
             std::string toKotlinWrapperType() override { return "Short"; }
@@ -148,6 +154,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::INT32;}
             std::string toNativeType() override { return "int32_t"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "int32_t"; }
             std::string toJNIType() override { return "jint"; }
             std::string toKotlinWrapperType() override { return "Int"; }
@@ -162,6 +169,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::INT64;}
             std::string toNativeType() override { return "int64_t"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "int64_t"; }
             std::string toJNIType() override { return "jlong"; }
             std::string toKotlinWrapperType() override { return "Long"; }
@@ -176,6 +184,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::DOUBLE;}
             std::string toNativeType() override { return "double"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "double"; }
             std::string toJNIType() override { return "jdouble"; }
             std::string toKotlinWrapperType() override { return "Double"; }
@@ -190,6 +199,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::FLOAT;}
             std::string toNativeType() override { return "float"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "float"; }
             std::string toJNIType() override { return "jfloat"; }
             std::string toKotlinWrapperType() override { return "Float"; }
@@ -204,6 +214,7 @@ namespace LibraryInterfaceGenerator
 
             Name getTypeName() override {return Name::STRING;}
             std::string toNativeType() override { return "std::string"; }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override {return "std::string"; }
             std::string toJNIType() override { return "jstring"; }
             std::string toKotlinWrapperType() override { return "String"; }
@@ -228,6 +239,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 if (auto object = _obj.lock())
                 {
@@ -282,6 +294,16 @@ namespace LibraryInterfaceGenerator
                     return ret;
                 }
                 return "";
+            }
+            std::string toNativeWeakType() override { 
+                if (auto object = _obj.lock())
+                {
+                    std::string ret = "std::weak_ptr<";
+                    ret += object->getCppName();
+                    ret += ">";
+                    return ret;
+                }
+                return ""; 
             }
             std::string toManagedType() override { 
                 if (auto object = _obj.lock())
@@ -351,6 +373,7 @@ namespace LibraryInterfaceGenerator
                 }
                 return "";
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 // return "void*";
                 if (auto object = _obj.lock())
@@ -418,6 +441,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -485,6 +509,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -552,6 +577,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -619,6 +645,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -686,6 +713,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -753,6 +781,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -820,6 +849,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -887,6 +917,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -950,6 +981,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -1016,6 +1048,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -1082,6 +1115,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::array<%s, %d>", toNativeElementType().c_str(), size);
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::array<%s, %d>", toManagedElementType().c_str(), size);
@@ -1161,6 +1195,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1225,6 +1260,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1289,6 +1325,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1352,6 +1389,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1415,6 +1453,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1478,6 +1517,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1542,6 +1582,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1606,6 +1647,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1672,6 +1714,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1740,6 +1783,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[128] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());
@@ -1806,6 +1850,7 @@ namespace LibraryInterfaceGenerator
                 sprintf(buffer, "std::vector<%s>", toNativeElementType().c_str());
                 return std::string(buffer);
             }
+            std::string toNativeWeakType() override { return toNativeType(); }
             std::string toManagedType() override { 
                 char buffer[256] {0};
                 sprintf(buffer, "std::vector<%s>", toManagedElementType().c_str());

@@ -22,6 +22,7 @@ namespace LibraryInterfaceGenerator
             std::string name;
             bool readonly;
             std::string description;
+            bool is_weak;
 
             explicit SymbolProperty(const nlohmann::json& object, 
                 ObjectReferenceSet& parentobjectReferenceSet,

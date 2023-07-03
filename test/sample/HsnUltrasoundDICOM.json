@@ -1404,6 +1404,7 @@
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/Patient",
                             "readonly" : false,
+                            "is_weak" : true,
                             "name" : "patient",
                             "description" : "Patient holding this study"
                         },
@@ -1647,6 +1648,7 @@
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/Study",
                             "readonly" : false,
+                            "is_weak" : true,
                             "name" : "study",
                             "description" : "Study holding this series"
                         },
@@ -1907,6 +1909,7 @@
                         {
                             "order" : "property",
                             "type" : "HsnUltrasoundDICOM/IE/Series",
+                            "is_weak" : true,
                             "readonly" : false,
                             "name" : "series",
                             "description" : "series holding this ultrasound image"

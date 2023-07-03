@@ -51,5 +51,15 @@ LibraryInterfaceGenerator::Implementation::SymbolProperty::SymbolProperty(
 
 		readonly = iter->get<bool>();
 	}
+	{
+		auto iter = object.find(Field::IsWeak);
+		if (iter != object.end())
+		{
+			is_weak = iter->get<bool>();
+		}
+		else {
+			is_weak = false;
+		}
+	}
 
 }
