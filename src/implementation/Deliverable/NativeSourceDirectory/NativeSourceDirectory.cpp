@@ -928,6 +928,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createSta
         auto parameters = createParameters(object);
         auto scopes = createScope(object);
         MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toNativeType(), scopes, object.name, parameters };
+        if (object.type->getTypeName() != SymbolType::Name::VOID)
+            ss << "return " << object.type->toNativeType() << "{};\n";
     }
 }
 
@@ -937,6 +939,8 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createCla
         auto parameters = createParameters(object);
         auto scopes = createScope(clazz);
         MethodCXXSourceScopedStream method_scope{ ss, false, "", "", object.type->toNativeType(), scopes, object.name, parameters };
+        if (object.type->getTypeName() != SymbolType::Name::VOID)
+            ss << "return " << object.type->toNativeType() << "{};\n";
     }
 }
 
