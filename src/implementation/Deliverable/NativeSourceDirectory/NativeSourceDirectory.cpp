@@ -1100,7 +1100,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createDer
         name += propertyName;
 
         std::string type = object.type->toNativeType();
-        if (!object.type->isPrimitive())
+        if (object.is_weak == false && !object.type->isPrimitive())
             type += "&";
 
         MethodCXXSourceScopedStream method_scope{ ss, true, "", "override", type, {}, name,
@@ -1124,7 +1124,7 @@ void LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::createPro
     name += propertyName;
 
     std::string type = object.type->toNativeType();
-    if (!object.type->isPrimitive())
+    if (object.is_weak == false && !object.type->isPrimitive())
         type += "&";
 
     auto scopes = createScope(clazz);
