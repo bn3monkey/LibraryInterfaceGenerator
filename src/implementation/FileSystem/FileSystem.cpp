@@ -101,3 +101,64 @@ Result LibraryInterfaceGenerator::Implementation::FileSystem::findAllFilePath(co
     std::filesystem::current_path(original_path);
     return Result();
 }
+
+static Result copyFile(const std::string& src_path, const std::string& dest_path)
+{
+    {
+        std::ifstream ifs(src_path, std::ios::binary);
+        if (!ifs) {
+            return Result(Result::Code::FILE_OPEN_FAIL, "File cannot be opened (%s)", src_path.c_str());
+        }
+
+        std::ofstream ofs(dest_path, std::ios::binary);
+        if (!ofs)
+        {
+            return Result(Result::Code::FILE_OPEN_FAIL, "File cannot be opened (%s)", dest_path.c_str());
+        }
+
+        ofs << ifs.rdbuf();
+
+        ifs.close();
+        ofs.close();
+    }
+    return Result();
+}
+static Result copyDirectory(const std::string& src_path ,const std::string& dest_path)
+{
+    Result result;
+    auto src_directory = std::filesystem::recursive_directory_iterator{ src_path };
+    for (const auto& iter : src_directory)
+    {
+        if (iter.is_directory())
+        {
+            auto child_dir_name = iter.path().filename().string();
+            auto child_src_path = src_path + "\\" + child_dir_name;
+            auto child_dest_path = dest_path + "\\" + child_dir_name;
+            result = copyDirectory(child_src_path, child_dest_path);
+        }
+        else {
+            auto child_file_name = iter.path().filename().string();
+            auto child_src_path = src_path + "\\" + child_file_name;
+            auto child_dest_path = dest_path + "\\" + child_file_name;
+            result = copyFile(child_src_path, child_dest_path);
+        }
+        if (!result) {
+            return result;
+        }
+    }
+    return result;
+}
+Result LibraryInterfaceGenerator::Implementation::FileSystem::copyDirectories(const std::string& src_path, const std::string& dest_path)
+{
+    if (!std::filesystem::exists(dest_path))
+    {
+        std::filesystem::create_directories(dest_path);
+    }
+    return copyDirectory(src_path, dest_path);
+}
+
+Result LibraryInterfaceGenerator::Implementation::FileSystem::removeDirectory(const std::string& path)
+{
+    std::filesystem::remove_all(path);
+    return Result();
+}

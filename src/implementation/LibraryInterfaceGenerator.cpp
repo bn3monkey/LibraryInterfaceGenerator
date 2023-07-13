@@ -7,9 +7,9 @@
 #include "Deliverable/SourceDirectory/SourceDirectory.hpp"
 #include "FileSystem/FileSystem.hpp"
 
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createTempRootDirectory(const std::string& temp_root_dir_path)
 {
-	auto ret = Implementation::FileSystem::createDirectories(root_dir_path);
+	auto ret = Implementation::FileSystem::createDirectories(temp_root_dir_path);
 	if (!ret)
 	{
 		return Error(Error::Code::FAIL, ret.toString());
@@ -17,7 +17,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createRootDirectory(
 	return Error(Error::Code::SUCCESS);
 }
 
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDirectory(const std::string& json_content, const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDirectory(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path)
 {
 	using namespace LibraryInterfaceGenerator::Implementation;
 
@@ -40,7 +40,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory nativeExternalLibraryDirectory{root_dir_path };
+	LibraryInterfaceGenerator::Implementation::NativeExternalLibraryDirectory nativeExternalLibraryDirectory{temp_root_dir_path };
 	nativeExternalLibraryDirectory.createLibraryDirectory();
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::Log);
 	nativeExternalLibraryDirectory.createExternalTool(NativeExternalLibraryDirectory::ExternalTool::MemoryPool);
@@ -49,7 +49,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 
 	LibraryInterfaceGenerator::Implementation::KotlinExternalLibraryDirectory kotlinExternalLibraryDirectory{};
 
-	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::NativeSourceDirectory nativeSourceDirectory{ nativeExternalLibraryDirectory, symbolTable, temp_root_dir_path };
 	auto result = nativeSourceDirectory.make();
 	if (!result)
 	{
@@ -57,7 +57,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeSourceDirectory, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::NativeInterface nativeInterface{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, nativeSourceDirectory, symbolTable, temp_root_dir_path };
 	result = nativeInterface.make();
 	if (!result)
 	{
@@ -67,7 +67,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 
 	
 
-	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, kotlinExternalLibraryDirectory, nativeInterface, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::Wrapper wrapper{ Environment::Kotlin_Android, nativeExternalLibraryDirectory, kotlinExternalLibraryDirectory, nativeInterface, symbolTable, temp_root_dir_path };
 	result = wrapper.make();
 	if (!result)
 	{
@@ -75,7 +75,7 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 
-	LibraryInterfaceGenerator::Implementation::SourceDirectory sourceDirectory{ Environment::Kotlin_Android, wrapper, symbolTable, root_dir_path };
+	LibraryInterfaceGenerator::Implementation::SourceDirectory sourceDirectory{ Environment::Kotlin_Android, wrapper, symbolTable, temp_root_dir_path };
 	result = sourceDirectory.make();
 	if (!result)
 	{
@@ -83,22 +83,28 @@ LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeSourceDi
 		return Error(Error::Code::FAIL, result.toString());
 	}
 	
+	Implementation::FileSystem::copyDirectories(temp_root_dir_path, root_dir_path);
+	result = Implementation::FileSystem::removeDirectory(temp_root_dir_path);
+	if (!result) {
+		printf("%s", result.toString().c_str());
+		return Error(Error::Code::FAIL, result.toString());
+	}
 
 	return Error(Error::Code::SUCCESS);
 }
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createAPIDocumentation(const std::string& json_content, const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createAPIDocumentation(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path)
 {
 	return Error(Error::Code::SUCCESS);
 }
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeInterface(const std::string& json_content, const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createNativeInterface(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path)
 {
 	return Error(Error::Code::SUCCESS);
 }
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createWrapper(const std::string& json_content, Framework env, const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createWrapper(const std::string& json_content, Framework env, const std::string& temp_root_dir_path, const std::string& root_dir_path)
 {
 	return Error(Error::Code::SUCCESS);
 }
-LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createSourceDirectory(const std::string& json_content, Framework env, const std::string& root_dir_path)
+LibraryInterfaceGenerator::Error LibraryInterfaceGenerator::createSourceDirectory(const std::string& json_content, Framework env, const std::string& temp_root_dir_path, const std::string& root_dir_path)
 {
 	return Error(Error::Code::SUCCESS);
 }

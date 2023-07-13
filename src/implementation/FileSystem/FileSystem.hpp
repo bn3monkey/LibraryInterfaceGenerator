@@ -17,6 +17,9 @@ namespace LibraryInterfaceGenerator
             Result createDirectories(const std::string& path);
             Result createFile(const std::string& path, const std::string& content);
             Result findAllFilePath(const std::string& path, std::vector<std::string>& file_paths, const std::vector<std::string>& postfixes);
+
+            Result copyDirectories(const std::string& src_path, const std::string& dest_path);
+            Result removeDirectory(const std::string& path);
         }
     }
 }

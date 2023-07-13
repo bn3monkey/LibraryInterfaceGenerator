@@ -31,12 +31,12 @@ namespace LibraryInterfaceGenerator
         Kotlin_Android,
     };
 
-    Error createRootDirectory(const std::string& root_dir_path);
-    Error createNativeSourceDirectory(const std::string& json_content, const std::string& root_dir_path);
-    Error createAPIDocumentation(const std::string& json_content, const std::string& root_dir_path);
-    Error createNativeInterface(const std::string& json_content, const std::string& root_dir_path);
-    Error createWrapper(const std::string& json_content, Framework env, const std::string& root_dir_path);
-    Error createSourceDirectory(const std::string& json_content, Framework env, const std::string& root_dir_path);
+    Error createTempRootDirectory(const std::string& temp_root_dir_path);
+    Error createNativeSourceDirectory(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path);
+    Error createAPIDocumentation(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path);
+    Error createNativeInterface(const std::string& json_content, const std::string& temp_root_dir_path, const std::string& root_dir_path);
+    Error createWrapper(const std::string& json_content, Framework env, const std::string& temp_root_dir_path, const std::string& root_dir_path);
+    Error createSourceDirectory(const std::string& json_content, Framework env, const std::string& temp_root_dir_path, const std::string& root_dir_path);
 }
 
 #endif

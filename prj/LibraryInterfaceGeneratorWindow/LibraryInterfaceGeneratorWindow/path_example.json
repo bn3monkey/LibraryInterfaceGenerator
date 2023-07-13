@@ -1,0 +1,6 @@
+{
+    "project_path" : "D:\\repo\\UltrasoundDICOM",
+    "input_directory" : "attribute",
+    "input_file" : "HsnUltrasoundDICOM.json",
+    "output_directory" : "library"
+}

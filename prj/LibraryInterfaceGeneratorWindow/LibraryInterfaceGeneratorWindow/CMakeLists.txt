@@ -18,6 +18,8 @@ set(implementation_dir ${src_dir}/implementation)
 message("implementation_dirs = ${implementation_dir}")
 set(library_dir ${src_dir}/library)
 message("library_dirs = ${library_dir}")
+set(json_dir ${src_dir}/json)
+message("json_dirs = ${json_dir}")
 
 set(test_dir "${repository_dir}/test")
 message("test_dir = ${test_dir}")
@@ -150,11 +152,14 @@ file(GLOB_RECURSE implementation_files
 	${implementation_dir}/Environment.hpp
 	${implementation_dir}/LibraryInterfaceGenerator.cpp
 
+	${include_dir}/*.hpp
+	${json_dir}/*.hpp
 )
 
 message("implementation_files =  ${implementation_files}")
 
 include_directories(${include_dir})
+include_directories(${json_dir})
 include_directories(${implementation_dir})
 
 # 이 프로젝트의 실행 파일에 소스를 추가합니다.
@@ -170,8 +175,8 @@ target_include_directories(LibraryInterfaceGeneratorWindow PUBLIC "C:/Program Fi
 
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD 17)
 set_property(TARGET LibraryInterfaceGeneratorWindow PROPERTY CXX_STANDARD_REQUIRED ON)
-# TODO: 필요한 경우 테스트를 추가하고 대상을 설치합니다.
 
+set_target_properties(LibraryInterfaceGeneratorWindow PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 
 

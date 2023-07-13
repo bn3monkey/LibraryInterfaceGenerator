@@ -114,7 +114,8 @@ namespace LibraryInterfaceGenerator
 					SYMBOL_TYPE_CAST_FAIL,
 
 					DIRECTORY_CREATION_FAIL,
-					FILE_CREATION_FAIL
+					FILE_CREATION_FAIL,
+					FILE_OPEN_FAIL
                 };
 
 
