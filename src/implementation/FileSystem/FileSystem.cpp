@@ -126,22 +126,25 @@ static Result copyFile(const std::string& src_path, const std::string& dest_path
 static Result copyDirectory(const std::string& src_path ,const std::string& dest_path)
 {
     Result result;
-    auto src_directory = std::filesystem::recursive_directory_iterator{ src_path };
-    for (const auto& iter : src_directory)
+    auto src_directory = std::filesystem::directory_iterator{ src_path };
+
+    for (const auto iter : src_directory)
+    //for (auto& name : names)
     {
+        auto child_name = iter.path().filename().string();
+        //auto child_name = name;
+        auto child_src_path = src_path + "\\" + child_name;
+        auto child_dest_path = dest_path + "\\" + child_name;
+
         if (iter.is_directory())
+        //if (name.find_first_of('.', 0) != name.length())
         {
-            auto child_dir_name = iter.path().filename().string();
-            auto child_src_path = src_path + "\\" + child_dir_name;
-            auto child_dest_path = dest_path + "\\" + child_dir_name;
             result = copyDirectory(child_src_path, child_dest_path);
         }
         else {
-            auto child_file_name = iter.path().filename().string();
-            auto child_src_path = src_path + "\\" + child_file_name;
-            auto child_dest_path = dest_path + "\\" + child_file_name;
             result = copyFile(child_src_path, child_dest_path);
         }
+
         if (!result) {
             return result;
         }

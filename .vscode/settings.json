@@ -84,5 +84,6 @@
         "condition_variable": "cpp",
         "unordered_set": "cpp",
         "variant": "cpp"
-    }
+    },
+    "C_Cpp.default.compilerPath": "cl.exe"
 }
