@@ -449,7 +449,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinWrapperType() override {
@@ -517,7 +517,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
@@ -585,7 +585,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
@@ -653,7 +653,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
@@ -721,7 +721,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
@@ -789,7 +789,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
@@ -857,7 +857,7 @@ namespace LibraryInterfaceGenerator
             }
             std::string toJNIType() override { 
                 char buffer[256] {0};
-                sprintf(buffer, "%sArray", toJNIType().c_str());
+                sprintf(buffer, "%sArray", toJNIElementType().c_str());
                 return std::string(buffer);
             }
             std::string toKotlinType() override {
