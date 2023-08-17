@@ -111,7 +111,7 @@ TEST(KotlinSourceStream, EnumKotlinSourceScopedStream)
 	SourceStream ss;
 
 	{
-		EnumKotlinSourceScopedStream enumStream{ ss, "Named"};
+		EnumKotlinSourceScopedStream enumStream{ ss, "Named", {} };
 		enumStream.addElement("SANS", "0");
 		enumStream.addElement("PAPYRUS", "1");
 		enumStream.addElement("UNDYNE", "2");
@@ -137,7 +137,7 @@ TEST(KotlinSourceStream, AdvancedEnumKotlinSourceScopedStream)
 	SourceStream ss;
 
 	{
-		AdvancedEnumKotlinSourceScopedStream enumStream{ ss, "Named" };
+		AdvancedEnumKotlinSourceScopedStream enumStream{ ss, "Named", {} };
 		enumStream.addElement("SANS", "0", "sans");
 		enumStream.addElement("PAPYRUS", "1", "papyrus");
 		enumStream.addElement("UNDYNE", "2", "undyne");
@@ -163,7 +163,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 	SourceStream ss;
 
 	{
-		InterfaceKotlinSourceScopedStream interfaceStream{ ss, "Monster" };
+		InterfaceKotlinSourceScopedStream interfaceStream{ ss, "Monster", {} };
 		MethodKotlinSourceScopedStream func{ ss, true, KotlinAccess::PUBLIC, "", "", "String", "baseFunction",
 				{
 					ParameterNode {
@@ -192,7 +192,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 							"defence"
 						},
 						ParameterNode {
-							ParameterNode::REFERENCE_OUT,
+							ParameterNode::VALUE,
 							"String",
 							"sans"
 						},
@@ -214,7 +214,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 							"defence"
 						},
 						ParameterNode {
-							ParameterNode::REFERENCE_OUT,
+							ParameterNode::VALUE,
 							"String",
 							"sans"
 						},
@@ -260,7 +260,7 @@ TEST(KotlinSourceStream, MethodKotlinSourceScopedStream)
 							"aa"
 						},
 						ParameterNode {
-							ParameterNode::REFERENCE_OUT,
+							ParameterNode::VALUE,
 							"Double",
 							"bb"
 						},
@@ -326,8 +326,8 @@ TEST(KotlinSourceStream, CommentKotlinSourceStream)
 	{
 		CommentKotlinSourceStream methodComment{ ss };
 		methodComment.addBrief("attack other units");
-		methodComment.addParameter(true, "other", "another unit");
-		methodComment.addParameter(true, "damage", "the damage that another unit takes");
+		methodComment.addParameter("other", "another unit");
+		methodComment.addParameter("damage", "the damage that another unit takes");
 		methodComment.addReturn("attack result");
 	}
 	{
@@ -358,7 +358,7 @@ TEST(KotlinSourceStream, CallKotlinSourceScopedStream)
 		"functionA",
 		{
 			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
-			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "float", "bb"},
 			ParameterNode{ParameterNode::VALUE, "double", "cc"}
 		}
 	);
@@ -369,7 +369,7 @@ TEST(KotlinSourceStream, CallKotlinSourceScopedStream)
 		"functionB",
 		{
 			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
-			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "float", "bb"},
 		}
 	);
 

@@ -346,7 +346,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 					"argv"
 				},
 				ParameterNode {
-					ParameterNode::REFERENCE_OUT,
+					ParameterNode::VALUE,
 					"int",
 					"result"
 				},
@@ -383,7 +383,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 					"argv"
 				},
 				ParameterNode {
-					ParameterNode::REFERENCE_OUT,
+					ParameterNode::VALUE,
 					"int",
 					"result"
 				},
@@ -420,7 +420,7 @@ TEST(CXXSourceStream, MethodCXXSourceScopedStream)
 					"argv"
 				},
 				ParameterNode {
-					ParameterNode::REFERENCE_OUT,
+					ParameterNode::VALUE,
 					"int",
 					"result"
 				},
@@ -469,8 +469,8 @@ TEST(CXXSourceStream, CommentCXXSourceStream)
 	{
 		CommentCXXSourceStream methodComment{ ss };
 		methodComment.addBrief("attack other units");
-		methodComment.addParameter(true, "other", "another unit");
-		methodComment.addParameter(true, "damage", "the damage that another unit takes");
+		methodComment.addParameter("other", "another unit");
+		methodComment.addParameter("damage", "the damage that another unit takes");
 		methodComment.addReturn("attack result");
 	}
 	{
@@ -501,7 +501,7 @@ TEST(CXXSourceStream, CallCXXSourceScopedStream)
 		"functionA", 
 		{
 			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
-			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "float", "bb"},
 			ParameterNode{ParameterNode::VALUE, "double", "cc"}
 		}
 	);
@@ -512,7 +512,7 @@ TEST(CXXSourceStream, CallCXXSourceScopedStream)
 		"functionB",
 		{
 			ParameterNode{ParameterNode::REFERENCE_IN, "int", "aa"},
-			ParameterNode{ParameterNode::REFERENCE_OUT, "float", "bb"},
+			ParameterNode{ParameterNode::VALUE, "float", "bb"},
 		}
 	);
 

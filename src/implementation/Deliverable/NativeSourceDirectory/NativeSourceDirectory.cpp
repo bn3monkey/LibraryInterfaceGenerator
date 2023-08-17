@@ -477,7 +477,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
 
                 }
                 {
-                    AccessCXXSourceScopedStream public_scope{ ss, AccessCXXSourceScopedStream::Specifier::Public };
+                    AccessCXXSourceScopedStream public_scope{ ss, AccessCXXSourceScopedStream::Specifier::Private };
                     for (auto& property_object : properties)
                     {
                         createPropertyField(ss, *property_object);

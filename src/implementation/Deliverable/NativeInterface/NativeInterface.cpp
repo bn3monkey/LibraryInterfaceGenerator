@@ -686,14 +686,21 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::findConverter(S
 	case SymbolType::Name::ENUMARRAY:
 	case SymbolType::Name::OBJECTARRAY:
 	case SymbolType::Name::CALLBACKARRAY:
-		ss << "MArray<";
-		for (auto& type : type.toElementTypes())
 		{
-			findConverter(ss, *type);
-			ss << ", ";
+			ss << "MArray<";
+			for (auto& type : type.toElementTypes())
+			{
+				findConverter(ss, *type);
+				ss << ", ";
+			}
+			// ss.pop(2);
+			auto* arrayType = reinterpret_cast<SymbolTypeBaseArray*>(&type);
+			auto size = arrayType->length();
+			std::stringstream tt;
+			tt << size;
+			ss << tt.str();
+			ss << ">";
 		}
-		ss.pop(2);
-		ss << ">";
 		break;
 
 	case SymbolType::Name::BOOLVECTOR:

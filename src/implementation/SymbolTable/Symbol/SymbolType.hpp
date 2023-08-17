@@ -412,6 +412,7 @@ namespace LibraryInterfaceGenerator
             virtual std::string toJNIElementType() = 0; 
             virtual std::string toKotlinWrapperElementType() = 0;
             virtual std::string toKotlinElementType() = 0;
+            size_t length() { return size; }
         protected:
             size_t size;
         };
