@@ -139,6 +139,8 @@ static Result copyDirectory(const std::string& src_path ,const std::string& dest
         if (iter.is_directory())
         //if (name.find_first_of('.', 0) != name.length())
         {
+            if (!std::filesystem::exists(child_dest_path))
+                std::filesystem::create_directories(child_dest_path);
             result = copyDirectory(child_src_path, child_dest_path);
         }
         else {
