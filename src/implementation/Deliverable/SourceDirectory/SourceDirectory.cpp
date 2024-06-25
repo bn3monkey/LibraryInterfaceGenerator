@@ -1146,7 +1146,7 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createInputProp
 {
 	if (object.type)
 	{
-		ss << "val i_value = toKotlinWrapperType(" << object.name << ")\n";
+		ss << "val i_value = toKotlinWrapperType(value)\n";
 	}
 }
 

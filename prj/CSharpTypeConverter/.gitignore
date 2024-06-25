@@ -1,0 +1,8 @@
+x64/
+Wrapper/bin/
+Wrapper/obj/
+Application/bin/
+Application/obj/
+Application/Properties/
+Library/x64/
+.vs/

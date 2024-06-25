@@ -45,7 +45,7 @@ namespace LibraryInterfaceGenerator
 
             std::string _src_dir_path;
 
-            // 1. Module Directory Á¦ÀÛ
+            // 1. Module Directory ï¿½ï¿½ï¿½ï¿½
             Result createModule(const SymbolModule& object, std::string& parent_path);
 
             Result createInterfaceFile(const SymbolClass& object, std::string& parent_path);
@@ -54,31 +54,31 @@ namespace LibraryInterfaceGenerator
             Result createMethodFile(const SymbolModule& object, std::string& parent_path);
             Result createCallbackFile(const SymbolCallback& object, std::string& parent_path);
             
-            // 2. Interface Àü¹® Á¦ÀÛ
+            // 2. Interface ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             SourceStream createInterfaceFileContent(const SymbolClass& object);
 
-            // 3. Class Àü¹® Á¦ÀÛ
+            // 3. Class ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             SourceStream createClassFileContent(const SymbolClass& object);
 
-            // 4. Enum Àü¹® Á¦ÀÛ
+            // 4. Enum ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             SourceStream createEnumFileContent(const SymbolEnum& object);
 
-            // 5. Method Àü¹® Á¦ÀÛ
+            // 5. Method ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             SourceStream createMethodFileContent(const SymbolModule& object);
 
             SourceStream createCallbackFileContent(const SymbolCallback& callback);
 
 
-            // 7. Code Block Á¦ÀÛ
+            // 7. Code Block ï¿½ï¿½ï¿½ï¿½
             void createForwardDeclaration(SourceStream& ss, const SymbolClass& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolModule& object);
             void createForwardDeclaration(SourceStream& ss, const SymbolCallback& object);
 
-            // Enum Block »ý¼º
+            // Enum Block ï¿½ï¿½ï¿½ï¿½
             void createEnumDefinition(SourceStream& ss, const SymbolEnum& object);
             void createCallbackDefinition(SourceStream& ss, const SymbolCallback& callback);
 
-            // Method Block »ý¼º
+            // Method Block ï¿½ï¿½ï¿½ï¿½
             std::string createMethodName(const SymbolClass& clazz, const std::string& method_name, int number);
             std::string createMethodName(const SymbolMethod& method, const std::string& method_name, int number);
 
