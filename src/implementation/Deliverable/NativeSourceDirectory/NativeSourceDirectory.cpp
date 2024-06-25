@@ -289,6 +289,7 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         ExternalIncludeCXXSourceStream ex2{ ss, "vector" };
         ExternalIncludeCXXSourceStream ex3{ ss, "string" };
         ExternalIncludeCXXSourceStream ex4{ ss, "memory" };
+        ExternalIncludeCXXSourceStream ex5{ ss, "array" };
         {
             ExternalIncludeCXXSourceStream ex{ ss, "functional" };
         }
@@ -407,6 +408,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         }
         {
             ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex5{ ss, "array" };
         }
 
         std::vector<std::string> base_classes_names;
@@ -576,6 +580,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         {
             ExternalIncludeCXXSourceStream ex{ ss, "memory" };
         }
+        {
+            ExternalIncludeCXXSourceStream ex5{ ss, "array" };
+        }
 
         {
             NamespaceCXXSourceScopedStream namespace_scope{ ss, object.parentModules };
@@ -608,6 +615,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         }
         {
             ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex5{ ss, "array" };
         }
 
         createForwardDeclaration(ss, object);
@@ -822,6 +832,9 @@ SourceStream LibraryInterfaceGenerator::Implementation::NativeSourceDirectory::c
         }
         {
             ExternalIncludeCXXSourceStream ex{ ss, "functional" };
+        }
+        {
+            ExternalIncludeCXXSourceStream ex5{ ss, "array" };
         }
         {
             createForwardDeclaration(ss, callback);
