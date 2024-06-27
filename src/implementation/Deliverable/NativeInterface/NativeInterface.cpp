@@ -570,11 +570,23 @@ void LibraryInterfaceGenerator::Implementation::NativeInterface::createStaticMet
 
 		MethodCXXSourceScopedStream method_scope{ ss, false, "", "", obj.type->toManagedType(), scope, obj.name, parameters };
 
+		if (obj.name == "initialize")
+		{
+			ss << "if (!Bn3Monkey::ManagedTypeConverter::initialize())\n";
+			ss << "\treturn nullptr;\n\n";
+		}
+
+
 		for (auto& parameter : obj.parameters)
 		{
 			createInputParameterChanger(ss, *parameter);
 		}
 		callStaticMethod(ss, obj);
+
+		if (obj.name == "release")
+		{
+			ss << "\nBn3Monkey::ManagedTypeConverter::release();\n";
+		}
 
 		if (obj.type->getTypeName() != SymbolType::Name::VOID)
 		{

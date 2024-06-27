@@ -919,6 +919,8 @@ void LibraryInterfaceGenerator::Implementation::SourceDirectory::createStaticMet
 			createParameters(object)
 		};
 
+
+
 		for (auto& parameter : object.parameters)
 		{
 			createInputParameterChanger(ss, *parameter);

@@ -594,12 +594,23 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::createNativeStaticMetho
 			createNativeStaticParameters(object)
 		};
 
+		if (object.name == "initialize")
+		{
+			ss << "if (!Bn3Monkey::Kotlin::KotlinTypeConverter::initialize(env))\n";
+			ss << "\treturn 0L;\n";
+		}
+
 		for (auto& parameter : object.parameters)
 		{
 			createNativeInputParameterChanger(ss, *parameter);
 		}
 		callNativeStaticMethod(ss, object);
 		
+		if (object.name == "release")
+		{
+			ss << "Bn3Monkey::Kotlin::KotlinTypeConverter::release(env);\n";
+		}
+
 		createNativeReturnValueChanger(ss, object);
 	}
 }
@@ -691,8 +702,15 @@ void LibraryInterfaceGenerator::Implementation::Wrapper::findConverter(SourceStr
 			findConverter(ss, *type);
 			ss << ", ";
 		}
-		ss.pop(2);
-		ss << ">";
+		{
+			// ss.pop(2);
+			auto* arrayType = reinterpret_cast<SymbolTypeBaseArray*>(&type);
+			auto size = arrayType->length();
+			std::stringstream tt;
+			tt << size;
+			ss << tt.str();
+			ss << ">";
+		}
 		break;
 
 	case SymbolType::Name::BOOLVECTOR:
