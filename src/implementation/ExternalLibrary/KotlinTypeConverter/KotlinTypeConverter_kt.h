@@ -99,12 +99,5 @@ static constexpr char* KOTLINTYPECONVERTER_KT =
 "}\n"
 "inline fun <reified T> toKotlinType(value : T) : T {\n"
 "    return value\n"
-"}\n"
-"inline fun <reified T> toKotlinType(value : Array<T>) : Array<T>{\n"
-"    return value\n"
-"}\n"
-"inline fun <reified T> toKotlinType(value : MutableList<T>) : MutableList<T>{\n"
-"    return value\n"
 "}\n";
-
 #endif //__BN3MONKEY_LIBRARY_INTERFACE_GENERATOR_KOTLINTYPECONVERTER_KT__

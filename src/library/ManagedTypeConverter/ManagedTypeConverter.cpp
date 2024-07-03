@@ -19,10 +19,10 @@ bool Bn3Monkey::ManagedTypeConverter::initialize()
 void Bn3Monkey::ManagedTypeConverter::release()
 {
 #ifdef __BN3MONKEY_MEMORY_POOL__
-	Bn3Monkey::Bn3MemoryPool::release();
 	for (auto& releaser : releasers)
 		releaser();
 	releasers.clear();
+	Bn3Monkey::Bn3MemoryPool::release();
 #else
 
 #endif
