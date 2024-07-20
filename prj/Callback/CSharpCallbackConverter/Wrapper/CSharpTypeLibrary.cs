@@ -33,17 +33,19 @@ namespace Wrapper
 
 
         private delegate void Callback(int param1, float param2);
+        Callback? _callback = null;
+        
         public void RegisterCallback(IntPtr context, Action<int, float> callback)
         {
-            Callback temp = new Callback(callback);
-            IntPtr callbackPtr = Marshal.GetFunctionPointerForDelegate(temp);
+             _callback = new Callback(callback);
+            IntPtr callbackPtr = Marshal.GetFunctionPointerForDelegate(_callback);
             CSharpTypeLibrary_registerCallback(context, callbackPtr);
-            GC.KeepAlive(temp);
         }
 
         public void UnregisterCallback(IntPtr context)
         {
             CSharpTypeLibrary_unregisterCallback(context);
+            _callback = null;
         }
 
         public void RunCallback(IntPtr context, int param1, float param2)
