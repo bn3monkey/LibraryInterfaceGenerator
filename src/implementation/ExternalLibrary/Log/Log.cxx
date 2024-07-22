@@ -80,7 +80,7 @@ void Bn3Monkey::Log::print(int priority, const char* tag, const char* format, va
 #endif
 
 #if defined __ANDROID__
-        __android_log_vprint(priority, tag, format, args);
+        __android_log_print(priority, tag, "%s", formatted);
 #endif
     formatted[formatted_size] = '\n';
     formatted[formatted_size + 1] = '\0';

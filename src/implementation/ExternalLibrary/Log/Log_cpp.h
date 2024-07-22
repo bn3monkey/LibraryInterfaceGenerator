@@ -83,7 +83,7 @@ static constexpr char* LOG_CPP =
 "#endif\n"
 "\n"
 "#if defined __ANDROID__\n"
-"        __android_log_vprint(priority, tag, format, args);\n"
+"    __android_log_print(priority, tag, \"%s\", formatted);\n"
 "#endif\n"
 "    formatted[formatted_size] = '\\n';\n"
 "    formatted[formatted_size + 1] = '\\0';\n"
