@@ -30,12 +30,12 @@ inline fun <reified T> toKotlinType(value : MutableList<Int>) : MutableList<T>  
     return value.map { toKotlinType<T>(it) }.toMutableList()
 }
 
-interface WrapperTypeObject
+interface WrapperTypeObject : AutoCloseable
 {
     fun toWrapperType() : Long
 }
 
-abstract class WrapperTypeObjectImpl(private val nativeHandle : NativeHandle) : WrapperTypeObject, AutoCloseable {
+abstract class WrapperTypeObjectImpl(private val nativeHandle : NativeHandle) : WrapperTypeObject {
 
     class NativeHandle(private var value : Long) {
         fun isValid() : Boolean = value != 0L
